@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --foreground: 0 0% 91%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 91%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 62%;
+    --accent: 207 72% 59%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 8 82% 56%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 24 95% 53%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes workout-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rep-pop {
+  0% {
+    transform: scale(0.92);
+    color: hsl(var(--primary));
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rest-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(249 115 22 / 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(249 115 22 / 0);
+  }
+}
+
+.animate-workout-card {
+  animation: workout-card-in 220ms ease-out;
+}
+
+.animate-rep-pop {
+  animation: rep-pop 180ms ease-out;
+}
+
+.animate-rest-pulse {
+  animation: rest-pulse 1.5s ease-in-out infinite;
+}
