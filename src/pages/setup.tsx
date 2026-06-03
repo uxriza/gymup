@@ -81,7 +81,7 @@ export function SetupPage() {
       <div className="grid grid-cols-2 gap-3">
         <Button className="h-12" variant="secondary" onClick={() => setShowExerciseModal(true)}>
           <Plus className="h-4 w-4" />
-          Tambah Gerakan
+          Tambah
         </Button>
         <Button className="h-12" onClick={() => setShowWorkoutModal(true)}>
           <Plus className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function SetupPage() {
             </div>
             <Button type="submit" className="w-full">
               <Plus className="h-4 w-4" />
-              Tambah Gerakan
+              Tambah
             </Button>
           </form>
         </DialogContent>
@@ -179,7 +179,7 @@ export function SetupPage() {
       <Dialog open={showWorkoutModal} onOpenChange={setShowWorkoutModal}>
         <DialogContent className="max-h-[90vh] w-[calc(100vw-32px)] overflow-y-auto rounded-lg">
           <DialogHeader>
-            <DialogTitle>Buat split latihan</DialogTitle>
+            <DialogTitle>Buat split</DialogTitle>
             <DialogDescription>Pilih gerakan sesuai urutan latihan yang kamu inginkan.</DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={submitWorkout}>
@@ -216,7 +216,7 @@ export function SetupPage() {
             </div>
 
             <Button type="submit" className="w-full">
-              Simpan Program
+              Simpan
             </Button>
           </form>
         </DialogContent>

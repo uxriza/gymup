@@ -91,7 +91,7 @@ export function SelectWorkoutPage() {
                     navigate("/workout");
                   }}
                 >
-                  Mulai Program
+                  Mulai
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </CardContent>

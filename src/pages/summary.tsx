@@ -15,7 +15,7 @@ export function SummaryPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">Belum ada ringkasan</h1>
-        <Button onClick={() => navigate("/")}>Kembali ke Beranda</Button>
+        <Button onClick={() => navigate("/")}>Beranda</Button>
       </div>
     );
   }
@@ -94,7 +94,7 @@ export function SummaryPage() {
       ) : null}
 
       <Button className="w-full" size="lg" onClick={() => navigate("/")}>
-        Kembali ke Beranda
+        Beranda
       </Button>
     </div>
   );

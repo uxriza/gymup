@@ -213,7 +213,7 @@ export function WorkoutPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">Tidak ada sesi aktif</h1>
-        <Button onClick={() => navigate("/")}>Pilih program</Button>
+        <Button onClick={() => navigate("/")}>Pilih</Button>
       </div>
     );
   }
@@ -327,7 +327,7 @@ export function WorkoutPage() {
       <CardHeader>
         <Button className="w-fit px-0 text-muted-foreground" variant="ghost" onClick={returnToExercisePicker}>
           <ArrowLeft className="h-4 w-4" />
-          Pilih gerakan lain
+          Pilih gerakan
         </Button>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -345,7 +345,7 @@ export function WorkoutPage() {
         {isExerciseCompleted ? (
           <Button className="h-12 w-full" size="lg" variant="secondary" onClick={returnToExercisePicker}>
             <Check className="h-4 w-4" />
-            Gerakan Selesai
+            Selesai
           </Button>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -355,7 +355,7 @@ export function WorkoutPage() {
             </Button>
             <Button className="h-12" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
               <Play className="h-4 w-4" />
-              Mulai Gerakan
+              Mulai
             </Button>
           </div>
         )}
@@ -430,7 +430,7 @@ export function WorkoutPage() {
 
         <Button className="h-12 w-full" variant="secondary" onClick={() => setShowInstructions(true)}>
           <Dumbbell className="h-4 w-4" />
-          Lihat Instruksi
+          Instruksi
         </Button>
 
         <div className="grid grid-cols-2 gap-3">
@@ -440,7 +440,7 @@ export function WorkoutPage() {
           </Button>
           <Button className="h-12" variant="outline" onClick={completeCurrentExercise}>
             <Check className="h-4 w-4" />
-            Akhiri Gerakan
+            Akhiri
           </Button>
         </div>
       </CardContent>
@@ -491,11 +491,11 @@ export function WorkoutPage() {
         <div className="grid grid-cols-2 gap-3">
           <Button className="h-12" size="lg" onClick={startNextSet}>
             <Play className="h-4 w-4" />
-            Mulai Set Berikutnya
+            Set berikutnya
           </Button>
           <Button className="h-12" size="lg" variant="outline" onClick={completeCurrentExercise}>
             <Check className="h-4 w-4" />
-            Akhiri Gerakan
+            Akhiri
           </Button>
         </div>
       </CardContent>
@@ -545,7 +545,7 @@ export function WorkoutPage() {
             <Button variant="outline" onClick={() => setShowFinish(false)}>
               Lanjutkan
             </Button>
-            <Button onClick={finishAndNavigate}>Simpan & Selesai</Button>
+            <Button onClick={finishAndNavigate}>Simpan</Button>
           </DialogFooter>
 
           <Button

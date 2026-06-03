@@ -1,17 +1,31 @@
 import { useEffect, useState } from "react";
 import { differenceInMinutes, endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
 import { id } from "date-fns/locale";
-import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Dumbbell, Play, Repeat2 } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGymStore } from "@/store/gym-store";
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+const isIosDevice = () => /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+const isStandaloneMode = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  ("standalone" in window.navigator && Boolean(window.navigator.standalone));
 
 export function HomePage() {
   const navigate = useNavigate();
   const { sessions, exercises, activeWorkout } = useGymStore();
   const [now, setNow] = useState(() => new Date());
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installGuideOpen, setInstallGuideOpen] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
   const latestSession = sessions[0];
   const latestCompletedExercises = latestSession?.exercises.filter((item) => item.completed) ?? [];
   const latestDuration = latestSession
@@ -37,6 +51,41 @@ export function HomePage() {
     const interval = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallShortcut = async () => {
+    if (isInstalled) return;
+
+    if (installPrompt) {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setIsInstalled(true);
+      }
+      setInstallPrompt(null);
+      return;
+    }
+
+    setInstallGuideOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -68,6 +117,25 @@ export function HomePage() {
             </Button>
           </div>
         </div>
+
+        {!isInstalled ? (
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-3 rounded-md border border-border bg-card p-3 text-left transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring"
+            onClick={handleInstallShortcut}
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
+                <Download className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">Tambah ke Home</span>
+                <span className="block text-xs text-muted-foreground">Buka GymUp seperti aplikasi dari layar utama HP.</span>
+              </span>
+            </span>
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+          </button>
+        ) : null}
       </section>
 
       <section className="space-y-3">
@@ -120,7 +188,7 @@ export function HomePage() {
           </CardHeader>
           <CardContent>
             <Button className="w-full" size="lg" onClick={() => navigate("/workout")}>
-              Lanjutkan Sesi
+              Lanjutkan
             </Button>
           </CardContent>
         </Card>
@@ -208,6 +276,36 @@ export function HomePage() {
           </Card>
         </section>
       ) : null}
+      <Dialog open={installGuideOpen} onOpenChange={setInstallGuideOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Tambah ke Home Screen</DialogTitle>
+            <DialogDescription>
+              {isIosDevice()
+                ? "Di iPhone, shortcut ditambahkan lewat tombol Share di Safari."
+                : "Kalau prompt install belum muncul, gunakan menu browser untuk menambahkan shortcut."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            {isIosDevice() ? (
+              <>
+                <div className="flex gap-3 rounded-md border border-border p-3">
+                  <Share2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <p>Tap tombol Share di Safari.</p>
+                </div>
+                <div className="rounded-md border border-border p-3">Pilih “Add to Home Screen” atau “Tambahkan ke Layar Utama”.</div>
+                <div className="rounded-md border border-border p-3">Tap “Add”, lalu buka GymUp dari icon di Home Screen.</div>
+              </>
+            ) : (
+              <>
+                <div className="rounded-md border border-border p-3">Buka menu browser.</div>
+                <div className="rounded-md border border-border p-3">Pilih “Install app” atau “Add to Home screen”.</div>
+                <div className="rounded-md border border-border p-3">Setelah terpasang, GymUp bisa dibuka dari Home Screen.</div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
