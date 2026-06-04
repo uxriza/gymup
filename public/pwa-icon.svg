@@ -1,4 +1,25 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="112" fill="#f97316"/>
-  <path d="M126 260H174L206 178L250 336L306 158L342 260H386" stroke="#101010" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="gymup-bg" x1="86" y1="54" x2="426" y2="458" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB15C"/>
+      <stop offset="0.42" stop-color="#FF6A18"/>
+      <stop offset="1" stop-color="#F24A00"/>
+    </linearGradient>
+    <radialGradient id="gymup-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(158 114) rotate(52) scale(292)">
+      <stop stop-color="#FFD2A8" stop-opacity="0.75"/>
+      <stop offset="0.55" stop-color="#FF7A1A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft-shadow" x="70" y="102" width="372" height="310" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#5A1D00" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="#0B0C0E"/>
+  <rect x="34" y="34" width="444" height="444" rx="100" fill="url(#gymup-bg)"/>
+  <rect x="34" y="34" width="444" height="444" rx="100" fill="url(#gymup-glow)"/>
+  <path opacity="0.2" d="M96 404C168 362 276 370 416 268" stroke="#0B0C0E" stroke-width="74" stroke-linecap="round"/>
+  <g filter="url(#soft-shadow)">
+    <path d="M112 260H168L204 170L252 350L310 150L348 260H400" stroke="#090A0C" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M112 260H168L204 170L252 350L310 150L348 260H400" stroke="#17191D" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M120 260H168L204 174L252 340L310 158L348 260H392" stroke="#FFF4EA" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.22"/>
 </svg>

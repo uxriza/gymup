@@ -46,7 +46,7 @@ export function SetupPage() {
     <div className="space-y-5">
       <section className="space-y-2">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Katalog gerakan</h1>
+          <h1 className="text-[2rem] font-bold leading-9">Katalog gerakan</h1>
           <p className="text-muted-foreground">Cari referensi gerakan dan instruksi dasar.</p>
         </div>
       </section>
@@ -54,7 +54,7 @@ export function SetupPage() {
       <section className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-12 pl-9" placeholder="Cari nama gerakan atau equipment" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <Input className="h-12 border-white/10 bg-card/80 pl-9" placeholder="Cari nama gerakan atau equipment" value={query} onChange={(event) => setQuery(event.target.value)} />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {categories.map((category) => {
@@ -86,7 +86,7 @@ export function SetupPage() {
             <button
               key={exercise.id}
               type="button"
-              className="min-h-24 w-full rounded-md border border-border bg-card p-4 text-left transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="surface-list-item min-h-24 w-full p-4 text-left focus:outline-none focus:ring-2 focus:ring-ring"
               onClick={() => setSelectedExercise(exercise)}
             >
               <div className="min-w-0 space-y-2">
@@ -109,7 +109,7 @@ export function SetupPage() {
             </button>
           ))
         ) : (
-          <Card>
+          <Card className="border-primary/10 bg-card/88">
             <CardHeader>
               <CardTitle>Gerakan tidak ditemukan</CardTitle>
               <CardDescription>Coba kata kunci atau kategori lain.</CardDescription>
@@ -149,7 +149,7 @@ export function SetupPage() {
                   <ol className="space-y-2 text-sm leading-6 text-muted-foreground">
                     {selectedExercise.instructions.map((instruction, index) => (
                       <li key={`${selectedExercise.id}-${index}`} className="flex gap-2">
-                        <span className="font-mono text-primary">{index + 1}</span>
+                        <span className="text-primary">{index + 1}</span>
                         <span>{instruction}</span>
                       </li>
                     ))}

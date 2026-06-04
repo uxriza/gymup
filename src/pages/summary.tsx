@@ -44,15 +44,15 @@ export function SummaryPage() {
           <div className="grid grid-cols-3 gap-2 rounded-md bg-secondary p-3 text-left">
             <div>
               <p className="text-xs text-muted-foreground">Selesai</p>
-              <p className="font-mono text-xl font-bold">{completed.length}</p>
+              <p className="text-xl font-bold">{completed.length}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Set</p>
-              <p className="font-mono text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualSets, 0)}</p>
+              <p className="text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualSets, 0)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Rep</p>
-              <p className="font-mono text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualReps, 0)}</p>
+              <p className="text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualReps, 0)}</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -67,29 +67,29 @@ export function SummaryPage() {
       </Dialog>
       <section className="space-y-2">
         <CheckCircle2 className="h-10 w-10 text-primary" />
-        <h1 className="text-3xl font-bold">Sesi tersimpan</h1>
+        <h1 className="text-[2rem] font-bold leading-9">Sesi tersimpan</h1>
         <p className="text-muted-foreground">
           {session.workoutName} · {format(new Date(session.date), "d MMM yyyy")} · {duration} menit
         </p>
       </section>
 
       <div className="grid grid-cols-3 gap-3">
-        <Card>
+        <Card className="border-primary/10 bg-card/88">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Selesai</p>
-            <p className="font-mono text-3xl font-bold">{completed.length}</p>
+            <p className="text-3xl font-bold">{completed.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Dilewati</p>
-            <p className="font-mono text-3xl font-bold">{skipped.length}</p>
+            <p className="text-3xl font-bold">{skipped.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Belum</p>
-            <p className="font-mono text-3xl font-bold">{planned.length}</p>
+            <p className="text-3xl font-bold">{planned.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -131,7 +131,7 @@ export function SummaryPage() {
         </Card>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] z-40 border-t border-border bg-background/95 px-4 pb-3 pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-[calc(max(34px,env(safe-area-inset-bottom))_+_72px)] z-40 border-t border-border bg-background/95 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
         <div className="mx-auto max-w-3xl">
           <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
             Beranda

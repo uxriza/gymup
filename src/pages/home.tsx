@@ -121,15 +121,16 @@ export function HomePage() {
             {format(now, "EEEE, d MMM", { locale: id })} · {format(now, "HH:mm:ss")}
           </p>
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-normal">Tracker latihan pribadi</h1>
+            <h1 className="text-[2rem] font-bold leading-9 tracking-normal">Tracker latihan pribadi</h1>
             <p className="max-w-xl text-sm leading-6 text-muted-foreground">
               Mulai program latihan, ikuti gerakan, lalu catat progres sesi secara lokal.
             </p>
           </div>
         </div>
 
-        <div className="rounded-md border border-primary/30 bg-primary/10 p-4">
-          <div className="flex items-center justify-between gap-4">
+        <div className="relative overflow-hidden rounded-xl border border-primary/24 bg-[linear-gradient(115deg,rgb(12_13_15/0.98)_0%,rgb(18_20_24/0.96)_54%,rgb(255_122_26/0.08)_100%)] p-4 shadow-[0_20px_56px_hsl(var(--primary)/0.08)]">
+          <div className="pointer-events-none absolute -right-14 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
+          <div className="relative flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-sm font-medium">{activeWorkout ? "Sesi sedang berjalan" : "Siap latihan hari ini"}</p>
               <p className="text-xs text-muted-foreground">
@@ -175,7 +176,7 @@ export function HomePage() {
                 <CalendarDays className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold">{weeklySessions.length}</p>
+                <p className="text-2xl font-bold">{weeklySessions.length}</p>
                 <p className="text-xs text-muted-foreground">Sesi</p>
               </div>
             </CardContent>
@@ -186,7 +187,7 @@ export function HomePage() {
                 <Clock3 className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold">{weeklyMinutes}</p>
+                <p className="text-2xl font-bold">{weeklyMinutes}</p>
                 <p className="text-xs text-muted-foreground">Menit</p>
               </div>
             </CardContent>
@@ -197,7 +198,7 @@ export function HomePage() {
                 <CheckCircle2 className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold">{weeklyCompletedExercises}</p>
+                <p className="text-2xl font-bold">{weeklyCompletedExercises}</p>
                 <p className="text-xs text-muted-foreground">Gerakan</p>
               </div>
             </CardContent>
@@ -250,26 +251,29 @@ export function HomePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-md bg-secondary p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock3 className="h-3 w-3" />
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock3 className="h-3 w-3 text-primary" />
                     Durasi
                   </p>
-                  <p className="font-mono text-2xl font-bold">{latestDuration}m</p>
+                  <p className="relative text-2xl font-bold">{latestDuration}m</p>
                 </div>
-                <div className="rounded-md bg-secondary p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Dumbbell className="h-3 w-3" />
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.055)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
+                    <Dumbbell className="h-3 w-3 text-primary" />
                     Set
                   </p>
-                  <p className="font-mono text-2xl font-bold">{latestSets}</p>
+                  <p className="relative text-2xl font-bold">{latestSets}</p>
                 </div>
-                <div className="rounded-md bg-secondary p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Repeat2 className="h-3 w-3" />
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.05)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
+                    <Repeat2 className="h-3 w-3 text-primary" />
                     Rep
                   </p>
-                  <p className="font-mono text-2xl font-bold">{latestRep}</p>
+                  <p className="relative text-2xl font-bold">{latestRep}</p>
                 </div>
               </div>
 
@@ -282,7 +286,7 @@ export function HomePage() {
                       return (
                         <div key={item.exerciseId} className="flex items-center justify-between gap-3 rounded-md border border-border p-2">
                           <p className="truncate text-sm font-medium">{exercise?.name || "Gerakan"}</p>
-                          <p className="shrink-0 font-mono text-xs text-muted-foreground">
+                          <p className="shrink-0 text-xs text-muted-foreground">
                             {item.actualSets} set · {item.actualReps} repetisi
                             {item.weightKg !== undefined ? ` · ${item.weightKg} kg` : ""}
                           </p>

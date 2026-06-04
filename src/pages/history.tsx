@@ -22,7 +22,7 @@ export function HistoryPage() {
     <div className="space-y-5">
       <section className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Riwayat</h1>
+          <h1 className="text-[2rem] font-bold leading-9">Riwayat</h1>
           <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini.</p>
         </div>
         {sessions.length ? (
@@ -57,16 +57,16 @@ export function HistoryPage() {
       </Dialog>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card>
-          <CardContent className="p-4">
+        <Card className="metric-surface">
+          <CardContent className="relative z-10 p-4">
             <p className="text-sm text-muted-foreground">Sesi 7 hari</p>
-            <p className="font-mono text-3xl font-bold">{lastSevenDays.length}</p>
+            <p className="text-3xl font-bold">{lastSevenDays.length}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="metric-surface">
+          <CardContent className="relative z-10 p-4">
             <p className="text-sm text-muted-foreground">Gerakan selesai</p>
-            <p className="font-mono text-3xl font-bold">{completedThisWeek}</p>
+            <p className="text-3xl font-bold">{completedThisWeek}</p>
           </CardContent>
         </Card>
       </div>
@@ -90,7 +90,7 @@ export function HistoryPage() {
           const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
 
           return (
-            <Card key={session.id}>
+            <Card key={session.id} className="border-primary/10 bg-card/88">
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -108,35 +108,35 @@ export function HistoryPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-4 gap-2">
-                  <div className="rounded-md bg-secondary p-2">
+                  <div className="metric-surface p-2">
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Clock3 className="h-3 w-3" />
                       Durasi
                     </p>
-                    <p className="font-mono text-lg font-bold">{duration}m</p>
+                    <p className="text-lg font-bold">{duration}m</p>
                   </div>
-                  <div className="rounded-md bg-secondary p-2">
+                  <div className="metric-surface p-2">
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <ListChecks className="h-3 w-3" />
                       Gerakan
                     </p>
-                    <p className="font-mono text-lg font-bold">
+                    <p className="text-lg font-bold">
                       {completed.length}/{session.exercises.length}
                     </p>
                   </div>
-                  <div className="rounded-md bg-secondary p-2">
+                  <div className="metric-surface p-2">
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Dumbbell className="h-3 w-3" />
                       Set
                     </p>
-                    <p className="font-mono text-lg font-bold">{totalSets}</p>
+                    <p className="text-lg font-bold">{totalSets}</p>
                   </div>
-                  <div className="rounded-md bg-secondary p-2">
+                  <div className="metric-surface p-2">
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Repeat2 className="h-3 w-3" />
                       Rep
                     </p>
-                    <p className="font-mono text-lg font-bold">{totalRep}</p>
+                    <p className="text-lg font-bold">{totalRep}</p>
                   </div>
                 </div>
 
@@ -158,7 +158,7 @@ export function HistoryPage() {
                   {session.exercises.slice(0, 4).map((item) => {
                     const exercise = exercises.find((candidate) => candidate.id === item.exerciseId);
                     return (
-                      <div key={item.exerciseId} className="flex items-center justify-between gap-3 rounded-md border border-border p-2">
+                      <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 p-2">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{exercise?.name || "Gerakan"}</p>
                           <p className="text-xs text-muted-foreground">

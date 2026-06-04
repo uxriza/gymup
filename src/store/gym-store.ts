@@ -46,6 +46,8 @@ type GymState = {
   sessions: Session[];
   activeWorkout?: ActiveWorkout;
   startWorkout: (workoutId: string) => void;
+  startCustomWorkout: () => void;
+  selectCustomExercise: (exerciseId: string) => void;
   selectExercise: (index: number) => void;
   returnToExercisePicker: () => void;
   startSelectedExercise: () => void;
@@ -91,6 +93,52 @@ export const useGymStore = create<GymState>()(
               skipped: false,
               weightKg: getLatestWeightForExercise(get().sessions, exerciseId),
             })),
+          },
+        });
+      },
+      startCustomWorkout: () => {
+        set({
+          activeWorkout: {
+            workoutId: "custom-session",
+            customName: "Latihan Mandiri",
+            isCustom: true,
+            startTime: new Date().toISOString(),
+            currentIndex: 0,
+            mode: "exercise_picker",
+            exercises: [],
+          },
+        });
+      },
+      selectCustomExercise: (exerciseId) => {
+        const activeWorkout = get().activeWorkout;
+        if (!activeWorkout?.isCustom) return;
+
+        const existingIndex = activeWorkout.exercises.findIndex((exercise) => exercise.exerciseId === exerciseId);
+
+        if (existingIndex >= 0) {
+          get().selectExercise(existingIndex);
+          return;
+        }
+
+        set({
+          activeWorkout: {
+            ...activeWorkout,
+            currentIndex: activeWorkout.exercises.length,
+            mode: "exercise_preview",
+            exercises: [
+              ...resetTransientExercises(activeWorkout, activeWorkout.exercises.length),
+              {
+                exerciseId,
+                status: "selected",
+                currentSet: 1,
+                currentReps: 0,
+                actualSets: 0,
+                actualReps: 0,
+                completed: false,
+                skipped: false,
+                weightKg: getLatestWeightForExercise(get().sessions, exerciseId),
+              },
+            ],
           },
         });
       },
@@ -276,7 +324,6 @@ export const useGymStore = create<GymState>()(
         const activeWorkout = get().activeWorkout;
         if (!activeWorkout) return undefined;
         const workout = get().workouts.find((item) => item.id === activeWorkout.workoutId);
-        if (!workout) return undefined;
         const exercises = commitCurrentSet(
           activeWorkout,
           get().exercises,
@@ -293,8 +340,8 @@ export const useGymStore = create<GymState>()(
         const session: Session = {
           id: uid("session"),
           date: new Date().toISOString(),
-          workoutId: workout.id,
-          workoutName: workout.name,
+          workoutId: workout?.id ?? activeWorkout.workoutId,
+          workoutName: workout?.name ?? activeWorkout.customName ?? "Latihan Mandiri",
           startTime: activeWorkout.startTime,
           endTime: new Date().toISOString(),
           exercises,

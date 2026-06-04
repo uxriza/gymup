@@ -56,6 +56,8 @@ export type ActiveExercise = {
 
 export type ActiveWorkout = {
   workoutId: string;
+  customName?: string;
+  isCustom?: boolean;
   startTime: string;
   currentIndex: number;
   mode: "exercise_picker" | "exercise_preview" | "exercise_active" | "resting";

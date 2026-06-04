@@ -3,7 +3,7 @@ import type { Exercise, Workout } from "@/types";
 export const defaultExercises: Exercise[] = [
   {
     id: "bench-press",
-    name: "Tekan Dada Barbel",
+    name: "Bench Press",
     category: "Chest",
     targetSets: 4,
     targetReps: 8,
@@ -22,7 +22,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "incline-bench-press-dumbel",
-    name: "Tekan Dada Miring Dumbel",
+    name: "Incline Bench Press - Dumbbell",
     category: "Chest",
     targetSets: 3,
     targetReps: 10,
@@ -41,7 +41,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "shoulder-press-dumbels",
-    name: "Tekan Bahu Dumbel",
+    name: "Shoulder Press, Dumbbells",
     category: "Shoulders",
     targetSets: 3,
     targetReps: 10,
@@ -60,7 +60,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "lateral-raises",
-    name: "Angkat Samping Bahu",
+    name: "Lateral Raises",
     category: "Shoulders",
     targetSets: 3,
     targetReps: 12,
@@ -79,7 +79,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "dips",
-    name: "Dips Dada",
+    name: "Dips",
     category: "Chest",
     targetSets: 3,
     targetReps: 8,
@@ -98,7 +98,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "benchpress-dumbels",
-    name: "Tekan Dada Dumbel",
+    name: "Benchpress Dumbbells",
     category: "Chest",
     targetSets: 3,
     targetReps: 10,
@@ -136,7 +136,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "pull-ups-on-machine",
-    name: "Pull-up Bantuan Mesin",
+    name: "Pull Ups on Machine",
     category: "Back",
     targetSets: 3,
     targetReps: 10,
@@ -154,7 +154,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "rowing-seated-narrow-pegangan",
-    name: "Row Duduk Grip Sempit",
+    name: "Rowing seated, narrow grip",
     category: "Back",
     targetSets: 4,
     targetReps: 10,
@@ -173,7 +173,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "facepull",
-    name: "Tarik Wajah Kabel",
+    name: "Facepull",
     category: "Shoulders",
     targetSets: 3,
     targetReps: 15,
@@ -191,7 +191,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "biceps-curls-with-barbell",
-    name: "Curl Bisep Barbel",
+    name: "Biceps Curls With Barbell",
     category: "Arms",
     targetSets: 3,
     targetReps: 10,
@@ -210,7 +210,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "hammer-curls",
-    name: "Hammer Curl Dumbel",
+    name: "Hammer Curls",
     category: "Arms",
     targetSets: 3,
     targetReps: 12,
@@ -229,7 +229,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "front-squats",
-    name: "Squat Depan",
+    name: "Front Squats",
     category: "Legs",
     targetSets: 4,
     targetReps: 8,
@@ -248,7 +248,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "romanian-deadlift",
-    name: "Deadlift Rumania",
+    name: "Romanian Deadlift",
     category: "Legs",
     targetSets: 3,
     targetReps: 10,
@@ -266,7 +266,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "leg-press",
-    name: "Dorong Kaki Mesin",
+    name: "Leg Press",
     category: "Legs",
     targetSets: 3,
     targetReps: 10,
@@ -285,7 +285,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "dumbel-lunges-walking",
-    name: "Lunge Jalan Dumbel",
+    name: "Dumbbell Lunges Walking",
     category: "Legs",
     targetSets: 3,
     targetReps: 12,
@@ -304,7 +304,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "leg-curls-sitting",
-    name: "Leg Curl Duduk",
+    name: "Leg Curls (sitting)",
     category: "Legs",
     targetSets: 3,
     targetReps: 12,
@@ -323,7 +323,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "standing-calf-raises",
-    name: "Angkat Betis Berdiri",
+    name: "Standing Calf Raises",
     category: "Calves",
     targetSets: 3,
     targetReps: 15,
@@ -342,7 +342,7 @@ export const defaultExercises: Exercise[] = [
   },
   {
     id: "hip-thrust",
-    name: "Dorong Pinggul",
+    name: "Hip Thrust",
     category: "Legs",
     targetSets: 3,
     targetReps: 10,

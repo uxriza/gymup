@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
   Plus,
+  Search,
   Sparkles,
   ThumbsUp,
   Timer,
@@ -15,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -36,6 +38,8 @@ import { formatCategoryLabel } from "@/lib/labels";
 import { cn, formatDuration } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 import type { ActiveExercise, Exercise } from "@/types";
+
+const categoryOrder = ["Semua", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves"];
 
 const statusLabel: Record<ActiveExercise["status"], string> = {
   planned: "Belum",
@@ -213,7 +217,7 @@ function ExerciseInfo({ exercise }: { exercise: Exercise }) {
           <ol className="space-y-2 text-sm text-muted-foreground">
             {instructions.map((instruction, index) => (
               <li key={`${exercise.id}-${index}`} className="flex gap-2">
-                <span className="font-mono text-primary">{index + 1}</span>
+                <span className="text-primary">{index + 1}</span>
                 <span>{instruction}</span>
               </li>
             ))}
@@ -231,6 +235,7 @@ export function WorkoutPage() {
     workouts,
     exercises,
     selectExercise,
+    selectCustomExercise,
     returnToExercisePicker,
     startSelectedExercise,
     incrementCurrentReps,
@@ -247,6 +252,8 @@ export function WorkoutPage() {
   const [summaryNotes, setSummaryNotes] = useState("");
   const [showFinish, setShowFinish] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
 
   useEffect(() => {
     if (!restSeconds) return;
@@ -261,6 +268,7 @@ export function WorkoutPage() {
   }, [activeWorkout?.mode]);
 
   const workout = workouts.find((item) => item.id === activeWorkout?.workoutId);
+  const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan Mandiri";
   const active = activeWorkout?.exercises[activeWorkout.currentIndex];
   const exercise = exercises.find((item) => item.id === active?.exerciseId);
 
@@ -295,13 +303,14 @@ export function WorkoutPage() {
   const progress = useMemo(() => {
     if (!activeWorkout) return 0;
     const done = activeWorkout.exercises.filter((item) => item.completed || item.skipped).length;
+    if (!activeWorkout.exercises.length) return 0;
     return Math.round((done / activeWorkout.exercises.length) * 100);
   }, [activeWorkout]);
 
-  if (!activeWorkout || !workout || !active || !exercise) {
+  if (!activeWorkout) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Tidak ada sesi aktif</h1>
+        <h1 className="text-[1.875rem] font-bold leading-8">Tidak ada sesi aktif</h1>
         <Button onClick={() => navigate("/")}>Pilih</Button>
       </div>
     );
@@ -311,9 +320,21 @@ export function WorkoutPage() {
   const skippedCount = activeWorkout.exercises.filter((item) => item.skipped).length;
   const plannedCount = activeWorkout.exercises.length - completedCount - skippedCount;
   const totalExerciseCount = activeWorkout.exercises.length;
-  const isExerciseCompleted = active.status === "completed";
+  const isExerciseCompleted = active?.status === "completed";
   const canStartExercise = !isExerciseCompleted;
   const showPreviewActions = activeWorkout.mode === "exercise_preview";
+  const categories = categoryOrder.filter((category) => category === "Semua" || exercises.some((item) => item.category === category));
+  const filteredCatalogExercises = exercises.filter((item) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    const matchesCategory = selectedCategory === "Semua" || item.category === selectedCategory;
+    const matchesQuery =
+      !normalizedQuery ||
+      item.name.toLowerCase().includes(normalizedQuery) ||
+      formatCategoryLabel(item.category).toLowerCase().includes(normalizedQuery) ||
+      item.equipment?.some((equipment) => equipment.toLowerCase().includes(normalizedQuery));
+
+    return matchesCategory && matchesQuery;
+  });
 
   const startRestTimer = () => {
     startRest();
@@ -333,20 +354,106 @@ export function WorkoutPage() {
     navigate("/summary");
   };
 
+  const renderCustomPicker = () => (
+    <div className="space-y-4 pb-24">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="metric-surface p-3">
+          <p className="text-xs text-muted-foreground">Selesai</p>
+          <p className="text-2xl font-bold">{completedCount}</p>
+        </div>
+        <div className="metric-surface p-3">
+          <p className="text-xs text-muted-foreground">Gerakan sesi</p>
+          <p className="text-2xl font-bold">{totalExerciseCount}</p>
+        </div>
+      </div>
+
+      <section className="space-y-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input className="h-12 pl-9" placeholder="Cari gerakan atau equipment" value={query} onChange={(event) => setQuery(event.target.value)} />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {categories.map((category) => {
+            const selected = category === selectedCategory;
+            return (
+              <Button
+                key={category}
+                type="button"
+                variant={selected ? "default" : "secondary"}
+                size="sm"
+                className="h-11 shrink-0 px-4"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category === "Semua" ? "Semua" : formatCategoryLabel(category)}
+              </Button>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="space-y-3">
+        {filteredCatalogExercises.map((item) => {
+          const activeExercise = activeWorkout.exercises.find((entry) => entry.exerciseId === item.id);
+          const isCompleted = activeExercise?.status === "completed";
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={cn(
+                "surface-list-item w-full p-4 text-left hover:border-primary/35",
+                isCompleted && "border-emerald-500/70 bg-emerald-500/10 hover:border-emerald-400/80",
+              )}
+              onClick={() => selectCustomExercise(item.id)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2">
+                    {isCompleted ? (
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-background">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                    ) : null}
+                    <p className={cn("truncate font-semibold", isCompleted && "text-emerald-100")}>{item.name}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {item.targetSets} set x {item.targetReps} repetisi · {formatCategoryLabel(item.category)}
+                  </p>
+                  {activeExercise && (activeExercise.actualSets > 0 || activeExercise.actualReps > 0) ? (
+                    <p className={cn("text-xs text-muted-foreground", isCompleted && "font-medium text-emerald-200/90")}>
+                      Tercatat {activeExercise.actualSets} set · {activeExercise.actualReps} repetisi
+                    </p>
+                  ) : null}
+                </div>
+                {activeExercise ? (
+                  <Badge className={cn("shrink-0", statusClass[activeExercise.status])}>
+                    {statusLabel[activeExercise.status]}
+                  </Badge>
+                ) : (
+                  <Badge className="shrink-0 bg-secondary text-muted-foreground">Pilih</Badge>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   const renderPicker = () => (
     <div className="space-y-4 pb-24">
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-md bg-secondary p-3">
+        <div className="metric-surface p-3">
           <p className="text-xs text-muted-foreground">Selesai</p>
-          <p className="font-mono text-2xl font-bold">{completedCount}</p>
+          <p className="text-2xl font-bold">{completedCount}</p>
         </div>
-        <div className="rounded-md bg-secondary p-3">
+        <div className="metric-surface p-3">
           <p className="text-xs text-muted-foreground">Total</p>
-          <p className="font-mono text-2xl font-bold">{totalExerciseCount}</p>
+          <p className="text-2xl font-bold">{totalExerciseCount}</p>
         </div>
-        <div className="rounded-md bg-secondary p-3">
+        <div className="metric-surface p-3">
           <p className="text-xs text-muted-foreground">Belum</p>
-          <p className="font-mono text-2xl font-bold">{plannedCount}</p>
+          <p className="text-2xl font-bold">{plannedCount}</p>
         </div>
       </div>
 
@@ -360,7 +467,7 @@ export function WorkoutPage() {
               key={activeExercise.exerciseId}
               type="button"
               className={cn(
-                "w-full rounded-md border border-border bg-card p-4 text-left transition hover:border-primary/50",
+                "surface-list-item w-full p-4 text-left hover:border-primary/35",
                 activeExercise.status === "completed" &&
                   "border-emerald-500/70 bg-emerald-500/10 hover:border-emerald-400/80",
                 activeExercise.status === "active" && "border-primary/60",
@@ -416,7 +523,7 @@ export function WorkoutPage() {
     </div>
   );
 
-  const renderPreview = () => (
+  const renderPreview = () => exercise && active ? (
     <Card className="animate-workout-card pb-24">
       <CardHeader>
         <Button className="w-fit px-0 text-muted-foreground" variant="ghost" onClick={returnToExercisePicker}>
@@ -427,7 +534,7 @@ export function WorkoutPage() {
           <div>
             <CardTitle className="text-xl">{exercise.name}</CardTitle>
             <CardDescription>
-              {exercise.targetSets} set x {exercise.targetReps} repetisi · {formatCategoryLabel(exercise.category)}
+              {exercise ? `${exercise.targetSets} set x ${exercise.targetReps} repetisi · ${formatCategoryLabel(exercise.category)}` : null}
             </CardDescription>
           </div>
           <Badge className={cn(statusClass[active.status])}>{statusLabel[active.status]}</Badge>
@@ -438,10 +545,10 @@ export function WorkoutPage() {
         <ExerciseInfo exercise={exercise} />
       </CardContent>
     </Card>
-  );
+  ) : null;
 
-  const renderActive = () => (
-    <Card className="animate-workout-card border-primary/50">
+  const renderActive = () => exercise && active ? (
+    <Card className="animate-workout-card border-primary/35 bg-card/90 shadow-[0_24px_80px_rgb(0_0_0/0.36)]">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -455,17 +562,17 @@ export function WorkoutPage() {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-md bg-secondary p-4">
+          <div className="metric-surface p-4">
             <p className="text-xs text-muted-foreground">Durasi gerakan</p>
-            <p className="font-mono text-3xl font-bold">{formatDuration(activeElapsedSeconds)}</p>
+            <p className="text-3xl font-bold">{formatDuration(activeElapsedSeconds)}</p>
           </div>
-          <div className="rounded-md bg-secondary p-4">
+          <div className="metric-surface p-4">
             <p className="text-xs text-muted-foreground">Set berjalan</p>
-            <p className="font-mono text-3xl font-bold">{active.currentSet}</p>
+            <p className="text-3xl font-bold">{active.currentSet}</p>
           </div>
         </div>
 
-        <div className="rounded-md border border-border bg-secondary/60 p-4">
+        <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold">Beban kerja</p>
@@ -475,7 +582,7 @@ export function WorkoutPage() {
               value={active.weightKg !== undefined ? String(active.weightKg) : "none"}
               onValueChange={(value) => updateCurrentWeight(value === "none" ? undefined : Number(value))}
             >
-              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 font-mono text-base sm:w-44" aria-label="Beban kerja dalam kilogram">
+              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base sm:w-44" aria-label="Beban kerja dalam kilogram">
                 <SelectValue placeholder="Pilih beban" />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">
@@ -490,13 +597,13 @@ export function WorkoutPage() {
           </div>
         </div>
 
-        <div className="rounded-md border border-border bg-secondary p-3">
+        <div className="rounded-md border border-primary/15 bg-card/80 p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <p className="text-center text-xs text-muted-foreground">Repetisi set ini</p>
           <div className="mt-2 grid grid-cols-[48px_1fr_48px] items-center gap-3">
             <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={removeRep} aria-label="Kurangi repetisi">
               <Minus className="h-5 w-5" />
             </Button>
-            <p className="text-center font-mono text-3xl font-bold">{active.currentReps}</p>
+            <p className="text-center text-3xl font-bold">{active.currentReps}</p>
             <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={addRep} aria-label="Tambah repetisi">
               <Plus className="h-5 w-5" />
             </Button>
@@ -521,10 +628,10 @@ export function WorkoutPage() {
         </div>
       </CardContent>
     </Card>
-  );
+  ) : null;
 
-  const renderResting = () => (
-    <Card className="animate-workout-card border-orange-500/50">
+  const renderResting = () => exercise && active ? (
+    <Card className="animate-workout-card border-primary/30 bg-card/90 shadow-[0_24px_80px_rgb(0_0_0/0.36)]">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -537,11 +644,11 @@ export function WorkoutPage() {
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="animate-rest-pulse rounded-md border border-orange-500/40 bg-orange-500/10 p-5">
+        <div className="animate-rest-pulse rounded-md border border-primary/20 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">Waktu istirahat</p>
-              <p className="font-mono text-5xl font-bold">{formatDuration(restSeconds)}</p>
+              <p className="text-5xl font-bold">{formatDuration(restSeconds)}</p>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setRestSeconds(0)} aria-label="Hentikan timer">
               <Pause className="h-5 w-5" />
@@ -550,7 +657,7 @@ export function WorkoutPage() {
           <Progress value={(restSeconds / 90) * 100} className="mt-4 bg-orange-500/20" />
         </div>
 
-        <div className="rounded-md border border-border bg-secondary/60 p-4">
+        <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <div className="flex gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
               <Sparkles className="h-5 w-5" />
@@ -576,15 +683,15 @@ export function WorkoutPage() {
         </div>
       </CardContent>
     </Card>
-  );
+  ) : null;
 
   return (
     <div className="space-y-5">
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm text-muted-foreground">{workout.name}</p>
-            <h1 className="text-2xl font-bold">Sesi latihan</h1>
+            <p className="text-sm text-muted-foreground">{sessionName}</p>
+            <h1 className="text-[1.875rem] font-bold leading-8">Sesi latihan</h1>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setShowFinish(true)} aria-label="Selesaikan sesi">
             <X className="h-5 w-5" />
@@ -593,19 +700,24 @@ export function WorkoutPage() {
         <Progress value={progress} />
         <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
           <span>{progress}% progres sesi</span>
-          <span className="font-mono">{formatDuration(sessionElapsedSeconds)}</span>
+          <span className="font-semibold">{formatDuration(sessionElapsedSeconds)}</span>
         </div>
       </section>
 
-      {activeWorkout.mode === "exercise_picker" ? renderPicker() : null}
+      {activeWorkout.mode === "exercise_picker" ? (activeWorkout.isCustom ? renderCustomPicker() : renderPicker()) : null}
       {activeWorkout.mode === "exercise_preview" ? renderPreview() : null}
       {activeWorkout.mode === "exercise_active" ? renderActive() : null}
       {activeWorkout.mode === "resting" ? renderResting() : null}
 
       {activeWorkout.mode === "exercise_picker" ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-[max(34px,env(safe-area-inset-bottom))] z-40 px-4">
           <div className="mx-auto max-w-3xl">
-            <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={() => setShowFinish(true)}>
+            <Button
+              className="min-h-12 w-full rounded-xl border border-white/10 bg-background/82 shadow-[0_18px_60px_rgb(0_0_0/0.45)] backdrop-blur-xl hover:border-primary/35"
+              size="lg"
+              variant="secondary"
+              onClick={() => setShowFinish(true)}
+            >
               Selesai Sesi
             </Button>
           </div>
@@ -613,7 +725,7 @@ export function WorkoutPage() {
       ) : null}
 
       {showPreviewActions ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3 backdrop-blur">
+        <div className="premium-dock fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
           <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3">
             <Button className="min-h-12" size="lg" variant="outline" onClick={returnToExercisePicker}>
               <ArrowLeft className="h-4 w-4" />
@@ -639,7 +751,9 @@ export function WorkoutPage() {
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle>Selesaikan sesi?</DialogTitle>
             <DialogDescription>
-              {completedCount} selesai · {skippedCount} dilewati · {plannedCount} belum
+              {activeWorkout.isCustom
+                ? `${completedCount} selesai · ${totalExerciseCount} gerakan sesi`
+                : `${completedCount} selesai · ${skippedCount} dilewati · ${plannedCount} belum`}
             </DialogDescription>
           </DialogHeader>
 
@@ -677,15 +791,17 @@ export function WorkoutPage() {
       <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
         <DialogContent className="max-h-[90vh] w-[calc(100vw-32px)] overflow-y-auto rounded-lg">
           <DialogHeader>
-            <DialogTitle>{exercise.name}</DialogTitle>
+            <DialogTitle>{exercise?.name}</DialogTitle>
             <DialogDescription>
-              {exercise.targetSets} set x {exercise.targetReps} repetisi · {formatCategoryLabel(exercise.category)}
+              {exercise ? `${exercise.targetSets} set x ${exercise.targetReps} repetisi · ${formatCategoryLabel(exercise.category)}` : null}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-5">
-            <ExerciseMedia exercise={exercise} />
-            <ExerciseInfo exercise={exercise} />
-          </div>
+          {exercise ? (
+            <div className="space-y-5">
+              <ExerciseMedia exercise={exercise} />
+              <ExerciseInfo exercise={exercise} />
+            </div>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>
