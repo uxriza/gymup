@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { differenceInMinutes, endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
+import { addMonths, differenceInMinutes, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isWithinInterval, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { id } from "date-fns/locale";
-import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGymStore } from "@/store/gym-store";
+import { cn } from "@/lib/utils";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -19,10 +20,20 @@ const isStandaloneMode = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   ("standalone" in window.navigator && Boolean(window.navigator.standalone));
 
+const weekdayLabels = ["S", "S", "R", "K", "J", "S", "M"];
+
+const getActivityCellClass = (count: number) => {
+  if (count >= 3) return "border-primary bg-primary";
+  if (count === 2) return "border-primary/70 bg-primary/70";
+  if (count === 1) return "border-primary/45 bg-primary/35";
+  return "border-border bg-secondary/70";
+};
+
 export function HomePage() {
   const navigate = useNavigate();
   const { sessions, exercises, activeWorkout } = useGymStore();
   const [now, setNow] = useState(() => new Date());
+  const [displayedMonth, setDisplayedMonth] = useState(() => new Date());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
@@ -32,7 +43,7 @@ export function HomePage() {
     ? Math.max(differenceInMinutes(new Date(latestSession.endTime), new Date(latestSession.startTime)), 1)
     : 0;
   const latestSets = latestSession?.exercises.reduce((total, item) => total + item.actualSets, 0) ?? 0;
-  const latestReps = latestSession?.exercises.reduce((total, item) => total + item.actualReps, 0) ?? 0;
+  const latestRep = latestSession?.exercises.reduce((total, item) => total + item.actualReps, 0) ?? 0;
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
   const weeklySessions = sessions.filter((session) =>
@@ -46,6 +57,20 @@ export function HomePage() {
     (total, session) => total + session.exercises.filter((exercise) => exercise.completed).length,
     0,
   );
+  const monthStart = startOfMonth(displayedMonth);
+  const monthEnd = endOfMonth(displayedMonth);
+  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const monthlySessions = sessions.filter((session) =>
+    isWithinInterval(new Date(session.date), { start: monthStart, end: monthEnd }),
+  );
+  const monthlyActiveDays = monthDays.filter((day) =>
+    monthlySessions.some((session) => isSameDay(new Date(session.date), day)),
+  ).length;
+  const monthStartOffset = (monthStart.getDay() + 6) % 7;
+  const monthGridDays = [...Array.from({ length: monthStartOffset }, () => null), ...monthDays];
+  const getSessionCountForDay = (day: Date) =>
+    monthlySessions.filter((session) => isSameDay(new Date(session.date), day)).length;
+  const canGoToNextMonth = !isSameMonth(displayedMonth, now);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(new Date()), 1000);
@@ -242,9 +267,9 @@ export function HomePage() {
                 <div className="rounded-md bg-secondary p-3">
                   <p className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Repeat2 className="h-3 w-3" />
-                    Reps
+                    Rep
                   </p>
-                  <p className="font-mono text-2xl font-bold">{latestReps}</p>
+                  <p className="font-mono text-2xl font-bold">{latestRep}</p>
                 </div>
               </div>
 
@@ -276,6 +301,77 @@ export function HomePage() {
           </Card>
         </section>
       ) : null}
+
+      <section className="space-y-2">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Aktivitas bulanan</h2>
+            <p className="text-sm text-muted-foreground">
+              {monthlyActiveDays} hari aktif · {monthlySessions.length} sesi
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              onClick={() => setDisplayedMonth((current) => subMonths(current, 1))}
+              aria-label="Lihat bulan sebelumnya"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <p className="min-w-20 text-center text-xs font-medium text-muted-foreground">{format(displayedMonth, "MMM yyyy", { locale: id })}</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              onClick={() => setDisplayedMonth((current) => addMonths(current, 1))}
+              disabled={!canGoToNextMonth}
+              aria-label="Lihat bulan berikutnya"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="space-y-2 p-3">
+            <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-medium text-muted-foreground">
+              {weekdayLabels.map((day, index) => (
+                <span key={`${day}-${index}`}>{day}</span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {monthGridDays.map((day, index) => {
+                if (!day) {
+                  return <span key={`empty-${index}`} className="h-7 rounded-md" aria-hidden="true" />;
+                }
+
+                const count = getSessionCountForDay(day);
+                const label = `${format(day, "d MMMM", { locale: id })}: ${count} sesi`;
+
+                return (
+                  <span
+                    key={day.toISOString()}
+                    role="img"
+                    aria-label={label}
+                    title={label}
+                    className={cn("h-7 rounded-md border shadow-sm", getActivityCellClass(count))}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground" aria-hidden="true">
+              <span className="mr-1">Aktivitas</span>
+              {[0, 1, 2, 3].map((count) => (
+                <span key={count} className={cn("h-2.5 w-2.5 rounded-sm border", getActivityCellClass(count))} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       <Dialog open={installGuideOpen} onOpenChange={setInstallGuideOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>

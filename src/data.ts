@@ -2,422 +2,415 @@ import type { Exercise, Workout } from "@/types";
 
 export const defaultExercises: Exercise[] = [
   {
-    "id": "bench-press",
-    "name": "Bench Press",
-    "category": "Chest",
-    "targetSets": 4,
-    "targetReps": 8,
-    "isOptional": false,
-    "notes": "Lay down on a bench, the bar should be directly above your eyes, the knees are somewhat angled and the feet are firmly on the floor. Concentrate, breath deeply and grab the bar more than shoulder wide. Bring it slowly do...",
-    "equipment": [
-      "Barbell",
-      "Bench"
+    id: "bench-press",
+    name: "Tekan Dada Barbel",
+    category: "Chest",
+    targetSets: 4,
+    targetReps: 8,
+    isOptional: false,
+    notes: "Latihan dorong utama untuk dada. Jaga bahu tetap stabil, turunkan bar dengan kontrol, lalu dorong kembali tanpa memantulkan bar di dada.",
+    equipment: ["Barbel", "Bench"],
+    updatedAt: "2026-04-15T22:23:56.330863+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/192/Bench-press-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/73/cfb72002-898f-443a-a124-a0bce8a2e6ad.MP4",
+    instructions: [
+      "Berbaring di bench dengan posisi bar tepat di atas garis mata.",
+      "Pijakkan kaki kuat di lantai dan pegang bar sedikit lebih lebar dari bahu.",
+      "Turunkan bar perlahan ke area dada tengah dengan siku tetap terkontrol.",
+      "Dorong bar ke atas sampai lengan hampir lurus tanpa mengangkat bahu dari bench.",
     ],
-    "updatedAt": "2026-04-15T22:23:56.330863+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/192/Bench-press-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/73/cfb72002-898f-443a-a124-a0bce8a2e6ad.MP4",
-    "instructions": [
-      "Lay down on a bench, the bar should be directly above your eyes, the knees are somewhat angled and the feet are firmly on the floor",
-      "Concentrate, breath deeply and grab the bar more than shoulder wide",
-      "Bring it slowly down till it briefly touches your chest at the height of your nipples",
-      "If you train with a high weight it is advisable to have a *spotter* that can help you up if you can't lift the weight on your own"
-    ]
   },
   {
-    "id": "incline-bench-press-dumbbell",
-    "name": "Incline Bench Press - Dumbbell",
-    "category": "Chest",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "* Bench should be angled anywhere from 30 to 45 degrees * Be sure to press dumbbells straight upward (perpendicular to the floor)",
-    "equipment": [
-      "Dumbbell",
-      "Incline bench"
+    id: "incline-bench-press-dumbel",
+    name: "Tekan Dada Miring Dumbel",
+    category: "Chest",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Fokus pada dada bagian atas. Gunakan sudut bench 30 sampai 45 derajat dan dorong dumbel secara stabil.",
+    equipment: ["Dumbel", "Bench miring"],
+    updatedAt: "2026-04-15T22:23:56.012930+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/16/Incline-press-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/537/b9c937e9-daeb-42a9-be8e-7a77e368478c.MOV",
+    instructions: [
+      "Atur bench miring sekitar 30 sampai 45 derajat.",
+      "Pegang dumbel di samping dada dengan pergelangan tetap netral.",
+      "Dorong dumbel ke atas secara lurus dan terkontrol.",
+      "Turunkan kembali perlahan sampai dada terasa meregang ringan.",
     ],
-    "updatedAt": "2026-04-15T22:23:56.012930+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/16/Incline-press-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/537/b9c937e9-daeb-42a9-be8e-7a77e368478c.MOV",
-    "instructions": [
-      "* Bench should be angled anywhere from 30 to 45 degrees * Be sure to press dumbbells straight upward (perpendicular to the floor)"
-    ]
   },
   {
-    "id": "shoulder-press-dumbbells",
-    "name": "Shoulder Press, Dumbbells",
-    "category": "Shoulders",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "Sit on a bench, the back rest should be almost vertical. Take two dumbbells and bring them up to shoulder height, the palms and the elbows point during the whole exercise to the front. Press the weights up, at the highes...",
-    "equipment": [
-      "Dumbbell"
+    id: "shoulder-press-dumbels",
+    name: "Tekan Bahu Dumbel",
+    category: "Shoulders",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Latihan bahu utama. Jaga punggung tegak dan hindari mengayun badan saat mendorong beban.",
+    equipment: ["Dumbel"],
+    updatedAt: "2026-04-15T22:23:55.654931+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/123/dumbel-shoulder-press-large-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/567/64f33c19-1d96-4b7c-af17-6c6a4941c614.MOV",
+    instructions: [
+      "Duduk atau berdiri dengan punggung tegak dan otot inti aktif.",
+      "Angkat dumbel setinggi bahu dengan telapak tangan menghadap depan.",
+      "Dorong dumbel ke atas sampai lengan hampir lurus.",
+      "Turunkan perlahan ke posisi awal tanpa kehilangan kontrol bahu.",
     ],
-    "updatedAt": "2026-04-15T22:23:55.654931+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/123/dumbbell-shoulder-press-large-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/567/64f33c19-1d96-4b7c-af17-6c6a4941c614.MOV",
-    "instructions": [
-      "Sit on a bench, the back rest should be almost vertical",
-      "Take two dumbbells and bring them up to shoulder height, the palms and the elbows point during the whole exercise to the front",
-      "Press the weights up, at the highest point they come very near but don't touch",
-      "Go slowly down and repeat."
-    ]
   },
   {
-    "id": "lateral-raises",
-    "name": "Lateral Raises",
-    "category": "Shoulders",
-    "targetSets": 3,
-    "targetReps": 12,
-    "isOptional": true,
-    "notes": "This exercise works the deltoid muscle of the shoulder. The movement starts with the arms straight, and the hands holding weights at the sides or in front of the body. Body is in a slight forward-leaning position with hi...",
-    "equipment": [
-      "Dumbbell"
+    id: "lateral-raises",
+    name: "Angkat Samping Bahu",
+    category: "Shoulders",
+    targetSets: 3,
+    targetReps: 12,
+    isOptional: true,
+    notes: "Gerakan isolasi untuk bahu samping. Gunakan beban ringan dan tempo stabil.",
+    equipment: ["Dumbel"],
+    updatedAt: "2026-04-15T22:23:55.570498+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/148/lateral-dumbel-raises-large-2.png",
+    videoUrl: "https://wger.de/media/exercise-video/348/de69928a-8a35-4096-821c-1f46de5e0e03.MOV",
+    instructions: [
+      "Berdiri tegak dengan dumbel di sisi tubuh.",
+      "Tekuk siku sedikit dan jaga bahu tetap rileks.",
+      "Angkat dumbel ke samping sampai sekitar setinggi bahu.",
+      "Turunkan perlahan tanpa mengayun badan.",
     ],
-    "updatedAt": "2026-04-15T22:23:55.570498+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/148/lateral-dumbbell-raises-large-2.png",
-    "videoUrl": "https://wger.de/media/exercise-video/348/de69928a-8a35-4096-821c-1f46de5e0e03.MOV",
-    "instructions": [
-      "This exercise works the deltoid muscle of the shoulder",
-      "The movement starts with the arms straight, and the hands holding weights at the sides or in front of the body",
-      "Body is in a slight forward-leaning position with hips and knees bent a little",
-      "Arms are kept straight or slightly bent, and raised through an arc of movement in the coronal plane that terminates when the hands are at approximately shoulder height"
-    ]
   },
   {
-    "id": "dips",
-    "name": "Dips",
-    "category": "Chest",
-    "targetSets": 3,
-    "targetReps": 8,
-    "isOptional": true,
-    "notes": "A dip is an upper-body strength exercise. Narrow, shoulder-width dips primarily train the triceps, with major synergists being the anterior deltoid, the pectoralis muscles (sternal, clavicular, and minor), and the rhombo...",
-    "equipment": [
-      "none (bodyweight exercise)"
+    id: "dips",
+    name: "Dips Dada",
+    category: "Chest",
+    targetSets: 3,
+    targetReps: 8,
+    isOptional: true,
+    notes: "Latihan berat badan untuk dada, bahu depan, dan trisep. Condongkan badan sedikit ke depan untuk menambah fokus dada.",
+    equipment: ["Berat badan"],
+    updatedAt: "2026-04-15T22:23:54.045674+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/194/34600351-8b0b-4cb0-8daa-583537be15b0.png",
+    videoUrl: "https://wger.de/media/exercise-video/194/d039ec90-474d-47a9-a3ad-bf0b00828c82.MP4",
+    instructions: [
+      "Pegang parallel bar dan angkat tubuh sampai lengan menopang badan.",
+      "Condongkan badan sedikit ke depan dan jaga bahu tetap stabil.",
+      "Turunkan tubuh perlahan sampai siku menekuk nyaman.",
+      "Dorong kembali ke atas tanpa mengunci siku terlalu keras.",
     ],
-    "updatedAt": "2026-04-15T22:23:54.045674+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/194/34600351-8b0b-4cb0-8daa-583537be15b0.png",
-    "videoUrl": "https://wger.de/media/exercise-video/194/d039ec90-474d-47a9-a3ad-bf0b00828c82.MP4",
-    "instructions": [
-      "A dip is an upper-body strength exercise",
-      "Narrow, shoulder-width dips primarily train the triceps, with major synergists being the anterior deltoid, the pectoralis muscles (sternal, clavicular, and minor), and the rhomboid muscles of the back (in that order).[1] Wide arm training places additional emphasis on the pectoral muscles, similar in respect to the way a wide grip bench press would focus more on the pectorals and less on the triceps."
-    ]
   },
   {
-    "id": "benchpress-dumbbells",
-    "name": "Benchpress Dumbbells",
-    "category": "Chest",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": true,
-    "notes": "The movement is very similar to benchpressing with a barbell, however, the weight is brought down to the chest at a lower point. Hold two dumbbells and lay down on a bench. Hold the weights next to the chest, at the heig...",
-    "equipment": [
-      "Bench",
-      "Dumbbell"
+    id: "benchpress-dumbels",
+    name: "Tekan Dada Dumbel",
+    category: "Chest",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: true,
+    notes: "Variasi tekan dada dengan dumbel untuk rentang gerak lebih bebas dan kontrol sisi kanan-kiri.",
+    equipment: ["Bench", "Dumbel"],
+    updatedAt: "2026-04-15T22:23:56.016514+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/97/Dumbbell-bench-press-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/75/080c799b-8afd-4130-8d72-9cef0cd79f54.MOV",
+    instructions: [
+      "Berbaring di bench dengan dumbel di samping dada.",
+      "Jaga kaki menapak dan bahu tetap menempel di bench.",
+      "Dorong dumbel ke atas sampai lengan hampir lurus.",
+      "Turunkan perlahan sampai dada terasa meregang ringan.",
     ],
-    "updatedAt": "2026-04-15T22:23:56.016514+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/97/Dumbbell-bench-press-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/75/080c799b-8afd-4130-8d72-9cef0cd79f54.MOV",
-    "instructions": [
-      "The movement is very similar to benchpressing with a barbell, however, the weight is brought down to the chest at a lower point",
-      "Hold two dumbbells and lay down on a bench",
-      "Hold the weights next to the chest, at the height of your nipples and press them up till the arms are stretched",
-      "Let the weight slowly and controlled down."
-    ]
   },
   {
-    "id": "pull-ups",
-    "name": "Pull-ups",
-    "category": "Back",
-    "targetSets": 4,
-    "targetReps": 8,
-    "isOptional": false,
-    "notes": "Grab the pull up bar with a wide grip, the body is hanging freely. Keep your chest out and pull yourself up till your chin reaches the bar or it touches your neck, if you want to pull behind you. Go with a slow and contr...",
-    "equipment": [
-      "Pull-up bar"
+    id: "pull-ups",
+    name: "Pull-up",
+    category: "Back",
+    targetSets: 4,
+    targetReps: 8,
+    isOptional: false,
+    notes: "Latihan tarik berat badan untuk punggung. Prioritaskan rentang gerak dan kontrol tulang belikat.",
+    equipment: ["Palang pull-up"],
+    updatedAt: "2026-04-15T22:23:56.751242+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/475/b0554016-16fd-4dbe-be47-a2a17d16ae0e.jpg",
+    videoUrl: "https://wger.de/media/exercise-video/475/83067ffe-ccb9-4e22-8507-5131b211ce74.MOV",
+    instructions: [
+      "Pegang bar dengan pegangan sedikit lebih lebar dari bahu.",
+      "Aktifkan punggung dengan menarik bahu turun terlebih dahulu.",
+      "Tarik tubuh sampai dagu mendekati atau melewati bar.",
+      "Turunkan tubuh perlahan sampai lengan kembali lurus terkontrol.",
     ],
-    "updatedAt": "2026-04-15T22:23:56.751242+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/475/b0554016-16fd-4dbe-be47-a2a17d16ae0e.jpg",
-    "videoUrl": "https://wger.de/media/exercise-video/475/83067ffe-ccb9-4e22-8507-5131b211ce74.MOV",
-    "instructions": [
-      "Grab the pull up bar with a wide grip, the body is hanging freely",
-      "Keep your chest out and pull yourself up till your chin reaches the bar or it touches your neck, if you want to pull behind you",
-      "Go with a slow and controlled movement down, always keeping the chest out."
-    ]
   },
   {
-    "id": "pull-ups-on-machine",
-    "name": "Pull Ups on Machine",
-    "category": "Back",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": true,
-    "notes": "Ikuti gerakan dengan kontrol penuh dan jaga tempo stabil.",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:55.167004+02:00",
-    "videoUrl": "https://wger.de/media/exercise-video/477/2e23bb52-2782-40c8-bf88-fa2d2e2a9a0d.MOV",
-    "instructions": [
-      "Atur posisi awal dengan stabil sebelum mulai bergerak.",
-      "Lakukan gerakan dengan tempo terkontrol dan jaga napas tetap stabil.",
-      "Hentikan set jika form mulai berantakan atau terasa nyeri."
-    ]
-  },
-  {
-    "id": "rowing-seated-narrow-grip",
-    "name": "Rowing seated, narrow grip",
-    "category": "Back",
-    "targetSets": 4,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "* Tighten muscles * Controlled movement * Slow movement * Keep upper body upright * Do not lean back * Pull toward chest",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:55.425143+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/512/b938437e-ff00-4679-9036-acb41bb28bbd.png",
-    "videoUrl": "https://wger.de/media/exercise-video/512/fff4c294-93f0-4926-b3a2-bf59ad4afaa5.MOV",
-    "instructions": [
-      "* Tighten muscles * Controlled movement * Slow movement * Keep upper body upright * Do not lean back * Pull toward chest"
-    ]
-  },
-  {
-    "id": "facepull",
-    "name": "Facepull",
-    "category": "Shoulders",
-    "targetSets": 3,
-    "targetReps": 15,
-    "isOptional": true,
-    "notes": "Attach a rope to a pulley station set at about chest level. Step back so you're supporting the weight with arms completely outstretched and assume a staggered (one foot forward) stance. Bend the knees slightly for a stab...",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:54.320038+02:00",
-    "videoUrl": "https://wger.de/media/exercise-video/222/245a824b-cd39-45f2-b251-2c0b7efead0d.MOV",
-    "instructions": [
-      "Attach a rope to a pulley station set at about chest level",
-      "Step back so you're supporting the weight with arms completely outstretched and assume a staggered (one foot forward) stance",
-      "Bend the knees slightly for a stable base",
-      "Retract the scapulae (squeeze your partner's finger with your shoulder blades) and pull the center of the rope slightly up towards the face"
-    ]
-  },
-  {
-    "id": "biceps-curls-with-barbell",
-    "name": "Biceps Curls With Barbell",
-    "category": "Arms",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "Hold the Barbell shoulder-wide, the back is straight, the shoulders slightly back, the arms are streched. Bend the arms, bringing the weight up, with a fast movement. Without pausing, let down the bar with a slow and con...",
-    "equipment": [
-      "Barbell"
+    id: "pull-ups-on-machine",
+    name: "Pull-up Bantuan Mesin",
+    category: "Back",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: true,
+    notes: "Variasi pull-up dengan bantuan mesin agar repetisi lebih stabil.",
+    equipment: ["Mesin assisted pull-up"],
+    updatedAt: "2026-04-15T22:23:55.167004+02:00",
+    videoUrl: "https://wger.de/media/exercise-video/477/2e23bb52-2782-40c8-bf88-fa2d2e2a9a0d.MOV",
+    instructions: [
+      "Atur beban bantuan sesuai kemampuan.",
+      "Pegang handle dengan kuat dan posisikan lutut atau kaki pada bantalan.",
+      "Tarik tubuh ke atas dengan fokus pada punggung.",
+      "Turunkan perlahan tanpa melepas kontrol mesin.",
     ],
-    "updatedAt": "2026-04-15T22:23:55.375060+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/74/Bicep-curls-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/91/483f4bff-e108-41f1-8e7b-0caf24952552.MOV",
-    "instructions": [
-      "Hold the Barbell shoulder-wide, the back is straight, the shoulders slightly back, the arms are streched",
-      "Bend the arms, bringing the weight up, with a fast movement",
-      "Without pausing, let down the bar with a slow and controlled movement",
-      "Don't allow your body to swing during the exercise, all work is done by the biceps, which are the only mucles that should move (pay attention to the elbows)."
-    ]
   },
   {
-    "id": "hammer-curls",
-    "name": "Hammer Curls",
-    "category": "Arms",
-    "targetSets": 3,
-    "targetReps": 12,
-    "isOptional": true,
-    "notes": "- **Start:** Hold dumbbells at your sides with palms facing your torso. - **Curl:** Lift the weights toward your shoulders while maintaining the neutral grip (like holding a hammer). - **Squeeze:** Contract the biceps at...",
-    "equipment": [
-      "Dumbbell"
+    id: "rowing-seated-narrow-pegangan",
+    name: "Row Duduk Grip Sempit",
+    category: "Back",
+    targetSets: 4,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Latihan row untuk punggung tengah. Jaga dada terbuka dan jangan menarik dengan momentum badan.",
+    equipment: ["Kabel row"],
+    updatedAt: "2026-04-15T22:23:55.425143+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/512/b938437e-ff00-4679-9036-acb41bb28bbd.png",
+    videoUrl: "https://wger.de/media/exercise-video/512/fff4c294-93f0-4926-b3a2-bf59ad4afaa5.MOV",
+    instructions: [
+      "Duduk tegak dengan kaki menapak pada platform.",
+      "Pegang handle narrow pegangan dan jaga dada terbuka.",
+      "Tarik handle ke arah perut atas sambil merapatkan tulang belikat.",
+      "Kembalikan beban perlahan tanpa membungkukkan punggung.",
     ],
-    "updatedAt": "2026-04-15T22:23:54.216768+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/86/Bicep-hammer-curl-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/272/df069052-2173-4f24-855f-a0eebe729f24.MOV",
-    "instructions": [
-      "- **Start:** Hold dumbbells at your sides with palms facing your torso. - **Curl:** Lift the weights toward your shoulders while maintaining the neutral grip (like holding a hammer). - **Squeeze:** Contract the biceps at the top without moving your elbows forward. - **Lower:** Slowly return to the starting position with full control."
-    ]
   },
   {
-    "id": "front-squats",
-    "name": "Front Squats",
-    "category": "Legs",
-    "targetSets": 4,
-    "targetReps": 8,
-    "isOptional": false,
-    "notes": "This variation of the squat trains the hamstrings and gluteus maximus. It also works the back extensors and abductors.",
-    "equipment": [
-      "Barbell"
+    id: "facepull",
+    name: "Tarik Wajah Kabel",
+    category: "Shoulders",
+    targetSets: 3,
+    targetReps: 15,
+    isOptional: true,
+    notes: "Gerakan untuk bahu belakang dan stabilitas tulang belikat. Cocok sebagai aksesori pull day.",
+    equipment: ["Kabel", "Tali kabel"],
+    updatedAt: "2026-04-15T22:23:54.320038+02:00",
+    videoUrl: "https://wger.de/media/exercise-video/222/245a824b-cd39-45f2-b251-2c0b7efead0d.MOV",
+    instructions: [
+      "Pasang rope di cable setinggi wajah atau dada atas.",
+      "Pegang rope dan mundur sampai kabel tegang.",
+      "Tarik rope ke arah wajah sambil membuka siku ke samping.",
+      "Tahan sebentar, lalu kembali perlahan ke posisi awal.",
     ],
-    "updatedAt": "2026-04-15T22:23:55.585492+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/191/Front-squat-1-857x1024.png",
-    "videoUrl": "https://wger.de/media/exercise-video/257/ad8ac7d9-b04d-415f-ae0e-837942ce2840.MOV",
-    "instructions": [
-      "This variation of the squat trains the hamstrings and gluteus maximus",
-      "It also works the back extensors and abductors."
-    ]
   },
   {
-    "id": "romanian-deadlift",
-    "name": "Romanian Deadlift",
-    "category": "Legs",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "DL from top to pos 2: https://www.youtube.com/watch?v=WtWtjViRsKo",
-    "equipment": [
-      "Barbell"
+    id: "biceps-curls-with-barbell",
+    name: "Curl Bisep Barbel",
+    category: "Arms",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Latihan utama untuk biceps. Jaga siku dekat tubuh dan hindari mengayun pinggang.",
+    equipment: ["Barbel"],
+    updatedAt: "2026-04-15T22:23:55.375060+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/74/Bicep-curls-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/91/483f4bff-e108-41f1-8e7b-0caf24952552.MOV",
+    instructions: [
+      "Pegang barbel selebar bahu dengan telapak tangan menghadap atas.",
+      "Jaga punggung tegak dan siku tetap dekat badan.",
+      "Angkat barbel ke arah dada dengan kontrol biceps.",
+      "Turunkan perlahan tanpa mengayun tubuh.",
     ],
-    "updatedAt": "2026-04-15T22:23:55.433530+02:00",
-    "videoUrl": "https://wger.de/media/exercise-video/507/307e7276-a14d-4ea0-b579-f5b0dbc6f5af.MOV",
-    "instructions": [
-      "DL from top to pos 2: https://www.youtube.com/watch?v=WtWtjViRsKo"
-    ]
   },
   {
-    "id": "leg-press",
-    "name": "Leg Press",
-    "category": "Legs",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": false,
-    "notes": "The leg press is a weight training exercise in which the individual pushes a weight or resistance away from them using their legs.",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:55.074837+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/371/d2136f96-3a43-4d4c-9944-1919c4ca1ce1.webp",
-    "videoUrl": "https://wger.de/media/exercise-video/371/6aae16b4-01b9-4eb4-935c-3250f84d2c59.MOV",
-    "instructions": [
-      "The leg press is a weight training exercise in which the individual pushes a weight or resistance away from them using their legs."
-    ]
-  },
-  {
-    "id": "dumbbell-lunges-walking",
-    "name": "Dumbbell Lunges Walking",
-    "category": "Legs",
-    "targetSets": 3,
-    "targetReps": 12,
-    "isOptional": true,
-    "notes": "Take two dumbbells in your hands, stand straight, feet about shoulder wide. Take one long step so that the front knee is approximately forming a right angle. The back leg is streched, the knee is low but doesn't touch th...",
-    "equipment": [
-      "Dumbbell"
+    id: "hammer-curls",
+    name: "Hammer Curl Dumbel",
+    category: "Arms",
+    targetSets: 3,
+    targetReps: 12,
+    isOptional: true,
+    notes: "Variasi curl dengan pegangan netral untuk biceps dan brachialis.",
+    equipment: ["Dumbel"],
+    updatedAt: "2026-04-15T22:23:54.216768+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/86/Bicep-hammer-curl-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/272/df069052-2173-4f24-855f-a0eebe729f24.MOV",
+    instructions: [
+      "Pegang dumbel di sisi tubuh dengan telapak tangan saling menghadap.",
+      "Jaga siku dekat badan dan bahu tidak ikut naik.",
+      "Angkat dumbel ke arah bahu dengan pegangan tetap netral.",
+      "Turunkan perlahan sampai lengan kembali lurus terkontrol.",
     ],
-    "updatedAt": "2026-04-15T22:23:56.366370+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/113/Walking-lunges-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/206/47a65c45-6fd1-4181-b71a-3a6c882e516b.MOV",
-    "instructions": [
-      "Take two dumbbells in your hands, stand straight, feet about shoulder wide",
-      "Take one long step so that the front knee is approximately forming a right angle",
-      "The back leg is streched, the knee is low but doesn't touch the ground. \"Complete\" the step by standing up and repeat the movement with the other leg."
-    ]
   },
   {
-    "id": "leg-curls-sitting",
-    "name": "Leg Curls (sitting)",
-    "category": "Legs",
-    "targetSets": 3,
-    "targetReps": 12,
-    "isOptional": false,
-    "notes": "Ikuti gerakan dengan kontrol penuh dan jaga tempo stabil.",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:53.335983+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/117/seated-leg-curl-large-1.png",
-    "videoUrl": "https://wger.de/media/exercise-video/366/43df4b79-d4c3-4fbf-bcb5-e0d825b84120.MOV",
-    "instructions": [
-      "Atur posisi awal dengan stabil sebelum mulai bergerak.",
-      "Lakukan gerakan dengan tempo terkontrol dan jaga napas tetap stabil.",
-      "Hentikan set jika form mulai berantakan atau terasa nyeri."
-    ]
-  },
-  {
-    "id": "standing-calf-raises",
-    "name": "Standing Calf Raises",
-    "category": "Calves",
-    "targetSets": 3,
-    "targetReps": 15,
-    "isOptional": true,
-    "notes": "Get onto the calf raises machine, you should able to completely push your calves down. Stand straight, don't make a hollow back and don't bend your legs. Pull yourself up as high as you can. Make a small pause of 1 - 2 s...",
-    "equipment": [],
-    "updatedAt": "2026-04-15T22:23:56.267867+02:00",
-    "imageUrl": "https://wger.de/media/exercise-images/622/9a429bd0-afd3-4ad0-8043-e9beec901c81.jpeg",
-    "videoUrl": "https://wger.de/media/exercise-video/622/35b7b625-77fd-4c09-8c57-3ad0f2f23175.MOV",
-    "instructions": [
-      "Get onto the calf raises machine, you should able to completely push your calves down",
-      "Stand straight, don't make a hollow back and don't bend your legs",
-      "Pull yourself up as high as you can",
-      "Make a small pause of 1 - 2 seconds and go slowly down."
-    ]
-  },
-  {
-    "id": "hip-thrust",
-    "name": "Hip Thrust",
-    "category": "Legs",
-    "targetSets": 3,
-    "targetReps": 10,
-    "isOptional": true,
-    "notes": "The bar should go directly on your upper thigh, directly below your crotch. Your feet should be directly under your knees. Push your hips up so that you form a straight line from your knees to your shoulders. Use a pad f...",
-    "equipment": [
-      "Barbell",
-      "Bench"
+    id: "front-squats",
+    name: "Squat Depan",
+    category: "Legs",
+    targetSets: 4,
+    targetReps: 8,
+    isOptional: false,
+    notes: "Variasi squat dengan posisi bar di depan untuk fokus kaki depan, otot inti, dan postur tegak.",
+    equipment: ["Barbel"],
+    updatedAt: "2026-04-15T22:23:55.585492+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/191/Front-squat-1-857x1024.png",
+    videoUrl: "https://wger.de/media/exercise-video/257/ad8ac7d9-b04d-415f-ae0e-837942ce2840.MOV",
+    instructions: [
+      "Letakkan bar di depan bahu dengan siku terangkat.",
+      "Buka kaki selebar bahu dan jaga otot inti aktif.",
+      "Turun ke posisi squat dengan dada tetap tegak.",
+      "Dorong lantai untuk kembali berdiri tanpa lutut masuk ke dalam.",
     ],
-    "updatedAt": "2026-04-15T22:23:54.183961+02:00",
-    "videoUrl": "https://wger.de/media/exercise-video/294/45bacf4b-1bb6-4d47-8bd1-9f00eddd4019.MOV",
-    "instructions": [
-      "The bar should go directly on your upper thigh, directly below your crotch",
-      "Your feet should be directly under your knees",
-      "Push your hips up so that you form a straight line from your knees to your shoulders",
-      "Use a pad for comfort."
-    ]
-  }
+  },
+  {
+    id: "romanian-deadlift",
+    name: "Deadlift Rumania",
+    category: "Legs",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Latihan hip hinge untuk otot paha belakang dan otot bokong. Fokus pada dorongan pinggul ke belakang.",
+    equipment: ["Barbel"],
+    updatedAt: "2026-04-15T22:23:55.433530+02:00",
+    videoUrl: "https://wger.de/media/exercise-video/507/307e7276-a14d-4ea0-b579-f5b0dbc6f5af.MOV",
+    instructions: [
+      "Pegang barbel di depan paha dengan punggung netral.",
+      "Dorong pinggul ke belakang sambil menurunkan bar mengikuti paha.",
+      "Jaga lutut sedikit menekuk dan punggung tetap rata.",
+      "Naik kembali dengan mengencangkan otot bokong dan otot paha belakang.",
+    ],
+  },
+  {
+    id: "leg-press",
+    name: "Dorong Kaki Mesin",
+    category: "Legs",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: false,
+    notes: "Latihan mesin untuk kaki. Jaga punggung menempel dan kontrol kedalaman gerakan.",
+    equipment: ["Mesin leg press"],
+    updatedAt: "2026-04-15T22:23:55.074837+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/371/d2136f96-3a43-4d4c-9944-1919c4ca1ce1.webp",
+    videoUrl: "https://wger.de/media/exercise-video/371/6aae16b4-01b9-4eb4-935c-3250f84d2c59.MOV",
+    instructions: [
+      "Duduk di mesin dengan punggung menempel penuh pada sandaran.",
+      "Letakkan kaki di platform selebar bahu.",
+      "Turunkan beban sampai lutut menekuk nyaman tanpa pinggul terangkat.",
+      "Dorong platform kembali tanpa mengunci lutut terlalu keras.",
+    ],
+  },
+  {
+    id: "dumbel-lunges-walking",
+    name: "Lunge Jalan Dumbel",
+    category: "Legs",
+    targetSets: 3,
+    targetReps: 12,
+    isOptional: true,
+    notes: "Latihan unilateral untuk kaki dan stabilitas. Jaga langkah stabil dan lutut mengikuti arah kaki.",
+    equipment: ["Dumbel"],
+    updatedAt: "2026-04-15T22:23:56.366370+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/113/Walking-lunges-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/206/47a65c45-6fd1-4181-b71a-3a6c882e516b.MOV",
+    instructions: [
+      "Pegang dumbel di sisi tubuh dan berdiri tegak.",
+      "Langkahkan satu kaki ke depan dengan jarak cukup panjang.",
+      "Turunkan tubuh sampai lutut depan menekuk sekitar 90 derajat.",
+      "Dorong kembali berdiri dan lanjutkan dengan kaki berikutnya.",
+    ],
+  },
+  {
+    id: "leg-curls-sitting",
+    name: "Leg Curl Duduk",
+    category: "Legs",
+    targetSets: 3,
+    targetReps: 12,
+    isOptional: false,
+    notes: "Latihan isolasi otot paha belakang dengan mesin. Jaga pinggul tetap menempel di kursi.",
+    equipment: ["Mesin leg curl"],
+    updatedAt: "2026-04-15T22:23:53.335983+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/117/seated-leg-curl-large-1.png",
+    videoUrl: "https://wger.de/media/exercise-video/366/43df4b79-d4c3-4fbf-bcb5-e0d825b84120.MOV",
+    instructions: [
+      "Atur bantalan mesin sesuai tinggi kaki.",
+      "Duduk dengan pinggul dan punggung menempel stabil.",
+      "Tekuk lutut untuk menarik bantalan ke bawah dengan otot paha belakang.",
+      "Kembalikan perlahan tanpa membiarkan beban jatuh.",
+    ],
+  },
+  {
+    id: "standing-calf-raises",
+    name: "Angkat Betis Berdiri",
+    category: "Calves",
+    targetSets: 3,
+    targetReps: 15,
+    isOptional: true,
+    notes: "Latihan betis berdiri. Gunakan rentang gerak penuh dan jeda singkat di puncak.",
+    equipment: ["Mesin calf raise"],
+    updatedAt: "2026-04-15T22:23:56.267867+02:00",
+    imageUrl: "https://wger.de/media/exercise-images/622/9a429bd0-afd3-4ad0-8043-e9beec901c81.jpeg",
+    videoUrl: "https://wger.de/media/exercise-video/622/35b7b625-77fd-4c09-8c57-3ad0f2f23175.MOV",
+    instructions: [
+      "Berdiri di mesin calf raise dengan posisi tubuh tegak.",
+      "Turunkan tumit sampai betis terasa meregang.",
+      "Dorong tubuh naik setinggi mungkin lewat ujung kaki.",
+      "Tahan sebentar di puncak, lalu turunkan perlahan.",
+    ],
+  },
+  {
+    id: "hip-thrust",
+    name: "Dorong Pinggul",
+    category: "Legs",
+    targetSets: 3,
+    targetReps: 10,
+    isOptional: true,
+    notes: "Latihan otot bokong dengan fokus ekstensi pinggul. Gunakan bantalan bar agar lebih nyaman.",
+    equipment: ["Barbel", "Bench"],
+    updatedAt: "2026-04-15T22:23:54.183961+02:00",
+    videoUrl: "https://wger.de/media/exercise-video/294/45bacf4b-1bb6-4d47-8bd1-9f00eddd4019.MOV",
+    instructions: [
+      "Sandarkan punggung atas pada bench dan letakkan bar di atas pinggul.",
+      "Posisikan kaki di lantai dengan lutut menekuk nyaman.",
+      "Dorong pinggul ke atas sampai badan membentuk garis dari bahu ke lutut.",
+      "Turunkan pinggul perlahan sambil menjaga otot inti tetap aktif.",
+    ],
+  },
 ];
 
 export const defaultWorkouts: Workout[] = [
   {
-    "id": "push-foundation",
-    "name": "Push Foundation",
-    "dayOfWeek": "Monday",
-    "exerciseIds": [
+    id: "push-foundation",
+    name: "Push Dasar",
+    dayOfWeek: "Monday",
+    exerciseIds: [
       "bench-press",
-      "incline-bench-press-dumbbell",
-      "shoulder-press-dumbbells",
+      "incline-bench-press-dumbel",
+      "shoulder-press-dumbels",
       "lateral-raises",
       "dips",
-      "benchpress-dumbbells"
-    ]
+      "benchpress-dumbels",
+    ],
   },
   {
-    "id": "pull-foundation",
-    "name": "Pull Foundation",
-    "dayOfWeek": "Wednesday",
-    "exerciseIds": [
+    id: "pull-foundation",
+    name: "Pull Dasar",
+    dayOfWeek: "Wednesday",
+    exerciseIds: [
       "pull-ups",
-      "rowing-seated-narrow-grip",
+      "rowing-seated-narrow-pegangan",
       "facepull",
       "biceps-curls-with-barbell",
       "hammer-curls",
-      "pull-ups-on-machine"
-    ]
+      "pull-ups-on-machine",
+    ],
   },
   {
-    "id": "legs-core",
-    "name": "Legs + Core",
-    "dayOfWeek": "Friday",
-    "exerciseIds": [
+    id: "legs-otot inti",
+    name: "Kaki + Core",
+    dayOfWeek: "Friday",
+    exerciseIds: [
       "front-squats",
       "romanian-deadlift",
       "leg-press",
-      "dumbbell-lunges-walking",
+      "dumbel-lunges-walking",
       "leg-curls-sitting",
-      "standing-calf-raises"
-    ]
+      "standing-calf-raises",
+    ],
   },
   {
-    "id": "full-body",
-    "name": "Full Body",
-    "dayOfWeek": "Flexible",
-    "exerciseIds": [
+    id: "full-body",
+    name: "Full Body",
+    dayOfWeek: "Flexible",
+    exerciseIds: [
       "bench-press",
       "pull-ups",
       "front-squats",
       "romanian-deadlift",
       "facepull",
-      "hip-thrust"
-    ]
-  }
+      "hip-thrust",
+    ],
+  },
 ];

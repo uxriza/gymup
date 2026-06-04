@@ -1,5 +1,5 @@
 import { NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Activity, Dumbbell, History, Lock, Settings, Trash2 } from "lucide-react";
+import { Activity, Dumbbell, History, ListChecks, Lock, Trash2 } from "lucide-react";
 import { HomePage } from "@/pages/home";
 import { SelectWorkoutPage } from "@/pages/select-workout";
 import { WorkoutPage } from "@/pages/workout";
@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const navItems = [
   { to: "/", label: "Latihan", icon: Dumbbell },
   { to: "/history", label: "Riwayat", icon: History },
-  { to: "/setup", label: "Atur", icon: Settings },
+  { to: "/setup", label: "Gerakan", icon: ListChecks },
 ];
 
 export function App() {
@@ -28,7 +28,7 @@ export function App() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <button className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
+          <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <Activity className="h-5 w-5" />
             </span>
@@ -84,7 +84,7 @@ export function App() {
 
       {!activeWorkout ? (
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur">
-          <div className="mx-auto grid max-w-3xl grid-cols-3 px-3 py-2">
+          <div className="mx-auto grid max-w-3xl grid-cols-3 px-3 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}

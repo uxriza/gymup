@@ -5,6 +5,7 @@ const categoryLabels: Record<string, string> = {
   Shoulders: "Bahu",
   Arms: "Lengan",
   Core: "Inti",
+  Calves: "Betis",
   Custom: "Kustom",
 };
 

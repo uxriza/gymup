@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { differenceInMinutes, format } from "date-fns";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGymStore } from "@/store/gym-store";
 
 export function SummaryPage() {
   const navigate = useNavigate();
   const { sessions, exercises } = useGymStore();
+  const [rewardOpen, setRewardOpen] = useState(true);
   const session = sessions[0];
 
   if (!session) {
@@ -26,7 +29,42 @@ export function SummaryPage() {
   const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-28">
+      <Dialog open={rewardOpen} onOpenChange={setRewardOpen}>
+        <DialogContent className="max-w-sm text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <Trophy className="h-7 w-7" />
+          </div>
+          <DialogHeader className="space-y-2 text-center">
+            <DialogTitle className="text-2xl">Latihan selesai</DialogTitle>
+            <DialogDescription>
+              Kamu menyelesaikan {completed.length} gerakan dari program {session.workoutName} dalam {duration} menit.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-2 rounded-md bg-secondary p-3 text-left">
+            <div>
+              <p className="text-xs text-muted-foreground">Selesai</p>
+              <p className="font-mono text-xl font-bold">{completed.length}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Set</p>
+              <p className="font-mono text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualSets, 0)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Rep</p>
+              <p className="font-mono text-xl font-bold">{session.exercises.reduce((total, item) => total + item.actualReps, 0)}</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Button className="min-h-12 w-full" onClick={() => setRewardOpen(false)}>
+              Lihat ringkasan
+            </Button>
+            <Button className="min-h-12 w-full" variant="secondary" onClick={() => navigate("/")}>
+              Beranda
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <section className="space-y-2">
         <CheckCircle2 className="h-10 w-10 text-primary" />
         <h1 className="text-3xl font-bold">Sesi tersimpan</h1>
@@ -93,9 +131,13 @@ export function SummaryPage() {
         </Card>
       ) : null}
 
-      <Button className="w-full" size="lg" onClick={() => navigate("/")}>
-        Beranda
-      </Button>
+      <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] z-40 border-t border-border bg-background/95 px-4 pb-3 pt-3 backdrop-blur">
+        <div className="mx-auto max-w-3xl">
+          <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
+            Beranda
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

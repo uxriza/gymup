@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { differenceInMinutes, format, isAfter, subDays } from "date-fns";
 import { id } from "date-fns/locale";
-import { Calendar, Clock3, Dumbbell, ListChecks, Repeat2, Trophy } from "lucide-react";
+import { Calendar, Clock3, Dumbbell, ListChecks, Repeat2, Trash2, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 
 export function HistoryPage() {
-  const { sessions, exercises } = useGymStore();
+  const { sessions, exercises, resetHistory } = useGymStore();
+  const [resetOpen, setResetOpen] = useState(false);
   const lastSevenDays = sessions.filter((session) => isAfter(new Date(session.date), subDays(new Date(), 7)));
   const completedThisWeek = lastSevenDays.reduce(
     (total, session) => total + session.exercises.filter((exercise) => exercise.completed).length,
@@ -16,10 +20,41 @@ export function HistoryPage() {
 
   return (
     <div className="space-y-5">
-      <section className="space-y-2">
-        <h1 className="text-3xl font-bold">Riwayat</h1>
-        <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini.</p>
+      <section className="flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Riwayat</h1>
+          <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini.</p>
+        </div>
+        {sessions.length ? (
+          <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label="Reset riwayat">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        ) : null}
       </section>
+
+      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reset riwayat?</DialogTitle>
+            <DialogDescription>Semua sesi latihan yang tersimpan akan dihapus. Program dan setup tetap aman.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button
+              className="min-h-12 w-full"
+              variant="destructive"
+              onClick={() => {
+                resetHistory();
+                setResetOpen(false);
+              }}
+            >
+              Reset riwayat
+            </Button>
+            <Button className="min-h-12 w-full" variant="secondary" onClick={() => setResetOpen(false)}>
+              Batal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-2 gap-3">
         <Card>
@@ -51,7 +86,7 @@ export function HistoryPage() {
           const skipped = session.exercises.filter((item) => item.skipped);
           const planned = session.exercises.filter((item) => !item.completed && !item.skipped);
           const totalSets = session.exercises.reduce((total, item) => total + item.actualSets, 0);
-          const totalReps = session.exercises.reduce((total, item) => total + item.actualReps, 0);
+          const totalRep = session.exercises.reduce((total, item) => total + item.actualReps, 0);
           const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
 
           return (
@@ -99,9 +134,9 @@ export function HistoryPage() {
                   <div className="rounded-md bg-secondary p-2">
                     <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Repeat2 className="h-3 w-3" />
-                      Reps
+                      Rep
                     </p>
-                    <p className="font-mono text-lg font-bold">{totalReps}</p>
+                    <p className="font-mono text-lg font-bold">{totalRep}</p>
                   </div>
                 </div>
 

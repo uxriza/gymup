@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
 import {
   ArrowLeft,
   Check,
@@ -9,6 +8,7 @@ import {
   Play,
   Plus,
   Sparkles,
+  ThumbsUp,
   Timer,
   X,
 } from "lucide-react";
@@ -20,7 +20,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -77,8 +76,11 @@ function ExerciseMedia({ exercise }: { exercise: Exercise }) {
           src={exercise.videoUrl}
           poster={exercise.imageUrl}
           controls
+          autoPlay
+          loop
           playsInline
           muted
+          preload="metadata"
         />
       ) : exercise.imageUrl ? (
         <img className="aspect-video w-full bg-black object-cover" src={exercise.imageUrl} alt={exercise.name} />
@@ -91,38 +93,125 @@ function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   );
 }
 
+const localizedInstructions: Record<string, string[]> = {
+  "bench-press": [
+    "Berbaring di bench dengan posisi bar tepat di atas garis mata.",
+    "Tekuk lutut secukupnya dan pastikan telapak kaki menapak stabil di lantai.",
+    "Tarik napas, pegang bar sedikit lebih lebar dari bahu, lalu turunkan bar perlahan ke dada.",
+    "Dorong bar kembali ke atas dengan kontrol. Gunakan spotter saat memakai beban berat.",
+  ],
+  "incline-bench-press-dumbel": [
+    "Atur bench pada sudut sekitar 30 sampai 45 derajat.",
+    "Pegang dumbel sejajar dada atas dengan bahu tetap stabil.",
+    "Dorong dumbel lurus ke atas, lalu turunkan perlahan dengan kontrol.",
+  ],
+  "shoulder-press-dumbels": [
+    "Duduk dengan sandaran hampir tegak dan punggung menempel stabil.",
+    "Angkat dumbel ke tinggi bahu dengan siku mengarah ke depan.",
+    "Dorong dumbel ke atas sampai hampir bertemu, lalu turunkan perlahan.",
+    "Jaga otot inti tetap aktif dan ulangi dengan tempo terkontrol.",
+  ],
+  "lateral-raises": [
+    "Berdiri stabil dengan dumbel di sisi tubuh.",
+    "Angkat lengan ke samping sampai sekitar tinggi bahu.",
+    "Jaga siku sedikit menekuk dan bahu tidak terangkat berlebihan.",
+    "Turunkan dumbel perlahan tanpa mengayun badan.",
+  ],
+  "dips": [
+    "Pegang handle dip dengan tubuh stabil dan bahu terkunci.",
+    "Turunkan tubuh perlahan sampai siku menekuk nyaman.",
+    "Dorong tubuh kembali ke atas dengan dada dan trisep tetap aktif.",
+    "Gunakan rentang gerak yang aman untuk bahu.",
+  ],
+  "benchpress-dumbels": [
+    "Berbaring di bench sambil memegang dua dumbel di sisi dada.",
+    "Dorong dumbel ke atas sampai lengan hampir lurus.",
+    "Turunkan dumbel perlahan ke posisi awal dengan kontrol.",
+    "Jaga pergelangan tangan netral dan bahu tetap stabil.",
+  ],
+  "pull-ups": [
+    "Pegang palang pull-up dengan grip lebar dan tubuh menggantung stabil.",
+    "Tarik dada ke arah bar sambil menjaga bahu turun dan punggung aktif.",
+    "Turunkan tubuh perlahan sampai lengan kembali panjang.",
+  ],
+  "rowing-seated-narrow-grip": [
+    "Duduk tegak dan pegang handle dengan grip sempit.",
+    "Tarik handle ke arah dada sambil merapatkan tulang belikat.",
+    "Jangan bersandar berlebihan dan jaga gerakan tetap terkontrol.",
+  ],
+  "facepull": [
+    "Atur pulley setinggi dada dan gunakan rope attachment.",
+    "Mundur sampai lengan lurus dan tubuh stabil.",
+    "Tarik rope ke arah wajah sambil merapatkan tulang belikat.",
+    "Kontrol gerakan balik tanpa melepas ketegangan bahu belakang.",
+  ],
+  "biceps-curls-with-barbell": [
+    "Pegang barbel selebar bahu dengan punggung tegak.",
+    "Tekuk siku untuk mengangkat bar tanpa mengayun badan.",
+    "Turunkan bar perlahan sampai lengan hampir lurus.",
+    "Jaga siku tetap dekat tubuh selama gerakan.",
+  ],
+  "hammer-curls": [
+    "Pegang dumbel di sisi tubuh dengan telapak tangan saling menghadap.",
+    "Angkat dumbel ke arah bahu tanpa mendorong siku ke depan.",
+    "Kencangkan biceps di posisi atas, lalu turunkan perlahan.",
+  ],
+  "front-squats": [
+    "Letakkan bar di depan bahu dengan siku mengarah ke depan.",
+    "Turunkan pinggul seperti squat sambil menjaga dada tetap tegak.",
+    "Dorong lantai untuk kembali berdiri dengan kontrol.",
+  ],
+  "romanian-deadlift": [
+    "Mulai dari posisi berdiri dengan bar atau dumbel di depan paha.",
+    "Dorong pinggul ke belakang sambil punggung tetap netral.",
+    "Turunkan beban sampai hamstring terasa tertarik, lalu kembali berdiri.",
+  ],
+  "leg-press": [
+    "Letakkan kaki di platform dengan posisi nyaman dan stabil.",
+    "Turunkan beban sampai lutut menekuk aman.",
+    "Dorong platform kembali tanpa mengunci lutut berlebihan.",
+  ],
+  "dumbel-lunges-walking": [
+    "Pegang dumbel di sisi tubuh dan berdiri tegak.",
+    "Ambil langkah panjang sampai lutut depan membentuk sudut nyaman.",
+    "Dorong tubuh ke depan untuk berdiri dan lanjutkan dengan kaki lainnya.",
+  ],
+  "standing-calf-raises": [
+    "Berdiri di mesin calf raise dengan posisi tubuh tegak.",
+    "Dorong tumit setinggi mungkin sampai betis berkontraksi.",
+    "Tahan sebentar, lalu turunkan tumit perlahan.",
+  ],
+  "hip-thrust": [
+    "Posisikan punggung atas di bench dan bar di atas panggul dengan pad.",
+    "Letakkan kaki tepat di bawah lutut.",
+    "Dorong pinggul ke atas sampai tubuh membentuk garis dari lutut ke bahu.",
+    "Turunkan pinggul perlahan dan ulangi dengan kontrol.",
+  ],
+};
+
+const getExerciseInstructions = (exercise: Exercise) => localizedInstructions[exercise.id] ?? exercise.instructions ?? [];
+
 function ExerciseInfo({ exercise }: { exercise: Exercise }) {
-  const contentFreshness = exercise.updatedAt
-    ? formatDistanceToNow(new Date(exercise.updatedAt), { addSuffix: true })
-    : undefined;
+  const instructions = getExerciseInstructions(exercise);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="secondary" className={exercise.isOptional ? "text-muted-foreground" : undefined}>
-          {exercise.isOptional ? "Opsional" : "Rekomendasi"}
-        </Badge>
-        {exercise.equipment?.slice(0, 4).map((item) => (
-          <Badge key={item} variant="secondary" className="gap-1 text-muted-foreground">
-            <Dumbbell className="h-3 w-3" />
-            {item}
-          </Badge>
-        ))}
-        {contentFreshness ? (
-          <Badge variant="outline" className="gap-1">
-            <Sparkles className="h-3 w-3 text-primary" />
-            Diperbarui {contentFreshness}
-          </Badge>
-        ) : null}
-      </div>
+      {exercise.equipment?.length ? (
+        <div className="flex flex-wrap gap-2">
+          {exercise.equipment.slice(0, 4).map((item) => (
+            <Badge key={item} variant="secondary" className="gap-1 text-muted-foreground">
+              <Dumbbell className="h-3 w-3" />
+              {item}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
 
-      {exercise.notes ? <p className="text-sm leading-6 text-muted-foreground">{exercise.notes}</p> : null}
-
-      {exercise.instructions?.length ? (
+      {instructions.length ? (
         <div className="space-y-2 rounded-md border border-border p-3">
           <p className="text-sm font-semibold">Instruksi gerakan</p>
           <ol className="space-y-2 text-sm text-muted-foreground">
-            {exercise.instructions.map((instruction, index) => (
+            {instructions.map((instruction, index) => (
               <li key={`${exercise.id}-${index}`} className="flex gap-2">
                 <span className="font-mono text-primary">{index + 1}</span>
                 <span>{instruction}</span>
@@ -221,8 +310,10 @@ export function WorkoutPage() {
   const completedCount = activeWorkout.exercises.filter((item) => item.completed).length;
   const skippedCount = activeWorkout.exercises.filter((item) => item.skipped).length;
   const plannedCount = activeWorkout.exercises.length - completedCount - skippedCount;
+  const totalExerciseCount = activeWorkout.exercises.length;
   const isExerciseCompleted = active.status === "completed";
   const canStartExercise = !isExerciseCompleted;
+  const showPreviewActions = activeWorkout.mode === "exercise_preview";
 
   const startRestTimer = () => {
     startRest();
@@ -243,15 +334,15 @@ export function WorkoutPage() {
   };
 
   const renderPicker = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-md bg-secondary p-3">
           <p className="text-xs text-muted-foreground">Selesai</p>
           <p className="font-mono text-2xl font-bold">{completedCount}</p>
         </div>
         <div className="rounded-md bg-secondary p-3">
-          <p className="text-xs text-muted-foreground">Dilewati</p>
-          <p className="font-mono text-2xl font-bold">{skippedCount}</p>
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="font-mono text-2xl font-bold">{totalExerciseCount}</p>
         </div>
         <div className="rounded-md bg-secondary p-3">
           <p className="text-xs text-muted-foreground">Belum</p>
@@ -267,6 +358,7 @@ export function WorkoutPage() {
           return (
             <button
               key={activeExercise.exerciseId}
+              type="button"
               className={cn(
                 "w-full rounded-md border border-border bg-card p-4 text-left transition hover:border-primary/50",
                 activeExercise.status === "completed" &&
@@ -284,7 +376,7 @@ export function WorkoutPage() {
                         <Check className="h-3.5 w-3.5" />
                       </span>
                     ) : null}
-                    <p className={cn("font-semibold", activeExercise.status === "completed" && "text-emerald-100")}>
+                    <p className={cn("truncate font-semibold", activeExercise.status === "completed" && "text-emerald-100")}>
                       {item.name}
                     </p>
                   </div>
@@ -292,9 +384,15 @@ export function WorkoutPage() {
                     <span>
                       {item.targetSets} set x {item.targetReps} repetisi · {formatCategoryLabel(item.category)}
                     </span>
-                    <Badge variant="secondary" className={item.isOptional ? "text-muted-foreground" : undefined}>
-                      {item.isOptional ? "Opsional" : "Rekomendasi"}
-                    </Badge>
+                    {!item.isOptional ? (
+                      <span
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 text-primary"
+                        aria-label="Rekomendasi"
+                        title="Rekomendasi"
+                      >
+                        <ThumbsUp className="h-3.5 w-3.5" />
+                      </span>
+                    ) : null}
                   </div>
                   {activeExercise.actualSets > 0 || activeExercise.actualReps > 0 ? (
                     <p
@@ -315,15 +413,11 @@ export function WorkoutPage() {
           );
         })}
       </div>
-
-      <Button className="w-full" size="lg" variant="secondary" onClick={() => setShowFinish(true)}>
-        Selesai Sesi
-      </Button>
     </div>
   );
 
   const renderPreview = () => (
-    <Card className="animate-workout-card">
+    <Card className="animate-workout-card pb-24">
       <CardHeader>
         <Button className="w-fit px-0 text-muted-foreground" variant="ghost" onClick={returnToExercisePicker}>
           <ArrowLeft className="h-4 w-4" />
@@ -342,23 +436,6 @@ export function WorkoutPage() {
       <CardContent className="space-y-5">
         <ExerciseMedia exercise={exercise} />
         <ExerciseInfo exercise={exercise} />
-        {isExerciseCompleted ? (
-          <Button className="h-12 w-full" size="lg" variant="secondary" onClick={returnToExercisePicker}>
-            <Check className="h-4 w-4" />
-            Selesai
-          </Button>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            <Button className="h-12" size="lg" variant="outline" onClick={returnToExercisePicker}>
-              <ArrowLeft className="h-4 w-4" />
-              Kembali
-            </Button>
-            <Button className="h-12" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
-              <Play className="h-4 w-4" />
-              Mulai
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
@@ -389,7 +466,7 @@ export function WorkoutPage() {
         </div>
 
         <div className="rounded-md border border-border bg-secondary/60 p-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold">Beban kerja</p>
               <p className="text-xs text-muted-foreground">Default mengikuti beban terakhir jika ada.</p>
@@ -398,10 +475,10 @@ export function WorkoutPage() {
               value={active.weightKg !== undefined ? String(active.weightKg) : "none"}
               onValueChange={(value) => updateCurrentWeight(value === "none" ? undefined : Number(value))}
             >
-              <SelectTrigger className="h-10 w-36 font-mono" aria-label="Beban kerja dalam kilogram">
+              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 font-mono text-base sm:w-44" aria-label="Beban kerja dalam kilogram">
                 <SelectValue placeholder="Pilih beban" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)]">
                 <SelectItem value="none">Belum ada</SelectItem>
                 {getWeightOptions(active.weightKg).map((weight) => (
                   <SelectItem key={weight} value={String(weight)}>
@@ -413,35 +490,34 @@ export function WorkoutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-[56px_1fr_56px] gap-3">
-          <Button variant="secondary" size="icon" onClick={removeRep} aria-label="Kurangi repetisi">
-            <Minus className="h-5 w-5" />
-          </Button>
-          <div className="flex min-h-12 items-center justify-center rounded-md border border-border bg-secondary px-3">
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">Repetisi set ini</p>
-              <p className="font-mono text-2xl font-bold">{active.currentReps}</p>
-            </div>
+        <div className="rounded-md border border-border bg-secondary p-3">
+          <p className="text-center text-xs text-muted-foreground">Repetisi set ini</p>
+          <div className="mt-2 grid grid-cols-[48px_1fr_48px] items-center gap-3">
+            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={removeRep} aria-label="Kurangi repetisi">
+              <Minus className="h-5 w-5" />
+            </Button>
+            <p className="text-center font-mono text-3xl font-bold">{active.currentReps}</p>
+            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={addRep} aria-label="Tambah repetisi">
+              <Plus className="h-5 w-5" />
+            </Button>
           </div>
-          <Button variant="secondary" size="icon" onClick={addRep} aria-label="Tambah repetisi">
-            <Plus className="h-5 w-5" />
-          </Button>
         </div>
 
-        <Button className="h-12 w-full" variant="secondary" onClick={() => setShowInstructions(true)}>
-          <Dumbbell className="h-4 w-4" />
-          Instruksi
-        </Button>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button className="h-12" variant="secondary" onClick={startRestTimer}>
-            <Timer className="h-4 w-4" />
+        <div className="space-y-3">
+          <Button className="h-14 w-full text-base" onClick={startRestTimer}>
+            <Timer className="h-5 w-5" />
             Istirahat
           </Button>
-          <Button className="h-12" variant="outline" onClick={completeCurrentExercise}>
-            <Check className="h-4 w-4" />
-            Akhiri
-          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button className="h-12" variant="secondary" onClick={() => setShowInstructions(true)}>
+              <Dumbbell className="h-4 w-4" />
+              Instruksi
+            </Button>
+            <Button className="h-12" variant="outline" onClick={completeCurrentExercise}>
+              <Check className="h-4 w-4" />
+              Akhiri
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -526,38 +602,75 @@ export function WorkoutPage() {
       {activeWorkout.mode === "exercise_active" ? renderActive() : null}
       {activeWorkout.mode === "resting" ? renderResting() : null}
 
+      {activeWorkout.mode === "exercise_picker" ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3 backdrop-blur">
+          <div className="mx-auto max-w-3xl">
+            <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={() => setShowFinish(true)}>
+              Selesai Sesi
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {showPreviewActions ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3 backdrop-blur">
+          <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3">
+            <Button className="min-h-12" size="lg" variant="outline" onClick={returnToExercisePicker}>
+              <ArrowLeft className="h-4 w-4" />
+              Kembali
+            </Button>
+            {isExerciseCompleted ? (
+              <Button className="min-h-12" size="lg" variant="secondary" onClick={returnToExercisePicker}>
+                <Check className="h-4 w-4" />
+                Selesai
+              </Button>
+            ) : (
+              <Button className="min-h-12" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
+                <Play className="h-4 w-4" />
+                Mulai
+              </Button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       <Dialog open={showFinish} onOpenChange={setShowFinish}>
-        <DialogContent className="w-[calc(100vw-32px)] rounded-lg">
-          <DialogHeader>
+        <DialogContent className="w-[calc(100vw-32px)] rounded-lg p-5 sm:p-6">
+          <DialogHeader className="space-y-2 text-left">
             <DialogTitle>Selesaikan sesi?</DialogTitle>
             <DialogDescription>
-              {completedCount} gerakan selesai, {skippedCount} dilewati, {plannedCount} belum dikerjakan.
+              {completedCount} selesai · {skippedCount} dilewati · {plannedCount} belum
             </DialogDescription>
           </DialogHeader>
 
           <Textarea
+            className="min-h-24"
             placeholder="Catatan sesi"
             value={summaryNotes}
             onChange={(event) => setSummaryNotes(event.target.value)}
           />
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowFinish(false)}>
-              Lanjutkan
+          <div className="space-y-3">
+            <Button className="min-h-12 w-full" size="lg" onClick={finishAndNavigate}>
+              Simpan Sesi
             </Button>
-            <Button onClick={finishAndNavigate}>Simpan</Button>
-          </DialogFooter>
+            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={() => setShowFinish(false)}>
+              Lanjutkan Latihan
+            </Button>
+          </div>
 
-          <Button
-            variant="ghost"
-            className="w-full text-muted-foreground"
-            onClick={() => {
-              cancelWorkout();
-              navigate("/");
-            }}
-          >
-            Buang sesi
-          </Button>
+          <div className="border-t border-border pt-3">
+            <Button
+              variant="ghost"
+              className="min-h-11 w-full text-muted-foreground hover:text-destructive"
+              onClick={() => {
+                cancelWorkout();
+                navigate("/");
+              }}
+            >
+              Buang sesi
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
