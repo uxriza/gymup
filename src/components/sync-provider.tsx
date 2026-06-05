@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/auth-provider";
 import { useGymStore } from "@/store/gym-store";
+import { defaultExercises, defaultWorkouts } from "@/data";
 import type { Exercise, Session, Workout } from "@/types";
 
 type SyncState = {
@@ -26,12 +27,18 @@ const getSnapshot = (): SyncState => {
   };
 };
 
-const mergeState = (remoteState: Partial<SyncState> | null | undefined, localState: SyncState): SyncState => ({
-  exercises: mergeById(remoteState?.exercises ?? [], localState.exercises),
-  workouts: mergeById(remoteState?.workouts ?? [], localState.workouts),
-  sessions: mergeById(remoteState?.sessions ?? [], localState.sessions).sort(
+const normalizeRemoteState = (remoteState: Partial<SyncState> | null | undefined): SyncState => ({
+  exercises: mergeById(remoteState?.exercises ?? [], defaultExercises),
+  workouts: mergeById(remoteState?.workouts ?? [], defaultWorkouts),
+  sessions: (remoteState?.sessions ?? []).sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   ),
+});
+
+const getEmptyAccountState = (): SyncState => ({
+  exercises: defaultExercises,
+  workouts: defaultWorkouts,
+  sessions: [],
 });
 
 export function SyncProvider({ children }: { children: ReactNode }) {
@@ -53,6 +60,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     };
 
     const startSync = async () => {
+      isApplyingRemoteState = true;
+      useGymStore.getState().replaceSyncedState(getEmptyAccountState());
+      isApplyingRemoteState = false;
+
       const remoteResult = await supabaseClient
         .from("gymup_sync_states")
         .select("state")
@@ -60,13 +71,17 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (remoteResult.data?.state) {
-        const mergedState = mergeState(remoteResult.data.state as Partial<SyncState>, getSnapshot());
+        const mergedState = normalizeRemoteState(remoteResult.data.state as Partial<SyncState>);
         isApplyingRemoteState = true;
         useGymStore.getState().replaceSyncedState(mergedState);
         isApplyingRemoteState = false;
         await saveState(user.id, mergedState);
       } else {
-        await saveState(user.id, getSnapshot());
+        const emptyAccountState = getEmptyAccountState();
+        isApplyingRemoteState = true;
+        useGymStore.getState().replaceSyncedState(emptyAccountState);
+        isApplyingRemoteState = false;
+        await saveState(user.id, emptyAccountState);
       }
 
       return useGymStore.subscribe((state) => {

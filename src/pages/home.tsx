@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/components/auth-provider";
 import { useGymStore } from "@/store/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ const getActivityCellClass = (count: number) => {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { displayName } = useAuth();
   const { sessions, exercises, workouts, activeWorkout } = useGymStore();
   const [now, setNow] = useState(() => new Date());
   const [displayedMonth, setDisplayedMonth] = useState(() => new Date());
@@ -114,26 +116,30 @@ export function HomePage() {
             {format(now, "EEEE, d MMM", { locale: id })} · {format(now, "HH:mm:ss")}
           </p>
           <div className="space-y-1">
-            <h1 className="text-[2rem] font-bold leading-9 tracking-normal">Tracker latihan pribadi</h1>
+            <h1 className="text-[2rem] font-bold leading-9 tracking-normal">
+              {displayName ? `Halo, ${displayName}` : "Tracker latihan pribadi"}
+            </h1>
             <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-              Mulai program latihan, ikuti gerakan, lalu catat progres sesi secara lokal.
+              {displayName
+                ? "Siap lanjutkan progres latihan hari ini"
+                : "Mulai program latihan, ikuti gerakan, lalu catat progres sesi secara lokal"}
             </p>
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-xl border border-primary/24 bg-[linear-gradient(115deg,rgb(12_13_15/0.98)_0%,rgb(18_20_24/0.96)_54%,rgb(255_122_26/0.08)_100%)] p-4 shadow-[0_20px_56px_hsl(var(--primary)/0.08)]">
-          <div className="pointer-events-none absolute -right-14 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
+        <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-[radial-gradient(circle_at_88%_22%,rgb(255_122_26/0.13),transparent_30%),linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(21_23_27/0.96)_62%,rgb(255_122_26/0.08)_100%)] p-4 shadow-[0_24px_70px_hsl(var(--primary)/0.08)]">
+          <div className="pointer-events-none absolute -bottom-14 -right-10 h-36 w-36 rounded-full border border-primary/20 bg-primary/8 blur-2xl" aria-hidden="true" />
           <div className="relative flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-medium">
-                {activeWorkout ? "Sesi sedang berjalan" : recommendedWorkout ? `Latihan berikutnya: ${recommendedWorkout.name}` : "Siap latihan hari ini"}
+              <p className="font-display text-xl font-bold uppercase leading-6">
+                {activeWorkout ? "Lanjutkan latihan" : "Mulai sesi latihan"}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="mt-1 max-w-[15rem] text-sm leading-6 text-muted-foreground">
                 {activeWorkout
-                  ? "Lanjutkan dari posisi terakhir."
+                  ? "Sesi kamu masih tersimpan"
                   : recommendedWorkout
-                    ? `${recommendedWorkout.exerciseIds.length} gerakan utama sudah disiapkan.`
-                    : "Pilih program dan mulai sesi baru."}
+                    ? `Saran: ${recommendedWorkout.name}`
+                    : "Mulai catat progres"}
               </p>
             </div>
             <Button className="h-12 shrink-0 px-4" size="lg" onClick={() => navigate(activeWorkout ? "/workout" : "/select")}>
@@ -155,7 +161,7 @@ export function HomePage() {
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-medium">Tambah ke layar utama</span>
-                <span className="block text-xs text-muted-foreground">Buka GymUp seperti aplikasi dari layar utama HP.</span>
+                <span className="block text-xs text-muted-foreground">Buka GymUp seperti aplikasi dari layar utama HP</span>
               </span>
             </span>
             <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -167,7 +173,7 @@ export function HomePage() {
         <Card className="border-primary/50 bg-primary/5">
           <CardHeader>
             <CardTitle>Sesi aktif</CardTitle>
-            <CardDescription>Lanjutkan sesi sebelum membuka halaman latihan lain.</CardDescription>
+            <CardDescription>Lanjutkan sesi sebelum membuka halaman latihan lain</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" size="lg" onClick={() => navigate("/workout")}>
@@ -181,7 +187,7 @@ export function HomePage() {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Terakhir</h2>
-            <p className="text-sm text-muted-foreground">Program dan progres sesi terbaru.</p>
+            <p className="text-sm text-muted-foreground">Program dan progres sesi terbaru</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/history")}>
             Riwayat
@@ -256,7 +262,7 @@ export function HomePage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Belum ada gerakan selesai di program terakhir.</p>
+                <p className="text-sm text-muted-foreground">Belum ada gerakan selesai di program terakhir</p>
               )}
             </CardContent>
           </Card>
@@ -316,7 +322,7 @@ export function HomePage() {
         </div>
         <Card>
           <CardContent className="space-y-2 p-3">
-            <div className="grid grid-cols-7 gap-1.5 text-center text-[9px] font-medium text-muted-foreground sm:text-[10px]">
+            <div className="grid grid-cols-7 gap-1.5 text-center text-[9px] font-medium text-muted-foreground">
               {weekdayLabels.map((day, index) => (
                 <span key={`${day}-${index}`}>{day}</span>
               ))}
@@ -357,8 +363,8 @@ export function HomePage() {
             <DialogTitle>Tambahkan ke layar utama</DialogTitle>
             <DialogDescription>
               {isIosDevice()
-                ? "Di iPhone, shortcut ditambahkan lewat tombol Bagikan di Safari."
-                : "Kalau pilihan pasang belum muncul, gunakan menu browser untuk menambahkan aplikasi."}
+                ? "Di iPhone, shortcut ditambahkan lewat tombol Bagikan di Safari"
+                : "Kalau pilihan pasang belum muncul, gunakan menu browser untuk menambahkan aplikasi"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
@@ -366,16 +372,16 @@ export function HomePage() {
               <>
                 <div className="flex gap-3 rounded-md border border-border p-3">
                   <Share2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <p>Ketuk tombol Bagikan di Safari.</p>
+                  <p>Ketuk tombol Bagikan di Safari</p>
                 </div>
-                <div className="rounded-md border border-border p-3">Pilih “Tambahkan ke Layar Utama”.</div>
-                <div className="rounded-md border border-border p-3">Ketuk “Tambah”, lalu buka GymUp dari ikon di layar utama.</div>
+                <div className="rounded-md border border-border p-3">Pilih “Tambahkan ke Layar Utama”</div>
+                <div className="rounded-md border border-border p-3">Ketuk “Tambah”, lalu buka GymUp dari ikon di layar utama</div>
               </>
             ) : (
               <>
-                <div className="rounded-md border border-border p-3">Buka menu browser.</div>
-                <div className="rounded-md border border-border p-3">Pilih “Pasang aplikasi” atau “Tambahkan ke layar utama”.</div>
-                <div className="rounded-md border border-border p-3">Setelah terpasang, GymUp bisa dibuka dari layar utama.</div>
+                <div className="rounded-md border border-border p-3">Buka menu browser</div>
+                <div className="rounded-md border border-border p-3">Pilih “Pasang aplikasi” atau “Tambahkan ke layar utama”</div>
+                <div className="rounded-md border border-border p-3">Setelah terpasang, GymUp bisa dibuka dari layar utama</div>
               </>
             )}
           </div>

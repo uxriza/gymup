@@ -54,6 +54,7 @@ type GymState = {
   startCustomWorkout: () => void;
   completeWarmup: () => void;
   startCooldown: () => void;
+  returnToMainSession: () => void;
   selectCustomExercise: (exerciseId: string) => void;
   selectExercise: (index: number) => void;
   returnToExercisePicker: () => void;
@@ -153,6 +154,20 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             phase: activeWorkout.cooldownIds?.length ? "cooldown" : "main",
+            mode: "exercise_picker",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
+          },
+        });
+      },
+      returnToMainSession: () => {
+        const activeWorkout = get().activeWorkout;
+        if (!activeWorkout) return;
+
+        set({
+          activeWorkout: {
+            ...activeWorkout,
+            phase: "main",
             mode: "exercise_picker",
             restStartedAt: undefined,
             restDurationSeconds: undefined,

@@ -6,12 +6,21 @@ type AuthContextValue = {
   authEnabled: boolean;
   loading: boolean;
   user: User | null;
+  displayName: string;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
+  updateName: (name: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+const getDisplayName = (user: User | null) => {
+  if (!user) return "";
+  const metadataName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name;
+  if (typeof metadataName === "string" && metadataName.trim()) return metadataName.trim();
+  return user.email?.split("@")[0] || "Kamu";
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -45,24 +54,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authEnabled: isSupabaseConfigured,
       loading,
       user,
+      displayName: getDisplayName(user),
       signIn: async (email, password) => {
         if (!supabase) return;
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
-      signUp: async (email, password) => {
+      signUp: async (email, password, name) => {
         if (!supabase) return;
+        const trimmedName = name.trim();
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/verified`,
+            data: {
+              full_name: trimmedName,
+              name: trimmedName,
+            },
           },
         });
         if (error) throw error;
         if (data.user && data.user.identities?.length === 0) {
           throw new Error("already registered");
         }
+      },
+      updateName: async (name) => {
+        if (!supabase) return;
+        const trimmedName = name.trim();
+        const { data, error } = await supabase.auth.updateUser({
+          data: {
+            full_name: trimmedName,
+            name: trimmedName,
+            display_name: trimmedName,
+          },
+        });
+        if (error) throw error;
+        setUser(data.user);
       },
       signOut: async () => {
         if (!supabase) return;

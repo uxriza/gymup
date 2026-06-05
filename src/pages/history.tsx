@@ -54,7 +54,7 @@ export function HistoryPage() {
       <section className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-[2rem] font-bold leading-9">Riwayat</h1>
-          <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini.</p>
+          <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini</p>
         </div>
         {sessions.length ? (
           <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label="Hapus riwayat">
@@ -67,7 +67,7 @@ export function HistoryPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Hapus riwayat?</DialogTitle>
-            <DialogDescription>Semua sesi latihan yang tersimpan akan dihapus. Program latihan tetap aman.</DialogDescription>
+            <DialogDescription>Semua sesi latihan yang tersimpan akan dihapus. Program latihan tetap aman</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Button
@@ -90,10 +90,10 @@ export function HistoryPage() {
       <section className="space-y-3">
         <div>
           <h2 className="text-lg font-semibold">Minggu ini</h2>
-          <p className="text-sm text-muted-foreground">Ringkasan sesi Senin sampai Minggu.</p>
+          <p className="text-sm text-muted-foreground">Ringkasan sesi Senin sampai Minggu</p>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <Card className="metric-surface">
+          <Card className="metric-surface border-primary/25">
             <CardContent className="relative z-10 space-y-2 p-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <CalendarDays className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function HistoryPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="metric-surface">
+          <Card className="metric-surface border-primary/25">
             <CardContent className="relative z-10 space-y-2 p-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <Clock3 className="h-4 w-4" />
@@ -115,7 +115,7 @@ export function HistoryPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="metric-surface">
+          <Card className="metric-surface border-primary/25">
             <CardContent className="relative z-10 space-y-2 p-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <CheckCircle2 className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function HistoryPage() {
           <Card>
             <CardHeader>
               <CardTitle>Belum ada sesi</CardTitle>
-              <CardDescription>Mulai latihan pertama kamu, nanti riwayatnya muncul di sini.</CardDescription>
+              <CardDescription>Mulai latihan pertama kamu, nanti riwayatnya muncul di sini</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="min-h-12 w-full" onClick={() => navigate("/select")}>
@@ -166,8 +166,12 @@ export function HistoryPage() {
               const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
 
               return (
-                <Card key={session.id} className="border-primary/10 bg-card/88">
-                  <CardHeader className="space-y-3">
+                <Card
+                  key={session.id}
+                  className="relative overflow-hidden border-primary/25 bg-[linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(18_20_24/0.96)_64%,rgb(255_122_26/0.045)_100%)] shadow-[0_18px_54px_rgb(0_0_0/0.24)]"
+                >
+                  <div className="pointer-events-none absolute -right-16 top-8 h-32 w-32 rounded-full bg-primary/6 blur-2xl" aria-hidden="true" />
+                  <CardHeader className="relative z-10 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <CardTitle className="truncate">{session.workoutName}</CardTitle>
@@ -182,23 +186,23 @@ export function HistoryPage() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="relative z-10 space-y-4">
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="metric-surface p-2">
+                      <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Clock3 className="h-3 w-3" />
                           Durasi
                         </p>
                         <p className="text-lg font-bold">{duration}m</p>
                       </div>
-                      <div className="metric-surface p-2">
+                      <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Dumbbell className="h-3 w-3" />
                           Set
                         </p>
                         <p className="text-lg font-bold">{totalSets}</p>
                       </div>
-                      <div className="metric-surface p-2">
+                      <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Repeat2 className="h-3 w-3" />
                           Repetisi
@@ -217,7 +221,7 @@ export function HistoryPage() {
                       {session.exercises.slice(0, 4).map((item) => {
                         const exercise = exercises.find((candidate) => candidate.id === item.exerciseId);
                         return (
-                          <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 p-2">
+                          <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 border-border/90 bg-background/42 p-2">
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium">{exercise?.name || "Gerakan"}</p>
                               <p className="text-xs text-muted-foreground">

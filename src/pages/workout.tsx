@@ -241,6 +241,7 @@ export function WorkoutPage() {
     exercises,
     completeWarmup,
     startCooldown,
+    returnToMainSession,
     selectExercise,
     selectCustomExercise,
     returnToExercisePicker,
@@ -257,6 +258,7 @@ export function WorkoutPage() {
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [summaryNotes, setSummaryNotes] = useState("");
   const [showFinish, setShowFinish] = useState(false);
+  const [showDiscard, setShowDiscard] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -382,8 +384,8 @@ export function WorkoutPage() {
     const isWarmup = phase === "warmup";
     const title = isWarmup ? "Pemanasan dulu" : "Pendinginan";
     const description = isWarmup
-      ? "Ikuti instruksi ringan ini sebelum memilih gerakan utama."
-      : "Turunkan intensitas sebentar sebelum menyimpan sesi.";
+      ? "Ikuti instruksi ringan ini sebelum memilih gerakan utama"
+      : "Turunkan intensitas sebentar sebelum menyimpan sesi";
     const buttonLabel = isWarmup ? "Mulai sesi latihan" : "Selesai pendinginan";
     const onAction = isWarmup ? completeWarmup : () => setShowFinish(true);
 
@@ -416,7 +418,7 @@ export function WorkoutPage() {
 
         {createPortal(
           <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
-            <div className="mx-auto w-full max-w-3xl">
+            <div className="mx-auto w-full max-w-[480px]">
               <Button className="min-h-12 w-full" size="lg" onClick={onAction}>
                 {isWarmup ? <Play className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                 {buttonLabel}
@@ -655,16 +657,16 @@ export function WorkoutPage() {
         </div>
 
         <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3">
             <div>
               <p className="text-sm font-semibold">Beban latihan</p>
-              <p className="text-xs text-muted-foreground">Mengikuti beban terakhir yang kamu pakai.</p>
+              <p className="text-xs text-muted-foreground">Mengikuti beban terakhir yang kamu pakai</p>
             </div>
             <Select
               value={active.weightKg !== undefined ? String(active.weightKg) : "none"}
               onValueChange={(value) => updateCurrentWeight(value === "none" ? undefined : Number(value))}
             >
-              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base sm:w-44" aria-label="Beban latihan dalam kilogram">
+              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base" aria-label="Beban latihan dalam kilogram">
                 <SelectValue placeholder="Pilih beban" />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">
@@ -762,7 +764,7 @@ export function WorkoutPage() {
         <div className="grid grid-cols-2 gap-3">
           <Button className="h-12" size="lg" onClick={startNextSet}>
             <Play className="h-4 w-4" />
-            Mulai set berikutnya
+            Set berikutnya
           </Button>
           <Button className="h-12" size="lg" variant="outline" onClick={completeCurrentExercise}>
             <Check className="h-4 w-4" />
@@ -784,9 +786,9 @@ export function WorkoutPage() {
               {activeWorkout.phase === "main" ? <Badge className="bg-primary/15 text-primary">{phaseLabel}</Badge> : null}
             </div>
           </div>
-          <Button variant="ghost" className="h-10 px-3" onClick={requestFinish} aria-label="Akhiri sesi">
+          <Button variant="ghost" className="h-10 px-3 text-muted-foreground hover:text-destructive" onClick={() => setShowDiscard(true)} aria-label="Buang sesi">
             <X className="h-4 w-4" />
-            Akhiri
+            Buang
           </Button>
         </div>
         <Progress value={progress} />
@@ -805,7 +807,7 @@ export function WorkoutPage() {
 
       {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_picker" ? createPortal(
         <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
-          <div className="mx-auto w-full max-w-3xl">
+          <div className="mx-auto w-full max-w-[480px]">
             <Button
               className="min-h-12 w-full"
               size="lg"
@@ -820,7 +822,7 @@ export function WorkoutPage() {
 
       {showPreviewActions ? createPortal(
         <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
-          <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-3">
+          <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
             <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={returnToExercisePicker}>
               <ArrowLeft className="h-4 w-4" />
               Kembali
@@ -842,7 +844,7 @@ export function WorkoutPage() {
       ) : null}
 
       <Dialog open={showFinish} onOpenChange={setShowFinish}>
-        <DialogContent className="w-[calc(100vw-32px)] rounded-lg p-5 sm:p-6">
+        <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle>Selesaikan sesi?</DialogTitle>
             <DialogDescription>
@@ -866,7 +868,16 @@ export function WorkoutPage() {
           ) : null}
 
           <div className="grid grid-cols-2 gap-3">
-            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={() => setShowFinish(false)}>
+            <Button
+              className="min-h-12 w-full"
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                returnToMainSession();
+                setShowFinish(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
               Lanjutkan latihan
             </Button>
             <Button className="min-h-12 w-full" size="lg" onClick={finishAndNavigate}>
@@ -879,6 +890,33 @@ export function WorkoutPage() {
               variant="ghost"
               className="min-h-11 w-full text-muted-foreground hover:text-destructive"
               onClick={() => {
+                cancelWorkout();
+                navigate("/");
+              }}
+            >
+              Buang sesi
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDiscard} onOpenChange={setShowDiscard}>
+        <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">
+          <DialogHeader className="space-y-2 text-left">
+            <DialogTitle>Buang sesi?</DialogTitle>
+            <DialogDescription>
+              Sesi aktif akan dihapus dan tidak disimpan ke riwayat
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <Button className="min-h-12 w-full" variant="outline" onClick={() => setShowDiscard(false)}>
+              Batal
+            </Button>
+            <Button
+              className="min-h-12 w-full"
+              variant="destructive"
+              onClick={() => {
+                setShowDiscard(false);
                 cancelWorkout();
                 navigate("/");
               }}

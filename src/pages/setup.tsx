@@ -13,6 +13,32 @@ import type { Exercise } from "@/types";
 
 const categoryOrder = ["Semua", "Warmup", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves", "Cooldown", "Custom"];
 
+function ExerciseMedia({ exercise }: { exercise: Exercise }) {
+  return (
+    <div className="overflow-hidden rounded-md border border-border bg-secondary">
+      {exercise.videoUrl ? (
+        <video
+          className="aspect-video w-full bg-black object-cover"
+          src={exercise.videoUrl}
+          poster={exercise.imageUrl}
+          controls
+          autoPlay
+          loop
+          playsInline
+          muted
+          preload="metadata"
+        />
+      ) : exercise.imageUrl ? (
+        <img className="aspect-video w-full bg-black object-cover" src={exercise.imageUrl} alt={exercise.name} />
+      ) : (
+        <div className="flex aspect-video w-full items-center justify-center bg-background text-sm text-muted-foreground">
+          Media gerakan belum tersedia
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SetupPage() {
   const { exercises } = useGymStore();
   const [query, setQuery] = useState("");
@@ -48,7 +74,7 @@ export function SetupPage() {
       <section className="space-y-2">
         <div className="space-y-1">
           <h1 className="text-[2rem] font-bold leading-9">Katalog gerakan</h1>
-          <p className="text-muted-foreground">Cari referensi gerakan dan instruksi dasar.</p>
+          <p className="text-muted-foreground">Cari referensi gerakan dan instruksi dasar</p>
         </div>
       </section>
 
@@ -116,7 +142,7 @@ export function SetupPage() {
           <Card className="border-primary/10 bg-card/88">
             <CardHeader>
               <CardTitle>Gerakan tidak ditemukan</CardTitle>
-              <CardDescription>Coba kata kunci atau kategori lain.</CardDescription>
+              <CardDescription>Coba kata kunci atau kategori lain</CardDescription>
             </CardHeader>
           </Card>
         )}
@@ -133,9 +159,7 @@ export function SetupPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              {selectedExercise.imageUrl ? (
-                <img className="aspect-video w-full rounded-md border border-border bg-secondary object-cover" src={selectedExercise.imageUrl} alt={selectedExercise.name} />
-              ) : null}
+              <ExerciseMedia exercise={selectedExercise} />
 
               {selectedExercise.equipment?.length ? (
                 <div className="flex flex-wrap gap-2">
@@ -159,7 +183,7 @@ export function SetupPage() {
                     ))}
                   </ol>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Instruksi belum tersedia untuk gerakan ini.</p>
+                  <p className="text-sm text-muted-foreground">Instruksi belum tersedia untuk gerakan ini</p>
                 )}
               </div>
             </>
