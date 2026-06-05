@@ -4,13 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import { Input } from "@/components/ui/input";
 import { formatCategoryLabel } from "@/lib/labels";
 import { defaultExercises } from "@/data";
 import { useGymStore } from "@/store/gym-store";
 import type { Exercise } from "@/types";
 
-const categoryOrder = ["Semua", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves", "Custom"];
+const categoryOrder = ["Semua", "Warmup", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves", "Cooldown", "Custom"];
 
 export function SetupPage() {
   const { exercises } = useGymStore();
@@ -54,9 +55,9 @@ export function SetupPage() {
       <section className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-12 border-white/10 bg-card/80 pl-9" placeholder="Cari nama gerakan atau equipment" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <Input className="h-12 border-white/10 bg-card/80 pl-9" placeholder="Cari nama gerakan atau alat" value={query} onChange={(event) => setQuery(event.target.value)} />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
           {categories.map((category) => {
             const selected = category === selectedCategory;
             return (
@@ -89,7 +90,9 @@ export function SetupPage() {
               className="surface-list-item min-h-24 w-full p-4 text-left focus:outline-none focus:ring-2 focus:ring-ring"
               onClick={() => setSelectedExercise(exercise)}
             >
-              <div className="min-w-0 space-y-2">
+              <div className="flex min-w-0 items-start gap-3">
+                <ExerciseThumbnail exercise={exercise} className="h-16 w-16" />
+                <div className="min-w-0 space-y-2">
                   <div className="space-y-1">
                     <p className="truncate font-semibold">{exercise.name}</p>
                     <p className="text-sm text-muted-foreground">
@@ -105,6 +108,7 @@ export function SetupPage() {
                       ))}
                     </div>
                   ) : null}
+                </div>
               </div>
             </button>
           ))

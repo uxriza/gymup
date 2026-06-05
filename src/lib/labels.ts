@@ -6,6 +6,8 @@ const categoryLabels: Record<string, string> = {
   Arms: "Lengan",
   Core: "Inti",
   Calves: "Betis",
+  Warmup: "Pemanasan",
+  Cooldown: "Pendinginan",
   Custom: "Kustom",
 };
 

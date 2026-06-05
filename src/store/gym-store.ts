@@ -40,6 +40,11 @@ const getLatestWeightForExercise = (sessions: Session[], exerciseId: string) => 
   return undefined;
 };
 
+const isPrepExercise = (exerciseId: string, exercises: Exercise[], categories: string[]) => {
+  const exercise = exercises.find((item) => item.id === exerciseId);
+  return Boolean(exercise && categories.includes(exercise.category));
+};
+
 type GymState = {
   exercises: Exercise[];
   workouts: Workout[];
@@ -47,13 +52,16 @@ type GymState = {
   activeWorkout?: ActiveWorkout;
   startWorkout: (workoutId: string) => void;
   startCustomWorkout: () => void;
+  completeWarmup: () => void;
+  startCooldown: () => void;
   selectCustomExercise: (exerciseId: string) => void;
   selectExercise: (index: number) => void;
   returnToExercisePicker: () => void;
   startSelectedExercise: () => void;
   incrementCurrentReps: (delta: number) => void;
   updateCurrentWeight: (weightKg?: number) => void;
-  startRest: () => void;
+  startRest: (durationSeconds?: number) => void;
+  stopRestTimer: () => void;
   startNextSet: () => void;
   completeCurrentExercise: () => void;
   skipCurrentExercise: () => void;
@@ -75,14 +83,27 @@ export const useGymStore = create<GymState>()(
       startWorkout: (workoutId) => {
         const workout = get().workouts.find((item) => item.id === workoutId);
         if (!workout) return;
+        const catalog = get().exercises;
+        const warmupIds = workout.warmupIds?.length
+          ? workout.warmupIds
+          : workout.exerciseIds.filter((exerciseId) => isPrepExercise(exerciseId, catalog, ["Warmup"]));
+        const cooldownIds = workout.cooldownIds?.length
+          ? workout.cooldownIds
+          : workout.exerciseIds.filter((exerciseId) => isPrepExercise(exerciseId, catalog, ["Cooldown"]));
+        const mainExerciseIds = workout.exerciseIds.filter(
+          (exerciseId) => !isPrepExercise(exerciseId, catalog, ["Warmup", "Cooldown"]),
+        );
 
         set({
           activeWorkout: {
             workoutId,
             startTime: new Date().toISOString(),
+            phase: warmupIds.length ? "warmup" : "main",
+            warmupIds,
+            cooldownIds,
             currentIndex: 0,
             mode: "exercise_picker",
-            exercises: workout.exerciseIds.map((exerciseId) => ({
+            exercises: mainExerciseIds.map((exerciseId) => ({
               exerciseId,
               status: "planned",
               currentSet: 1,
@@ -100,18 +121,47 @@ export const useGymStore = create<GymState>()(
         set({
           activeWorkout: {
             workoutId: "custom-session",
-            customName: "Latihan Mandiri",
+            customName: "Latihan mandiri",
             isCustom: true,
             startTime: new Date().toISOString(),
+            phase: "warmup",
+            warmupIds: ["dynamic-warm-up"],
+            cooldownIds: ["full-body-stretch"],
             currentIndex: 0,
             mode: "exercise_picker",
             exercises: [],
           },
         });
       },
+      completeWarmup: () => {
+        const activeWorkout = get().activeWorkout;
+        if (!activeWorkout) return;
+
+        set({
+          activeWorkout: {
+            ...activeWorkout,
+            phase: "main",
+            mode: "exercise_picker",
+          },
+        });
+      },
+      startCooldown: () => {
+        const activeWorkout = get().activeWorkout;
+        if (!activeWorkout) return;
+
+        set({
+          activeWorkout: {
+            ...activeWorkout,
+            phase: activeWorkout.cooldownIds?.length ? "cooldown" : "main",
+            mode: "exercise_picker",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
+          },
+        });
+      },
       selectCustomExercise: (exerciseId) => {
         const activeWorkout = get().activeWorkout;
-        if (!activeWorkout?.isCustom) return;
+        if (!activeWorkout?.isCustom || activeWorkout.phase !== "main") return;
 
         const existingIndex = activeWorkout.exercises.findIndex((exercise) => exercise.exerciseId === exerciseId);
 
@@ -145,7 +195,7 @@ export const useGymStore = create<GymState>()(
       selectExercise: (index) => {
         const activeWorkout = get().activeWorkout;
         const selectedExercise = activeWorkout?.exercises[index];
-        if (!activeWorkout || !selectedExercise) return;
+        if (!activeWorkout || activeWorkout.phase !== "main" || !selectedExercise) return;
 
         set({
           activeWorkout: {
@@ -174,6 +224,8 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             mode: "exercise_picker",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
             exercises: activeWorkout.exercises.map((exercise, index) =>
               index === activeWorkout.currentIndex && exercise.status === "selected"
                 ? { ...exercise, status: "planned" }
@@ -195,6 +247,8 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             mode: "exercise_active",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
             exercises: activeWorkout.exercises.map((exercise, index) =>
               index === activeWorkout.currentIndex
                 ? {
@@ -239,7 +293,7 @@ export const useGymStore = create<GymState>()(
           },
         });
       },
-      startRest: () => {
+      startRest: (durationSeconds = 90) => {
         const activeWorkout = get().activeWorkout;
         if (!activeWorkout) return;
 
@@ -247,9 +301,23 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             mode: "resting",
+            restStartedAt: new Date().toISOString(),
+            restDurationSeconds: durationSeconds,
             exercises: commitCurrentSet(activeWorkout, get().exercises, true).map((exercise, index) =>
               index === activeWorkout.currentIndex ? { ...exercise, status: "resting" } : exercise,
             ),
+          },
+        });
+      },
+      stopRestTimer: () => {
+        const activeWorkout = get().activeWorkout;
+        if (!activeWorkout) return;
+
+        set({
+          activeWorkout: {
+            ...activeWorkout,
+            restStartedAt: undefined,
+            restDurationSeconds: 0,
           },
         });
       },
@@ -263,6 +331,8 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             mode: "exercise_active",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
             exercises: activeWorkout.exercises.map((exercise, index) =>
               index === activeWorkout.currentIndex
                 ? { ...exercise, status: "active", currentSet: exercise.currentSet + 1, currentReps: targetReps }
@@ -284,6 +354,8 @@ export const useGymStore = create<GymState>()(
           activeWorkout: {
             ...activeWorkout,
             mode: "exercise_picker",
+            restStartedAt: undefined,
+            restDurationSeconds: undefined,
             exercises: committedExercises.map((exercise, index) =>
               index === activeWorkout.currentIndex
                 ? {
@@ -341,7 +413,7 @@ export const useGymStore = create<GymState>()(
           id: uid("session"),
           date: new Date().toISOString(),
           workoutId: workout?.id ?? activeWorkout.workoutId,
-          workoutName: workout?.name ?? activeWorkout.customName ?? "Latihan Mandiri",
+          workoutName: workout?.name ?? activeWorkout.customName ?? "Latihan mandiri",
           startTime: activeWorkout.startTime,
           endTime: new Date().toISOString(),
           exercises,
@@ -379,7 +451,7 @@ export const useGymStore = create<GymState>()(
     }),
     {
       name: "gymup-store",
-      version: 3,
+      version: 9,
       migrate: (persistedState) => {
         const state = persistedState as Partial<GymState> | undefined;
         return {

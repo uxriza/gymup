@@ -1,15 +1,18 @@
-import { NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Activity, Dumbbell, History, ListChecks, Lock, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Activity, Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Trash2 } from "lucide-react";
 import { HomePage } from "@/pages/home";
 import { SelectWorkoutPage } from "@/pages/select-workout";
 import { WorkoutPage } from "@/pages/workout";
-import { SummaryPage } from "@/pages/summary";
 import { HistoryPage } from "@/pages/history";
 import { SetupPage } from "@/pages/setup";
+import { AuthPage } from "@/pages/auth";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
+import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const navItems = [
   { to: "/", label: "Latihan", icon: Dumbbell },
@@ -20,10 +23,24 @@ const navItems = [
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { authEnabled, loading, user, signOut } = useAuth();
   const { activeWorkout, workouts, cancelWorkout } = useGymStore();
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const activeWorkoutName = workouts.find((workout) => workout.id === activeWorkout?.workoutId)?.name;
-  const isLockedRoute = Boolean(activeWorkout && !["/workout", "/summary"].includes(location.pathname));
+  const isLockedRoute = Boolean(activeWorkout && location.pathname !== "/workout");
   const showBottomNav = !activeWorkout && location.pathname !== "/select";
+
+  if (authEnabled && loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (authEnabled && !user) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -40,6 +57,16 @@ export function App() {
               <span className="block text-xs text-muted-foreground">Catatan latihan pribadi</span>
             </span>
           </button>
+          {authEnabled ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Keluar akun"
+              onClick={() => setLogoutOpen(true)}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </header>
 
@@ -59,7 +86,7 @@ export function App() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button className="w-full" size="lg" onClick={() => navigate("/workout")}>
-                Lanjutkan Sesi
+                Lanjutkan sesi
               </Button>
               <Button
                 className="w-full"
@@ -70,7 +97,7 @@ export function App() {
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-                Buang Sesi
+                Buang sesi
               </Button>
             </CardContent>
           </Card>
@@ -79,7 +106,7 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/select" element={<SelectWorkoutPage />} />
             <Route path="/workout" element={<WorkoutPage />} />
-            <Route path="/summary" element={<SummaryPage />} />
+            <Route path="/summary" element={<Navigate to="/history" replace />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/setup" element={<SetupPage />} />
           </Routes>
@@ -108,6 +135,32 @@ export function App() {
           </div>
         </nav>
       ) : null}
+
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5 sm:p-6">
+          <DialogHeader className="space-y-2 text-left">
+            <DialogTitle>Keluar dari akun?</DialogTitle>
+            <DialogDescription>
+              Data latihan yang sudah tersimpan tetap aman. Kamu perlu masuk lagi untuk melanjutkan sinkronisasi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <Button className="min-h-12 w-full" variant="outline" onClick={() => setLogoutOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              className="min-h-12 w-full"
+              onClick={() => {
+                setLogoutOpen(false);
+                void signOut();
+                navigate("/");
+              }}
+            >
+              Keluar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/auth-provider";
 import { useGymStore } from "@/store/gym-store";
 import type { Exercise, Session, Workout } from "@/types";
 
@@ -34,8 +35,10 @@ const mergeState = (remoteState: Partial<SyncState> | null | undefined, localSta
 });
 
 export function SyncProvider({ children }: { children: ReactNode }) {
+  const { authEnabled, loading, user } = useAuth();
+
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase || !authEnabled || loading || !user?.id) return;
 
     const supabaseClient = supabase;
     let syncTimer: number | undefined;
@@ -50,16 +53,6 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     };
 
     const startSync = async () => {
-      const sessionResult = await supabaseClient.auth.getSession();
-      let user = sessionResult.data.session?.user;
-
-      if (!user) {
-        const anonymousResult = await supabaseClient.auth.signInAnonymously();
-        user = anonymousResult.data.user ?? undefined;
-      }
-
-      if (!user) return;
-
       const remoteResult = await supabaseClient
         .from("gymup_sync_states")
         .select("state")
@@ -98,7 +91,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(syncTimer);
       unsubscribe?.();
     };
-  }, []);
+  }, [authEnabled, loading, user?.id]);
 
   return children;
 }

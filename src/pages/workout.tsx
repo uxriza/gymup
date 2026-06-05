@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   Check,
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { defaultExercises } from "@/data";
 import { formatCategoryLabel } from "@/lib/labels";
 import { cn, formatDuration } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
@@ -47,7 +50,7 @@ const statusLabel: Record<ActiveExercise["status"], string> = {
   active: "Berjalan",
   resting: "Istirahat",
   completed: "Selesai",
-  skipped: "Dilewati",
+  skipped: "Belum",
 };
 
 const statusClass: Record<ActiveExercise["status"], string> = {
@@ -99,13 +102,13 @@ function ExerciseMedia({ exercise }: { exercise: Exercise }) {
 
 const localizedInstructions: Record<string, string[]> = {
   "bench-press": [
-    "Berbaring di bench dengan posisi bar tepat di atas garis mata.",
+    "Berbaring di bangku dengan posisi palang tepat di atas garis mata.",
     "Tekuk lutut secukupnya dan pastikan telapak kaki menapak stabil di lantai.",
-    "Tarik napas, pegang bar sedikit lebih lebar dari bahu, lalu turunkan bar perlahan ke dada.",
-    "Dorong bar kembali ke atas dengan kontrol. Gunakan spotter saat memakai beban berat.",
+    "Tarik napas, pegang palang sedikit lebih lebar dari bahu, lalu turunkan palang perlahan ke dada.",
+    "Dorong palang kembali ke atas dengan kontrol. Minta bantuan penjaga saat memakai beban berat.",
   ],
   "incline-bench-press-dumbel": [
-    "Atur bench pada sudut sekitar 30 sampai 45 derajat.",
+    "Atur bangku pada sudut sekitar 30 sampai 45 derajat.",
     "Pegang dumbel sejajar dada atas dengan bahu tetap stabil.",
     "Dorong dumbel lurus ke atas, lalu turunkan perlahan dengan kontrol.",
   ],
@@ -122,37 +125,37 @@ const localizedInstructions: Record<string, string[]> = {
     "Turunkan dumbel perlahan tanpa mengayun badan.",
   ],
   "dips": [
-    "Pegang handle dip dengan tubuh stabil dan bahu terkunci.",
+    "Pegang pegangan dip dengan tubuh stabil dan bahu terkunci.",
     "Turunkan tubuh perlahan sampai siku menekuk nyaman.",
     "Dorong tubuh kembali ke atas dengan dada dan trisep tetap aktif.",
     "Gunakan rentang gerak yang aman untuk bahu.",
   ],
   "benchpress-dumbels": [
-    "Berbaring di bench sambil memegang dua dumbel di sisi dada.",
+    "Berbaring di bangku sambil memegang dua dumbel di sisi dada.",
     "Dorong dumbel ke atas sampai lengan hampir lurus.",
     "Turunkan dumbel perlahan ke posisi awal dengan kontrol.",
     "Jaga pergelangan tangan netral dan bahu tetap stabil.",
   ],
   "pull-ups": [
-    "Pegang palang pull-up dengan grip lebar dan tubuh menggantung stabil.",
-    "Tarik dada ke arah bar sambil menjaga bahu turun dan punggung aktif.",
+    "Pegang palang pull-up dengan pegangan lebar dan tubuh menggantung stabil.",
+    "Tarik dada ke arah palang sambil menjaga bahu turun dan punggung aktif.",
     "Turunkan tubuh perlahan sampai lengan kembali panjang.",
   ],
-  "rowing-seated-narrow-grip": [
-    "Duduk tegak dan pegang handle dengan grip sempit.",
-    "Tarik handle ke arah dada sambil merapatkan tulang belikat.",
+  "rowing-seated-narrow-pegangan": [
+    "Duduk tegak dan pegang pegangan sempit.",
+    "Tarik pegangan ke arah dada sambil merapatkan tulang belikat.",
     "Jangan bersandar berlebihan dan jaga gerakan tetap terkontrol.",
   ],
   "facepull": [
-    "Atur pulley setinggi dada dan gunakan rope attachment.",
+    "Atur katrol setinggi dada dan gunakan tali.",
     "Mundur sampai lengan lurus dan tubuh stabil.",
-    "Tarik rope ke arah wajah sambil merapatkan tulang belikat.",
+    "Tarik tali ke arah wajah sambil merapatkan tulang belikat.",
     "Kontrol gerakan balik tanpa melepas ketegangan bahu belakang.",
   ],
   "biceps-curls-with-barbell": [
     "Pegang barbel selebar bahu dengan punggung tegak.",
-    "Tekuk siku untuk mengangkat bar tanpa mengayun badan.",
-    "Turunkan bar perlahan sampai lengan hampir lurus.",
+    "Tekuk siku untuk mengangkat palang tanpa mengayun badan.",
+    "Turunkan palang perlahan sampai lengan hampir lurus.",
     "Jaga siku tetap dekat tubuh selama gerakan.",
   ],
   "hammer-curls": [
@@ -161,19 +164,19 @@ const localizedInstructions: Record<string, string[]> = {
     "Kencangkan biceps di posisi atas, lalu turunkan perlahan.",
   ],
   "front-squats": [
-    "Letakkan bar di depan bahu dengan siku mengarah ke depan.",
+    "Letakkan palang di depan bahu dengan siku mengarah ke depan.",
     "Turunkan pinggul seperti squat sambil menjaga dada tetap tegak.",
     "Dorong lantai untuk kembali berdiri dengan kontrol.",
   ],
   "romanian-deadlift": [
-    "Mulai dari posisi berdiri dengan bar atau dumbel di depan paha.",
+    "Mulai dari posisi berdiri dengan palang atau dumbel di depan paha.",
     "Dorong pinggul ke belakang sambil punggung tetap netral.",
     "Turunkan beban sampai hamstring terasa tertarik, lalu kembali berdiri.",
   ],
   "leg-press": [
-    "Letakkan kaki di platform dengan posisi nyaman dan stabil.",
+    "Letakkan kaki di pijakan dengan posisi nyaman dan stabil.",
     "Turunkan beban sampai lutut menekuk aman.",
-    "Dorong platform kembali tanpa mengunci lutut berlebihan.",
+    "Dorong pijakan kembali tanpa mengunci lutut berlebihan.",
   ],
   "dumbel-lunges-walking": [
     "Pegang dumbel di sisi tubuh dan berdiri tegak.",
@@ -181,12 +184,12 @@ const localizedInstructions: Record<string, string[]> = {
     "Dorong tubuh ke depan untuk berdiri dan lanjutkan dengan kaki lainnya.",
   ],
   "standing-calf-raises": [
-    "Berdiri di mesin calf raise dengan posisi tubuh tegak.",
+    "Berdiri di mesin latihan betis dengan posisi tubuh tegak.",
     "Dorong tumit setinggi mungkin sampai betis berkontraksi.",
     "Tahan sebentar, lalu turunkan tumit perlahan.",
   ],
   "hip-thrust": [
-    "Posisikan punggung atas di bench dan bar di atas panggul dengan pad.",
+    "Posisikan punggung atas di bangku dan palang di atas panggul dengan bantalan.",
     "Letakkan kaki tepat di bawah lutut.",
     "Dorong pinggul ke atas sampai tubuh membentuk garis dari lutut ke bahu.",
     "Turunkan pinggul perlahan dan ulangi dengan kontrol.",
@@ -194,6 +197,8 @@ const localizedInstructions: Record<string, string[]> = {
 };
 
 const getExerciseInstructions = (exercise: Exercise) => localizedInstructions[exercise.id] ?? exercise.instructions ?? [];
+
+const getSeedExercise = (exercise: Exercise) => defaultExercises.find((item) => item.id === exercise.id) ?? exercise;
 
 function ExerciseInfo({ exercise }: { exercise: Exercise }) {
   const instructions = getExerciseInstructions(exercise);
@@ -234,6 +239,8 @@ export function WorkoutPage() {
     activeWorkout,
     workouts,
     exercises,
+    completeWarmup,
+    startCooldown,
     selectExercise,
     selectCustomExercise,
     returnToExercisePicker,
@@ -241,67 +248,61 @@ export function WorkoutPage() {
     incrementCurrentReps,
     updateCurrentWeight,
     startRest,
+    stopRestTimer,
     startNextSet,
     completeCurrentExercise,
     finishWorkout,
     cancelWorkout,
   } = useGymStore();
-  const [restSeconds, setRestSeconds] = useState(0);
-  const [activeElapsedSeconds, setActiveElapsedSeconds] = useState(0);
-  const [sessionElapsedSeconds, setSessionElapsedSeconds] = useState(0);
+  const [nowTick, setNowTick] = useState(() => Date.now());
   const [summaryNotes, setSummaryNotes] = useState("");
   const [showFinish, setShowFinish] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
-  useEffect(() => {
-    if (!restSeconds) return;
-    const interval = window.setInterval(() => setRestSeconds((value) => Math.max(value - 1, 0)), 1000);
-    return () => window.clearInterval(interval);
-  }, [restSeconds]);
-
-  useEffect(() => {
-    if (activeWorkout?.mode !== "resting") {
-      setRestSeconds(0);
-    }
-  }, [activeWorkout?.mode]);
-
   const workout = workouts.find((item) => item.id === activeWorkout?.workoutId);
-  const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan Mandiri";
+  const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan mandiri";
   const active = activeWorkout?.exercises[activeWorkout.currentIndex];
-  const exercise = exercises.find((item) => item.id === active?.exerciseId);
+  const catalogExercises = exercises.map(getSeedExercise);
+  const mainCatalogExercises = catalogExercises.filter((item) => !["Warmup", "Cooldown"].includes(item.category));
+  const findExerciseById = (id?: string) => catalogExercises.find((item) => item.id === id);
+  const exercise = findExerciseById(active?.exerciseId);
+  const warmupExercises = (activeWorkout?.warmupIds ?? []).map(findExerciseById).filter(Boolean) as Exercise[];
+  const cooldownExercises = (activeWorkout?.cooldownIds ?? []).map(findExerciseById).filter(Boolean) as Exercise[];
+
+  const sessionElapsedSeconds = activeWorkout?.startTime
+    ? Math.max(Math.floor((nowTick - new Date(activeWorkout.startTime).getTime()) / 1000), 0)
+    : 0;
+  const activeElapsedSeconds = activeWorkout?.mode === "exercise_active" && active?.startedAt
+    ? Math.max(Math.floor((nowTick - new Date(active.startedAt).getTime()) / 1000), 0)
+    : 0;
+  const restDurationSeconds = activeWorkout?.restDurationSeconds ?? 90;
+  const restElapsedSeconds = activeWorkout?.restStartedAt
+    ? Math.max(Math.floor((nowTick - new Date(activeWorkout.restStartedAt).getTime()) / 1000), 0)
+    : 0;
+  const restSeconds = activeWorkout?.mode === "resting"
+    ? Math.max(restDurationSeconds - restElapsedSeconds, 0)
+    : 0;
 
   useEffect(() => {
-    if (!activeWorkout?.startTime) {
-      setSessionElapsedSeconds(0);
-      return;
-    }
+    const updateNow = () => setNowTick(Date.now());
+    updateNow();
+    const interval = window.setInterval(updateNow, 1000);
+    window.addEventListener("focus", updateNow);
+    document.addEventListener("visibilitychange", updateNow);
 
-    const updateElapsed = () => {
-      setSessionElapsedSeconds(Math.max(Math.floor((Date.now() - new Date(activeWorkout.startTime).getTime()) / 1000), 0));
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", updateNow);
+      document.removeEventListener("visibilitychange", updateNow);
     };
-    updateElapsed();
-    const interval = window.setInterval(updateElapsed, 1000);
-    return () => window.clearInterval(interval);
-  }, [activeWorkout?.startTime]);
-
-  useEffect(() => {
-    if (activeWorkout?.mode !== "exercise_active" || !active?.startedAt) {
-      setActiveElapsedSeconds(0);
-      return;
-    }
-
-    const updateElapsed = () => {
-      setActiveElapsedSeconds(Math.max(Math.floor((Date.now() - new Date(active.startedAt!).getTime()) / 1000), 0));
-    };
-    updateElapsed();
-    const interval = window.setInterval(updateElapsed, 1000);
-    return () => window.clearInterval(interval);
-  }, [active?.startedAt, activeWorkout?.mode]);
+  }, []);
 
   const progress = useMemo(() => {
     if (!activeWorkout) return 0;
+    if (activeWorkout.phase === "warmup") return 0;
+    if (activeWorkout.phase === "cooldown") return 100;
     const done = activeWorkout.exercises.filter((item) => item.completed || item.skipped).length;
     if (!activeWorkout.exercises.length) return 0;
     return Math.round((done / activeWorkout.exercises.length) * 100);
@@ -311,20 +312,31 @@ export function WorkoutPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-[1.875rem] font-bold leading-8">Tidak ada sesi aktif</h1>
-        <Button onClick={() => navigate("/")}>Pilih</Button>
+        <Button onClick={() => navigate("/select")}>Pilih latihan</Button>
       </div>
     );
   }
 
   const completedCount = activeWorkout.exercises.filter((item) => item.completed).length;
-  const skippedCount = activeWorkout.exercises.filter((item) => item.skipped).length;
-  const plannedCount = activeWorkout.exercises.length - completedCount - skippedCount;
+  const plannedCount = activeWorkout.exercises.length - completedCount;
   const totalExerciseCount = activeWorkout.exercises.length;
+  const phaseLabel = activeWorkout.phase === "warmup"
+    ? "Pemanasan"
+    : activeWorkout.phase === "cooldown"
+      ? "Pendinginan"
+      : "Latihan";
+  const pageTitle = activeWorkout.phase === "main" ? "Sesi latihan" : phaseLabel;
+  const progressLabel = activeWorkout.phase === "main"
+    ? `${progress}% progres sesi`
+    : activeWorkout.phase === "warmup"
+      ? "Tahap awal"
+      : "Tahap akhir";
+  const isRestComplete = activeWorkout.mode === "resting" && restSeconds === 0;
   const isExerciseCompleted = active?.status === "completed";
   const canStartExercise = !isExerciseCompleted;
-  const showPreviewActions = activeWorkout.mode === "exercise_preview";
-  const categories = categoryOrder.filter((category) => category === "Semua" || exercises.some((item) => item.category === category));
-  const filteredCatalogExercises = exercises.filter((item) => {
+  const showPreviewActions = activeWorkout.phase === "main" && activeWorkout.mode === "exercise_preview";
+  const categories = categoryOrder.filter((category) => category === "Semua" || mainCatalogExercises.some((item) => item.category === category));
+  const filteredCatalogExercises = mainCatalogExercises.filter((item) => {
     const normalizedQuery = query.trim().toLowerCase();
     const matchesCategory = selectedCategory === "Semua" || item.category === selectedCategory;
     const matchesQuery =
@@ -337,8 +349,7 @@ export function WorkoutPage() {
   });
 
   const startRestTimer = () => {
-    startRest();
-    setRestSeconds(90);
+    startRest(90);
   };
 
   const addRep = () => {
@@ -351,7 +362,71 @@ export function WorkoutPage() {
 
   const finishAndNavigate = () => {
     finishWorkout(summaryNotes);
-    navigate("/summary");
+    navigate("/history");
+  };
+
+  const requestFinish = () => {
+    if (activeWorkout.phase === "main" && cooldownExercises.length) {
+      startCooldown();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setShowFinish(true);
+  };
+
+  const renderPrepStep = (
+    phase: "warmup" | "cooldown",
+    items: Exercise[],
+  ) => {
+    const isWarmup = phase === "warmup";
+    const title = isWarmup ? "Pemanasan dulu" : "Pendinginan";
+    const description = isWarmup
+      ? "Ikuti instruksi ringan ini sebelum memilih gerakan utama."
+      : "Turunkan intensitas sebentar sebelum menyimpan sesi.";
+    const buttonLabel = isWarmup ? "Mulai sesi latihan" : "Selesai pendinginan";
+    const onAction = isWarmup ? completeWarmup : () => setShowFinish(true);
+
+    return (
+      <Card className="animate-workout-card border-primary/20 bg-card/90">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-2xl">{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4 pb-24">
+          {items.map((item) => (
+            <div key={item.id} className="surface-list-item space-y-3 p-4">
+              <div className="flex items-start gap-3">
+                <ExerciseThumbnail exercise={item} className="h-14 w-14 rounded-[0.375rem]" />
+                <div className="min-w-0">
+                  <p className="font-semibold">{item.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.targetReps >= 45 ? `${item.targetReps} detik` : `${item.targetSets} set x ${item.targetReps} repetisi`}
+                  </p>
+                </div>
+              </div>
+              <ExerciseInfo exercise={item} />
+            </div>
+          ))}
+        </CardContent>
+
+        {createPortal(
+          <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
+            <div className="mx-auto w-full max-w-3xl">
+              <Button className="min-h-12 w-full" size="lg" onClick={onAction}>
+                {isWarmup ? <Play className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                {buttonLabel}
+              </Button>
+            </div>
+          </div>,
+          document.body,
+        )}
+      </Card>
+    );
   };
 
   const renderCustomPicker = () => (
@@ -370,9 +445,9 @@ export function WorkoutPage() {
       <section className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-12 pl-9" placeholder="Cari gerakan atau equipment" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <Input className="h-12 pl-9" placeholder="Cari gerakan atau alat" value={query} onChange={(event) => setQuery(event.target.value)} />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
           {categories.map((category) => {
             const selected = category === selectedCategory;
             return (
@@ -407,7 +482,9 @@ export function WorkoutPage() {
               onClick={() => selectCustomExercise(item.id)}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 space-y-1">
+                <div className="flex min-w-0 items-start gap-3">
+                  <ExerciseThumbnail exercise={item} className="h-16 w-16" />
+                  <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     {isCompleted ? (
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-background">
@@ -424,6 +501,7 @@ export function WorkoutPage() {
                       Tercatat {activeExercise.actualSets} set · {activeExercise.actualReps} repetisi
                     </p>
                   ) : null}
+                  </div>
                 </div>
                 {activeExercise ? (
                   <Badge className={cn("shrink-0", statusClass[activeExercise.status])}>
@@ -459,7 +537,7 @@ export function WorkoutPage() {
 
       <div className="space-y-3">
         {activeWorkout.exercises.map((activeExercise, index) => {
-          const item = exercises.find((exerciseItem) => exerciseItem.id === activeExercise.exerciseId);
+          const item = findExerciseById(activeExercise.exerciseId);
           if (!item) return null;
 
           return (
@@ -476,7 +554,9 @@ export function WorkoutPage() {
               onClick={() => selectExercise(index)}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 space-y-1">
+                <div className="flex min-w-0 items-start gap-3">
+                  <ExerciseThumbnail exercise={item} className="h-16 w-16" />
+                  <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     {activeExercise.status === "completed" ? (
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-background">
@@ -511,6 +591,7 @@ export function WorkoutPage() {
                       Tercatat {activeExercise.actualSets} set · {activeExercise.actualReps} repetisi
                     </p>
                   ) : null}
+                  </div>
                 </div>
                 <Badge className={cn("shrink-0", statusClass[activeExercise.status])}>
                   {statusLabel[activeExercise.status]}
@@ -555,6 +636,7 @@ export function WorkoutPage() {
             <CardTitle className="text-xl">{exercise.name}</CardTitle>
             <CardDescription>
               Set {active.currentSet} · target {exercise.targetSets} set x {exercise.targetReps} repetisi
+              {active.currentSet > exercise.targetSets ? " · set tambahan" : ""}
             </CardDescription>
           </div>
           <Badge className={cn(statusClass.active)}>Berjalan</Badge>
@@ -575,14 +657,14 @@ export function WorkoutPage() {
         <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold">Beban kerja</p>
-              <p className="text-xs text-muted-foreground">Default mengikuti beban terakhir jika ada.</p>
+              <p className="text-sm font-semibold">Beban latihan</p>
+              <p className="text-xs text-muted-foreground">Mengikuti beban terakhir yang kamu pakai.</p>
             </div>
             <Select
               value={active.weightKg !== undefined ? String(active.weightKg) : "none"}
               onValueChange={(value) => updateCurrentWeight(value === "none" ? undefined : Number(value))}
             >
-              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base sm:w-44" aria-label="Beban kerja dalam kilogram">
+              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base sm:w-44" aria-label="Beban latihan dalam kilogram">
                 <SelectValue placeholder="Pilih beban" />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">
@@ -647,14 +729,20 @@ export function WorkoutPage() {
         <div className="animate-rest-pulse rounded-md border border-primary/20 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm text-muted-foreground">Waktu istirahat</p>
+              <p className="text-sm text-muted-foreground">{isRestComplete ? "Istirahat selesai" : "Waktu istirahat"}</p>
               <p className="text-5xl font-bold">{formatDuration(restSeconds)}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setRestSeconds(0)} aria-label="Hentikan timer">
-              <Pause className="h-5 w-5" />
-            </Button>
+            {!isRestComplete ? (
+              <Button variant="ghost" size="icon" onClick={stopRestTimer} aria-label="Hentikan timer">
+                <Pause className="h-5 w-5" />
+              </Button>
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/15 text-primary">
+                <Check className="h-5 w-5" />
+              </div>
+            )}
           </div>
-          <Progress value={(restSeconds / 90) * 100} className="mt-4 bg-orange-500/20" />
+          <Progress value={restDurationSeconds ? ((restDurationSeconds - restSeconds) / restDurationSeconds) * 100 : 100} className="mt-4 bg-orange-500/20" />
         </div>
 
         <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
@@ -674,7 +762,7 @@ export function WorkoutPage() {
         <div className="grid grid-cols-2 gap-3">
           <Button className="h-12" size="lg" onClick={startNextSet}>
             <Play className="h-4 w-4" />
-            Set berikutnya
+            Mulai set berikutnya
           </Button>
           <Button className="h-12" size="lg" variant="outline" onClick={completeCurrentExercise}>
             <Check className="h-4 w-4" />
@@ -691,59 +779,66 @@ export function WorkoutPage() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">{sessionName}</p>
-            <h1 className="text-[1.875rem] font-bold leading-8">Sesi latihan</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <h1 className="text-[1.875rem] font-bold leading-8">{pageTitle}</h1>
+              {activeWorkout.phase === "main" ? <Badge className="bg-primary/15 text-primary">{phaseLabel}</Badge> : null}
+            </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setShowFinish(true)} aria-label="Selesaikan sesi">
-            <X className="h-5 w-5" />
+          <Button variant="ghost" className="h-10 px-3" onClick={requestFinish} aria-label="Akhiri sesi">
+            <X className="h-4 w-4" />
+            Akhiri
           </Button>
         </div>
         <Progress value={progress} />
         <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-          <span>{progress}% progres sesi</span>
+          <span>{progressLabel}</span>
           <span className="font-semibold">{formatDuration(sessionElapsedSeconds)}</span>
         </div>
       </section>
 
-      {activeWorkout.mode === "exercise_picker" ? (activeWorkout.isCustom ? renderCustomPicker() : renderPicker()) : null}
-      {activeWorkout.mode === "exercise_preview" ? renderPreview() : null}
-      {activeWorkout.mode === "exercise_active" ? renderActive() : null}
-      {activeWorkout.mode === "resting" ? renderResting() : null}
+      {activeWorkout.phase === "warmup" ? renderPrepStep("warmup", warmupExercises) : null}
+      {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_picker" ? (activeWorkout.isCustom ? renderCustomPicker() : renderPicker()) : null}
+      {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_preview" ? renderPreview() : null}
+      {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_active" ? renderActive() : null}
+      {activeWorkout.phase === "main" && activeWorkout.mode === "resting" ? renderResting() : null}
+      {activeWorkout.phase === "cooldown" ? renderPrepStep("cooldown", cooldownExercises) : null}
 
-      {activeWorkout.mode === "exercise_picker" ? (
-        <div className="fixed inset-x-0 bottom-[max(34px,env(safe-area-inset-bottom))] z-40 px-4">
-          <div className="mx-auto max-w-3xl">
+      {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_picker" ? createPortal(
+        <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
+          <div className="mx-auto w-full max-w-3xl">
             <Button
-              className="min-h-12 w-full rounded-xl border border-white/10 bg-background/82 shadow-[0_18px_60px_rgb(0_0_0/0.45)] backdrop-blur-xl hover:border-primary/35"
+              className="min-h-12 w-full"
               size="lg"
-              variant="secondary"
-              onClick={() => setShowFinish(true)}
+              onClick={requestFinish}
             >
-              Selesai Sesi
+              Selesai sesi
             </Button>
           </div>
-        </div>
+        </div>,
+        document.body,
       ) : null}
 
-      {showPreviewActions ? (
-        <div className="premium-dock fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
-          <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3">
-            <Button className="min-h-12" size="lg" variant="outline" onClick={returnToExercisePicker}>
+      {showPreviewActions ? createPortal(
+        <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
+          <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-3">
+            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={returnToExercisePicker}>
               <ArrowLeft className="h-4 w-4" />
               Kembali
             </Button>
             {isExerciseCompleted ? (
-              <Button className="min-h-12" size="lg" variant="secondary" onClick={returnToExercisePicker}>
+              <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={returnToExercisePicker}>
                 <Check className="h-4 w-4" />
                 Selesai
               </Button>
             ) : (
-              <Button className="min-h-12" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
+              <Button className="min-h-12 w-full" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
                 <Play className="h-4 w-4" />
                 Mulai
               </Button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       ) : null}
 
       <Dialog open={showFinish} onOpenChange={setShowFinish}>
@@ -753,7 +848,7 @@ export function WorkoutPage() {
             <DialogDescription>
               {activeWorkout.isCustom
                 ? `${completedCount} selesai · ${totalExerciseCount} gerakan sesi`
-                : `${completedCount} selesai · ${skippedCount} dilewati · ${plannedCount} belum`}
+                : `${completedCount} selesai · ${plannedCount} tidak dikerjakan`}
             </DialogDescription>
           </DialogHeader>
 
@@ -764,12 +859,18 @@ export function WorkoutPage() {
             onChange={(event) => setSummaryNotes(event.target.value)}
           />
 
-          <div className="space-y-3">
-            <Button className="min-h-12 w-full" size="lg" onClick={finishAndNavigate}>
-              Simpan Sesi
-            </Button>
+          {completedCount === 0 ? (
+            <div className="rounded-md border border-primary/25 bg-primary/10 p-3 text-sm leading-6 text-primary">
+              Belum ada gerakan yang selesai. Tetap simpan sesi?
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-3">
             <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={() => setShowFinish(false)}>
-              Lanjutkan Latihan
+              Lanjutkan latihan
+            </Button>
+            <Button className="min-h-12 w-full" size="lg" onClick={finishAndNavigate}>
+              Simpan sesi
             </Button>
           </div>
 

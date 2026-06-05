@@ -17,7 +17,9 @@ export type Workout = {
   id: string;
   name: string;
   dayOfWeek?: string;
+  warmupIds?: string[];
   exerciseIds: string[];
+  cooldownIds?: string[];
 };
 
 export type CompletedExercise = {
@@ -59,6 +61,11 @@ export type ActiveWorkout = {
   customName?: string;
   isCustom?: boolean;
   startTime: string;
+  phase: "warmup" | "main" | "cooldown";
+  warmupIds?: string[];
+  cooldownIds?: string[];
+  restStartedAt?: string;
+  restDurationSeconds?: number;
   currentIndex: number;
   mode: "exercise_picker" | "exercise_preview" | "exercise_active" | "resting";
   exercises: ActiveExercise[];

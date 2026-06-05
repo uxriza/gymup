@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { addMonths, differenceInMinutes, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isWithinInterval, startOfMonth, startOfWeek, subMonths } from "date-fns";
+import { addMonths, differenceInMinutes, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth, isWithinInterval, startOfMonth, subMonths } from "date-fns";
 import { id } from "date-fns/locale";
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const isStandaloneMode = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   ("standalone" in window.navigator && Boolean(window.navigator.standalone));
 
-const weekdayLabels = ["S", "S", "R", "K", "J", "S", "M"];
+const weekdayLabels = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 
 const getActivityCellClass = (count: number) => {
   if (count >= 3) return "border-primary bg-primary";
@@ -31,32 +31,25 @@ const getActivityCellClass = (count: number) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { sessions, exercises, activeWorkout } = useGymStore();
+  const { sessions, exercises, workouts, activeWorkout } = useGymStore();
   const [now, setNow] = useState(() => new Date());
   const [displayedMonth, setDisplayedMonth] = useState(() => new Date());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
   const latestSession = sessions[0];
+  const latestWorkoutIndex = latestSession
+    ? workouts.findIndex((workout) => workout.id === latestSession.workoutId)
+    : -1;
+  const recommendedWorkout = workouts.length
+    ? workouts[latestWorkoutIndex >= 0 ? (latestWorkoutIndex + 1) % workouts.length : 0]
+    : undefined;
   const latestCompletedExercises = latestSession?.exercises.filter((item) => item.completed) ?? [];
   const latestDuration = latestSession
     ? Math.max(differenceInMinutes(new Date(latestSession.endTime), new Date(latestSession.startTime)), 1)
     : 0;
   const latestSets = latestSession?.exercises.reduce((total, item) => total + item.actualSets, 0) ?? 0;
   const latestRep = latestSession?.exercises.reduce((total, item) => total + item.actualReps, 0) ?? 0;
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-  const weeklySessions = sessions.filter((session) =>
-    isWithinInterval(new Date(session.date), { start: weekStart, end: weekEnd }),
-  );
-  const weeklyMinutes = weeklySessions.reduce(
-    (total, session) => total + Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1),
-    0,
-  );
-  const weeklyCompletedExercises = weeklySessions.reduce(
-    (total, session) => total + session.exercises.filter((exercise) => exercise.completed).length,
-    0,
-  );
   const monthStart = startOfMonth(displayedMonth);
   const monthEnd = endOfMonth(displayedMonth);
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -132,9 +125,15 @@ export function HomePage() {
           <div className="pointer-events-none absolute -right-14 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
           <div className="relative flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-medium">{activeWorkout ? "Sesi sedang berjalan" : "Siap latihan hari ini"}</p>
+              <p className="text-sm font-medium">
+                {activeWorkout ? "Sesi sedang berjalan" : recommendedWorkout ? `Latihan berikutnya: ${recommendedWorkout.name}` : "Siap latihan hari ini"}
+              </p>
               <p className="text-xs text-muted-foreground">
-                {activeWorkout ? "Lanjutkan dari posisi terakhir." : "Pilih program dan mulai sesi baru."}
+                {activeWorkout
+                  ? "Lanjutkan dari posisi terakhir."
+                  : recommendedWorkout
+                    ? `${recommendedWorkout.exerciseIds.length} gerakan utama sudah disiapkan.`
+                    : "Pilih program dan mulai sesi baru."}
               </p>
             </div>
             <Button className="h-12 shrink-0 px-4" size="lg" onClick={() => navigate(activeWorkout ? "/workout" : "/select")}>
@@ -147,7 +146,7 @@ export function HomePage() {
         {!isInstalled ? (
           <button
             type="button"
-            className="flex w-full items-center justify-between gap-3 rounded-md border border-border bg-card p-3 text-left transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex w-full items-center justify-between gap-3 rounded-md border border-border/80 bg-card/70 p-3 text-left transition-colors hover:bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-ring"
             onClick={handleInstallShortcut}
           >
             <span className="flex min-w-0 items-center gap-3">
@@ -155,7 +154,7 @@ export function HomePage() {
                 <Download className="h-5 w-5" />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-medium">Tambah ke Home</span>
+                <span className="block text-sm font-medium">Tambah ke layar utama</span>
                 <span className="block text-xs text-muted-foreground">Buka GymUp seperti aplikasi dari layar utama HP.</span>
               </span>
             </span>
@@ -164,53 +163,11 @@ export function HomePage() {
         ) : null}
       </section>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-semibold">Minggu ini</h2>
-          <p className="text-sm text-muted-foreground">Ringkasan latihan Senin sampai Minggu.</p>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <CalendarDays className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{weeklySessions.length}</p>
-                <p className="text-xs text-muted-foreground">Sesi</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <Clock3 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{weeklyMinutes}</p>
-                <p className="text-xs text-muted-foreground">Menit</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{weeklyCompletedExercises}</p>
-                <p className="text-xs text-muted-foreground">Gerakan</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       {activeWorkout ? (
         <Card className="border-primary/50 bg-primary/5">
           <CardHeader>
             <CardTitle>Sesi aktif</CardTitle>
-            <CardDescription>Lanjutkan sesi sebelum membuka flow latihan lain.</CardDescription>
+            <CardDescription>Lanjutkan sesi sebelum membuka halaman latihan lain.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" size="lg" onClick={() => navigate("/workout")}>
@@ -220,19 +177,19 @@ export function HomePage() {
         </Card>
       ) : null}
 
-      {latestSession ? (
-        <section className="space-y-3">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold">Terakhir</h2>
-              <p className="text-sm text-muted-foreground">Program dan progres sesi terbaru.</p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/history")}>
-              Riwayat
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Terakhir</h2>
+            <p className="text-sm text-muted-foreground">Program dan progres sesi terbaru.</p>
           </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/history")}>
+            Riwayat
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
 
+        {latestSession ? (
           <Card>
             <CardHeader className="space-y-3">
               <div>
@@ -271,7 +228,7 @@ export function HomePage() {
                   <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
                   <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
                     <Repeat2 className="h-3 w-3 text-primary" />
-                    Rep
+                    Repetisi
                   </p>
                   <p className="relative text-2xl font-bold">{latestRep}</p>
                 </div>
@@ -303,8 +260,26 @@ export function HomePage() {
               )}
             </CardContent>
           </Card>
-        </section>
-      ) : null}
+        ) : (
+          <Card className="border-primary/10 bg-card/80">
+            <CardContent className="space-y-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/15 text-primary">
+                <Dumbbell className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium">Belum ada sesi selesai</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Mulai latihan pertama kamu, nanti progres terakhir akan muncul di sini.
+                </p>
+              </div>
+              <Button className="min-h-11 w-full" onClick={() => navigate("/select")}>
+                Mulai latihan
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </section>
 
       <section className="space-y-2">
         <div className="flex items-end justify-between gap-3">
@@ -341,7 +316,7 @@ export function HomePage() {
         </div>
         <Card>
           <CardContent className="space-y-2 p-3">
-            <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-medium text-muted-foreground">
+            <div className="grid grid-cols-7 gap-1.5 text-center text-[9px] font-medium text-muted-foreground sm:text-[10px]">
               {weekdayLabels.map((day, index) => (
                 <span key={`${day}-${index}`}>{day}</span>
               ))}
@@ -379,11 +354,11 @@ export function HomePage() {
       <Dialog open={installGuideOpen} onOpenChange={setInstallGuideOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tambah ke Home Screen</DialogTitle>
+            <DialogTitle>Tambahkan ke layar utama</DialogTitle>
             <DialogDescription>
               {isIosDevice()
-                ? "Di iPhone, shortcut ditambahkan lewat tombol Share di Safari."
-                : "Kalau prompt install belum muncul, gunakan menu browser untuk menambahkan shortcut."}
+                ? "Di iPhone, shortcut ditambahkan lewat tombol Bagikan di Safari."
+                : "Kalau pilihan pasang belum muncul, gunakan menu browser untuk menambahkan aplikasi."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
@@ -391,16 +366,16 @@ export function HomePage() {
               <>
                 <div className="flex gap-3 rounded-md border border-border p-3">
                   <Share2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <p>Tap tombol Share di Safari.</p>
+                  <p>Ketuk tombol Bagikan di Safari.</p>
                 </div>
-                <div className="rounded-md border border-border p-3">Pilih “Add to Home Screen” atau “Tambahkan ke Layar Utama”.</div>
-                <div className="rounded-md border border-border p-3">Tap “Add”, lalu buka GymUp dari icon di Home Screen.</div>
+                <div className="rounded-md border border-border p-3">Pilih “Tambahkan ke Layar Utama”.</div>
+                <div className="rounded-md border border-border p-3">Ketuk “Tambah”, lalu buka GymUp dari ikon di layar utama.</div>
               </>
             ) : (
               <>
                 <div className="rounded-md border border-border p-3">Buka menu browser.</div>
-                <div className="rounded-md border border-border p-3">Pilih “Install app” atau “Add to Home screen”.</div>
-                <div className="rounded-md border border-border p-3">Setelah terpasang, GymUp bisa dibuka dari Home Screen.</div>
+                <div className="rounded-md border border-border p-3">Pilih “Pasang aplikasi” atau “Tambahkan ke layar utama”.</div>
+                <div className="rounded-md border border-border p-3">Setelah terpasang, GymUp bisa dibuka dari layar utama.</div>
               </>
             )}
           </div>

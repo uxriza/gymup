@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { defaultExercises } from "@/data";
 import { formatCategoryLabel } from "@/lib/labels";
@@ -55,7 +56,7 @@ export function SelectWorkoutPage() {
             Mulai sesi latihan
           </p>
           <h1 className="text-[2rem] font-bold leading-9 tracking-normal">Pilih latihan</h1>
-          <p className="text-sm text-muted-foreground">Mulai dari program atau susun sesi mandiri.</p>
+          <p className="text-sm text-muted-foreground">Pakai program siap latihan atau mulai sesi mandiri.</p>
         </div>
       </section>
 
@@ -100,13 +101,16 @@ export function SelectWorkoutPage() {
                   <CardContent className="animate-in slide-in-from-top-1 space-y-4 p-4 pt-0 duration-200 sm:p-6 sm:pt-0">
                     <div className="space-y-2">
                       {workoutExercises.slice(0, 6).map((exercise, index) => (
-                        <div key={exercise!.id} className="surface-list-item px-3 py-2">
-                          <p className="truncate text-sm font-medium">
-                            {index + 1}. {exercise!.name}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {exercise!.targetSets} x {exercise!.targetReps} · {formatCategoryLabel(exercise!.category)}
-                          </p>
+                        <div key={exercise!.id} className="surface-list-item flex items-center gap-3 px-3 py-2">
+                          <ExerciseThumbnail exercise={exercise!} className="h-12 w-12 rounded-[0.375rem]" />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {index + 1}. {exercise!.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {exercise!.targetSets} x {exercise!.targetReps} · {formatCategoryLabel(exercise!.category)}
+                            </p>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -145,7 +149,7 @@ export function SelectWorkoutPage() {
             </CardHeader>
             <CardContent>
               <Button className="min-h-12 w-full" size="lg" onClick={startManualWorkout}>
-                Mulai Latihan
+                Mulai latihan
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </CardContent>
