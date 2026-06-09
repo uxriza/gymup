@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useMemo, useState } fr
 import type { User } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { upsertAnalyticsProfile } from "@/lib/analytics-sync";
+import { setSentryUser } from "@/lib/sentry";
 
 type AuthContextValue = {
   authEnabled: boolean;
@@ -49,6 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setSentryUser(user?.id ?? null);
+  }, [user?.id]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
