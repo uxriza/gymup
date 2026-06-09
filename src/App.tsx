@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/toast";
 
 const navItems = [
   { to: "/", label: "Latihan", icon: Dumbbell },
@@ -33,8 +34,9 @@ const PageLoader = () => (
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const { authEnabled, loading, user, displayName, updateName, signOut } = useAuth();
-  const { activeWorkout, workouts, cancelWorkout } = useGymStore();
+  const { activeWorkout, workouts, cancelWorkout, resetLocalState } = useGymStore();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileName, setProfileName] = useState(displayName);
@@ -137,6 +139,11 @@ export function App() {
                 onClick={() => {
                   cancelWorkout();
                   navigate("/");
+                  toast({
+                    title: "Sesi dibuang",
+                    description: "Sesi aktif tidak disimpan",
+                    variant: "destructive",
+                  });
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -240,6 +247,10 @@ export function App() {
                     await updateName(trimmedName);
                     setProfileName(trimmedName);
                     setProfileOpen(false);
+                    toast({
+                      title: "Nama berhasil diubah",
+                      description: "Sapaan di aplikasi sudah diperbarui",
+                    });
                   } catch {
                     setProfileError("Nama belum bisa diperbarui. Coba lagi sebentar");
                   } finally {
@@ -269,10 +280,24 @@ export function App() {
             </Button>
             <Button
               className="min-h-12 w-full"
-              onClick={() => {
+              onClick={async () => {
                 setLogoutOpen(false);
-                void signOut();
-                navigate("/");
+                try {
+                  await signOut();
+                  resetLocalState();
+                  navigate("/");
+                  toast({
+                    title: "Berhasil keluar",
+                    description: "Data lokal di perangkat ini sudah dibersihkan",
+                    variant: "default",
+                  });
+                } catch {
+                  toast({
+                    title: "Belum bisa keluar",
+                    description: "Coba lagi sebentar",
+                    variant: "destructive",
+                  });
+                }
               }}
             >
               Keluar

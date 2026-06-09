@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { defaultExercises } from "@/data";
 import { formatCategoryLabel } from "@/lib/labels";
 import { cn, formatDuration } from "@/lib/utils";
@@ -235,6 +236,7 @@ function ExerciseInfo({ exercise }: { exercise: Exercise }) {
 
 export function WorkoutPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     activeWorkout,
     workouts,
@@ -301,6 +303,43 @@ export function WorkoutPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeWorkout || !navigator.wakeLock) return;
+
+    let wakeLock: WakeLockSentinel | undefined;
+    let isCancelled = false;
+
+    const requestWakeLock = async () => {
+      if (document.visibilityState !== "visible" || wakeLock || isCancelled) return;
+
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => {
+          wakeLock = undefined;
+        });
+      } catch {
+        wakeLock = undefined;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void requestWakeLock();
+      }
+    };
+
+    void requestWakeLock();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isCancelled = true;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (wakeLock && !wakeLock.released) {
+        void wakeLock.release();
+      }
+    };
+  }, [activeWorkout]);
+
   const progress = useMemo(() => {
     if (!activeWorkout) return 0;
     if (activeWorkout.phase === "warmup") return 0;
@@ -365,6 +404,10 @@ export function WorkoutPage() {
   const finishAndNavigate = () => {
     finishWorkout(summaryNotes);
     navigate("/history");
+    toast({
+      title: "Sesi tersimpan",
+      description: "Riwayat latihan sudah diperbarui",
+    });
   };
 
   const requestFinish = () => {
@@ -631,7 +674,7 @@ export function WorkoutPage() {
   ) : null;
 
   const renderActive = () => exercise && active ? (
-    <Card className="animate-workout-card border-primary/35 bg-card/90 shadow-[0_24px_80px_rgb(0_0_0/0.36)]">
+    <Card className="animate-workout-card border-primary/35 bg-card/90 pb-24 shadow-[0_24px_80px_rgb(0_0_0/0.36)]">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -690,23 +733,6 @@ export function WorkoutPage() {
             <p className="text-center text-3xl font-bold">{active.currentReps}</p>
             <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={addRep} aria-label="Tambah repetisi">
               <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Button className="h-14 w-full text-base" onClick={startRestTimer}>
-            <Timer className="h-5 w-5" />
-            Istirahat
-          </Button>
-          <div className="grid grid-cols-2 gap-3">
-            <Button className="h-12" variant="secondary" onClick={() => setShowInstructions(true)}>
-              <Dumbbell className="h-4 w-4" />
-              Instruksi
-            </Button>
-            <Button className="h-12" variant="outline" onClick={completeCurrentExercise}>
-              <Check className="h-4 w-4" />
-              Akhiri
             </Button>
           </div>
         </div>
@@ -820,6 +846,26 @@ export function WorkoutPage() {
         document.body,
       ) : null}
 
+      {activeWorkout.phase === "main" && activeWorkout.mode === "exercise_active" ? createPortal(
+        <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
+          <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
+            <Button className="col-span-2 min-h-12 w-full text-base" size="lg" onClick={startRestTimer}>
+              <Timer className="h-5 w-5" />
+              Istirahat
+            </Button>
+            <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={() => setShowInstructions(true)}>
+              <Dumbbell className="h-4 w-4" />
+              Instruksi
+            </Button>
+            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeCurrentExercise}>
+              <Check className="h-4 w-4" />
+              Akhiri
+            </Button>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
       {showPreviewActions ? createPortal(
         <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
           <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
@@ -892,6 +938,11 @@ export function WorkoutPage() {
               onClick={() => {
                 cancelWorkout();
                 navigate("/");
+                toast({
+                  title: "Sesi dibuang",
+                  description: "Sesi aktif tidak disimpan",
+                  variant: "destructive",
+                });
               }}
             >
               Buang sesi
@@ -919,6 +970,11 @@ export function WorkoutPage() {
                 setShowDiscard(false);
                 cancelWorkout();
                 navigate("/");
+                toast({
+                  title: "Sesi dibuang",
+                  description: "Sesi aktif tidak disimpan",
+                  variant: "destructive",
+                });
               }}
             >
               Buang sesi

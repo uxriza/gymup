@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 
@@ -22,6 +23,7 @@ const getDateGroupLabel = (date: Date, now: Date) => {
 
 export function HistoryPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { sessions, exercises, resetHistory } = useGymStore();
   const [resetOpen, setResetOpen] = useState(false);
   const now = new Date();
@@ -76,6 +78,11 @@ export function HistoryPage() {
               onClick={() => {
                 resetHistory();
                 setResetOpen(false);
+                toast({
+                  title: "Riwayat dihapus",
+                  description: "Semua sesi latihan sudah dibersihkan",
+                  variant: "destructive",
+                });
               }}
             >
               Hapus riwayat
