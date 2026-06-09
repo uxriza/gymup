@@ -69,6 +69,7 @@ type GymState = {
   finishWorkout: (notes: string) => Session | undefined;
   cancelWorkout: () => void;
   replaceSyncedState: (state: Pick<GymState, "exercises" | "workouts" | "sessions">) => void;
+  resetLocalState: () => void;
   resetHistory: () => void;
   addExercise: (exercise: Omit<Exercise, "id">) => void;
   addWorkout: (name: string, dayOfWeek: string, exerciseIds: string[]) => void;
@@ -448,6 +449,14 @@ export const useGymStore = create<GymState>()(
           exercises: state.exercises,
           workouts: state.workouts,
           sessions: state.sessions,
+          activeWorkout: undefined,
+        }),
+      resetLocalState: () =>
+        set({
+          exercises: defaultExercises,
+          workouts: defaultWorkouts,
+          sessions: [],
+          activeWorkout: undefined,
         }),
       resetHistory: () => set({ sessions: [] }),
       addExercise: (exercise) => {

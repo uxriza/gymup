@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/auth-provider";
+import { useToast } from "@/components/ui/toast";
 import { useGymStore } from "@/store/gym-store";
 import { defaultExercises, defaultWorkouts } from "@/data";
 import type { Exercise, Session, Workout } from "@/types";
@@ -43,6 +44,7 @@ const getEmptyAccountState = (): SyncState => ({
 
 export function SyncProvider({ children }: { children: ReactNode }) {
   const { authEnabled, loading, user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!supabase || !authEnabled || loading || !user?.id) return;
@@ -50,13 +52,27 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     const supabaseClient = supabase;
     let syncTimer: number | undefined;
     let isApplyingRemoteState = false;
+    let syncErrorShown = false;
+
+    const notifySyncError = () => {
+      if (syncErrorShown) return;
+      syncErrorShown = true;
+      toast({
+        title: "Sinkronisasi tertunda",
+        description: "Data tetap tersimpan di perangkat ini. Coba cek koneksi nanti",
+        variant: "destructive",
+      });
+    };
 
     const saveState = async (userId: string, state: SyncState) => {
-      await supabaseClient.from("gymup_sync_states").upsert({
+      const { error } = await supabaseClient.from("gymup_sync_states").upsert({
         user_id: userId,
         state,
         updated_at: new Date().toISOString(),
       });
+
+      if (error) throw error;
+      syncErrorShown = false;
     };
 
     const startSync = async () => {
@@ -70,18 +86,36 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         .eq("user_id", user.id)
         .maybeSingle();
 
+      if (remoteResult.error) {
+        notifySyncError();
+        isApplyingRemoteState = true;
+        useGymStore.getState().replaceSyncedState(getEmptyAccountState());
+        isApplyingRemoteState = false;
+        return useGymStore.subscribe((state) => {
+          if (isApplyingRemoteState) return;
+          window.clearTimeout(syncTimer);
+          syncTimer = window.setTimeout(() => {
+            void saveState(user.id, {
+              exercises: state.exercises,
+              workouts: state.workouts,
+              sessions: state.sessions,
+            }).catch(notifySyncError);
+          }, 800);
+        });
+      }
+
       if (remoteResult.data?.state) {
         const mergedState = normalizeRemoteState(remoteResult.data.state as Partial<SyncState>);
         isApplyingRemoteState = true;
         useGymStore.getState().replaceSyncedState(mergedState);
         isApplyingRemoteState = false;
-        await saveState(user.id, mergedState);
+        await saveState(user.id, mergedState).catch(notifySyncError);
       } else {
         const emptyAccountState = getEmptyAccountState();
         isApplyingRemoteState = true;
         useGymStore.getState().replaceSyncedState(emptyAccountState);
         isApplyingRemoteState = false;
-        await saveState(user.id, emptyAccountState);
+        await saveState(user.id, emptyAccountState).catch(notifySyncError);
       }
 
       return useGymStore.subscribe((state) => {
@@ -92,7 +126,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
             exercises: state.exercises,
             workouts: state.workouts,
             sessions: state.sessions,
-          });
+          }).catch(notifySyncError);
         }, 800);
       });
     };
@@ -106,7 +140,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(syncTimer);
       unsubscribe?.();
     };
-  }, [authEnabled, loading, user?.id]);
+  }, [authEnabled, loading, toast, user?.id]);
 
   return children;
 }
