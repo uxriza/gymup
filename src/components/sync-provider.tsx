@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth-provider";
 import { useToast } from "@/components/ui/toast";
 import { useGymStore } from "@/store/gym-store";
 import { defaultExercises, defaultWorkouts } from "@/data";
+import { syncAnalyticsState, upsertAnalyticsProfile } from "@/lib/analytics-sync";
 import type { Exercise, Session, Workout } from "@/types";
 
 type SyncState = {
@@ -72,10 +73,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) throw error;
+      await syncAnalyticsState(userId, state);
       syncErrorShown = false;
     };
 
     const startSync = async () => {
+      await upsertAnalyticsProfile(user).catch(notifySyncError);
+
       isApplyingRemoteState = true;
       useGymStore.getState().replaceSyncedState(getEmptyAccountState());
       isApplyingRemoteState = false;

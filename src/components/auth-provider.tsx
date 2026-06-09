@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { upsertAnalyticsProfile } from "@/lib/analytics-sync";
 
 type AuthContextValue = {
   authEnabled: boolean;
@@ -91,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (error) throw error;
         setUser(data.user);
+        await upsertAnalyticsProfile(data.user);
       },
       signOut: async () => {
         if (!supabase) return;

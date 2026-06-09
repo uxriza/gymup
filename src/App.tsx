@@ -24,6 +24,7 @@ const HistoryPage = lazy(() => import("@/pages/history").then((module) => ({ def
 const SetupPage = lazy(() => import("@/pages/setup").then((module) => ({ default: module.SetupPage })));
 const AuthPage = lazy(() => import("@/pages/auth").then((module) => ({ default: module.AuthPage })));
 const VerifiedPage = lazy(() => import("@/pages/verified").then((module) => ({ default: module.VerifiedPage })));
+const AdminPage = lazy(() => import("@/pages/admin").then((module) => ({ default: module.AdminPage })));
 
 const PageLoader = () => (
   <div className="flex min-h-[45vh] items-center justify-center">
@@ -43,8 +44,9 @@ export function App() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState("");
   const activeWorkoutName = workouts.find((workout) => workout.id === activeWorkout?.workoutId)?.name;
+  const isAdminRoute = location.pathname === "/admin";
   const isLockedRoute = Boolean(activeWorkout && location.pathname !== "/workout");
-  const showBottomNav = !activeWorkout && location.pathname !== "/select";
+  const showBottomNav = !activeWorkout && !["/select", "/admin"].includes(location.pathname);
 
   if (authEnabled && loading) {
     return (
@@ -75,7 +77,7 @@ export function App() {
       <div className="app-gym-background" aria-hidden="true" />
 
       <header className="sticky top-0 z-20 border-b border-white/10 bg-background/76 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[480px] items-center justify-between px-4 py-3">
+        <div className={cn("mx-auto flex items-center justify-between px-4 py-3", isAdminRoute ? "max-w-7xl sm:px-6 lg:px-8" : "max-w-[480px]")}>
           <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#ff922e_0%,#ff6a18_62%,#ffa24a_100%)] text-primary-foreground shadow-[0_0_22px_rgb(255_106_24/0.24)]">
               <Activity className="h-5 w-5" />
@@ -114,7 +116,13 @@ export function App() {
         </div>
       </header>
 
-      <main className={cn("relative mx-auto max-w-[480px] px-4 pt-5", showBottomNav ? "pb-24" : "pb-8")}>
+      <main
+        className={cn(
+          "relative mx-auto px-4 pt-5",
+          isAdminRoute ? "max-w-7xl pb-10 sm:px-6 lg:px-8" : "max-w-[480px]",
+          !isAdminRoute && (showBottomNav ? "pb-24" : "pb-8"),
+        )}
+      >
         <div key={location.pathname} className="animate-page-transition">
           <Suspense fallback={<PageLoader />}>
             {isLockedRoute ? (
@@ -160,6 +168,7 @@ export function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/verified" element={<VerifiedPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         )}
           </Suspense>
