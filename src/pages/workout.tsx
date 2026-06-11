@@ -264,6 +264,11 @@ export function WorkoutPage() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [exerciseReward, setExerciseReward] = useState<{
+    name: string;
+    sets: number;
+    reps: number;
+  } | null>(null);
 
   const workout = workouts.find((item) => item.id === activeWorkout?.workoutId);
   const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan mandiri";
@@ -340,6 +345,13 @@ export function WorkoutPage() {
     };
   }, [activeWorkout]);
 
+  useEffect(() => {
+    if (!exerciseReward) return;
+
+    const timeout = window.setTimeout(() => setExerciseReward(null), 1700);
+    return () => window.clearTimeout(timeout);
+  }, [exerciseReward]);
+
   const progress = useMemo(() => {
     if (!activeWorkout) return 0;
     if (activeWorkout.phase === "warmup") return 0;
@@ -399,6 +411,27 @@ export function WorkoutPage() {
 
   const removeRep = () => {
     incrementCurrentReps(-1);
+  };
+
+  const completeExerciseWithReward = () => {
+    if (!active || !exercise || !activeWorkout) {
+      completeCurrentExercise();
+      return;
+    }
+
+    const willCommitCurrentSet = activeWorkout.mode === "exercise_active";
+    const savedReps = willCommitCurrentSet
+      ? active.currentReps > 0
+        ? active.currentReps
+        : exercise.targetReps
+      : 0;
+
+    setExerciseReward({
+      name: exercise.name,
+      sets: active.actualSets + (willCommitCurrentSet ? 1 : 0),
+      reps: active.actualReps + savedReps,
+    });
+    completeCurrentExercise();
   };
 
   const finishAndNavigate = () => {
@@ -792,7 +825,7 @@ export function WorkoutPage() {
             <Play className="h-4 w-4" />
             Set berikutnya
           </Button>
-          <Button className="h-12" size="lg" variant="outline" onClick={completeCurrentExercise}>
+          <Button className="h-12" size="lg" variant="outline" onClick={completeExerciseWithReward}>
             <Check className="h-4 w-4" />
             Akhiri
           </Button>
@@ -857,7 +890,7 @@ export function WorkoutPage() {
               <Dumbbell className="h-4 w-4" />
               Instruksi
             </Button>
-            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeCurrentExercise}>
+            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeExerciseWithReward}>
               <Check className="h-4 w-4" />
               Akhiri
             </Button>
@@ -884,6 +917,22 @@ export function WorkoutPage() {
                 Mulai
               </Button>
             )}
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
+      {exerciseReward ? createPortal(
+        <div className="pointer-events-none fixed inset-0 z-[70] flex items-center justify-center px-6" role="status" aria-live="polite">
+          <div className="animate-page-transition w-full max-w-[20rem] rounded-xl border border-primary/40 bg-[radial-gradient(circle_at_82%_18%,rgb(255_122_26/0.24),transparent_34%),linear-gradient(145deg,rgb(16_18_22/0.98)_0%,rgb(24_27_33/0.96)_100%)] p-5 text-center shadow-[0_28px_90px_rgb(0_0_0/0.55),0_0_42px_rgb(255_122_26/0.16)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_rgb(255_122_26/0.34)]">
+              <Sparkles className="h-7 w-7" />
+            </div>
+            <p className="mt-4 font-display text-2xl font-bold uppercase leading-7">Gerakan selesai</p>
+            <p className="mt-2 text-base font-semibold">{exerciseReward.name}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {exerciseReward.sets} set · {exerciseReward.reps} repetisi tercatat
+            </p>
           </div>
         </div>,
         document.body,

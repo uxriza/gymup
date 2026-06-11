@@ -445,12 +445,12 @@ export const useGymStore = create<GymState>()(
       },
       cancelWorkout: () => set({ activeWorkout: undefined }),
       replaceSyncedState: (state) =>
-        set({
+        set((currentState) => ({
           exercises: state.exercises,
           workouts: state.workouts,
           sessions: state.sessions,
-          activeWorkout: undefined,
-        }),
+          activeWorkout: currentState.activeWorkout,
+        })),
       resetLocalState: () =>
         set({
           exercises: defaultExercises,
@@ -475,14 +475,14 @@ export const useGymStore = create<GymState>()(
     }),
     {
       name: "gymup-store",
-      version: 9,
+      version: 10,
       migrate: (persistedState) => {
         const state = persistedState as Partial<GymState> | undefined;
         return {
           ...state,
           exercises: defaultExercises,
           workouts: defaultWorkouts,
-          activeWorkout: undefined,
+          activeWorkout: state?.activeWorkout,
         };
       },
     },
