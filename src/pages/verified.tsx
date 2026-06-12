@@ -57,8 +57,8 @@ export function VerifiedPage() {
               )}
             </div>
             <div className="space-y-1.5">
-              <CardTitle className="font-display text-2xl font-bold uppercase leading-7">{loading ? "Memeriksa akun" : title}</CardTitle>
-              <CardDescription className="text-sm leading-6">
+              <CardTitle className="page-title">{loading ? "Memeriksa akun" : title}</CardTitle>
+              <CardDescription className="page-description">
                 {loading ? "Tunggu sebentar, kami sedang mengecek status verifikasi email kamu" : description}
               </CardDescription>
             </div>

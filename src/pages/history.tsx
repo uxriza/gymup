@@ -55,8 +55,8 @@ export function HistoryPage() {
     <div className="space-y-5">
       <section className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-[2rem] font-bold leading-9">Riwayat</h1>
-          <p className="text-muted-foreground">Sesi latihan yang tersimpan di perangkat ini</p>
+          <h1 className="page-title">Riwayat</h1>
+          <p className="page-description">Sesi latihan yang tersimpan di perangkat ini</p>
         </div>
         {sessions.length ? (
           <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label="Hapus riwayat">
@@ -96,8 +96,8 @@ export function HistoryPage() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-semibold">Minggu ini</h2>
-          <p className="text-sm text-muted-foreground">Ringkasan sesi Senin sampai Minggu</p>
+          <h2 className="section-title">Minggu ini</h2>
+          <p className="section-description">Ringkasan sesi Senin sampai Minggu</p>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <Card className="metric-surface border-primary/25">
@@ -106,8 +106,8 @@ export function HistoryPage() {
                 <CalendarDays className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{weeklySessions.length}</p>
-                <p className="text-xs text-muted-foreground">Sesi</p>
+                <p className="metric-value">{weeklySessions.length}</p>
+                <p className="metric-label">Sesi</p>
               </div>
             </CardContent>
           </Card>
@@ -117,8 +117,8 @@ export function HistoryPage() {
                 <Clock3 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{weeklyMinutes}</p>
-                <p className="text-xs text-muted-foreground">Menit</p>
+                <p className="metric-value">{weeklyMinutes}</p>
+                <p className="metric-label">Menit</p>
               </div>
             </CardContent>
           </Card>
@@ -128,8 +128,8 @@ export function HistoryPage() {
                 <CheckCircle2 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{weeklyCompletedExercises}</p>
-                <p className="text-xs text-muted-foreground">Gerakan</p>
+                <p className="metric-value">{weeklyCompletedExercises}</p>
+                <p className="metric-label">Gerakan</p>
               </div>
             </CardContent>
           </Card>
@@ -139,8 +139,8 @@ export function HistoryPage() {
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold">Daftar sesi</h2>
-            <p className="text-sm text-muted-foreground">{sessions.length} sesi tersimpan</p>
+            <h2 className="section-title">Daftar sesi</h2>
+            <p className="section-description">{sessions.length} sesi tersimpan</p>
           </div>
         </div>
 

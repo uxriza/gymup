@@ -129,10 +129,10 @@ export function AuthPage() {
                   <CheckCircle2 className="h-6 w-6" />
                 </div>
                 <div className="space-y-1.5">
-                  <CardTitle className="font-display text-2xl font-bold uppercase leading-7">
+                  <CardTitle className="page-title">
                     Cek email kamu
                   </CardTitle>
-                  <CardDescription className="text-sm leading-6">
+                  <CardDescription className="page-description">
                     Akun berhasil dibuat. Buka email verifikasi yang kami kirim ke {registeredEmail}
                   </CardDescription>
                 </div>
@@ -168,10 +168,10 @@ export function AuthPage() {
                   </TabsList>
                 </Tabs>
                 <div className="space-y-1.5">
-                  <CardTitle className="font-display text-2xl font-bold uppercase leading-7">
+                  <CardTitle className="page-title">
                     {mode === "login" ? "Masuk akun" : "Buat akun"}
                   </CardTitle>
-                  <CardDescription className="text-sm leading-6">
+                  <CardDescription className="page-description">
                     {mode === "login"
                       ? "Lanjutkan latihan dan simpan progres ke akun kamu"
                       : "Buat akun untuk menyimpan riwayat latihan pribadi"}

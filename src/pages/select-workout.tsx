@@ -51,12 +51,12 @@ export function SelectWorkoutPage() {
           Beranda
         </Button>
         <div className="space-y-2">
-          <p className="flex items-center gap-2 text-sm text-primary">
+          <p className="eyebrow flex items-center gap-2">
             <ListChecks className="h-4 w-4" />
             Mulai sesi latihan
           </p>
-          <h1 className="text-[2rem] font-bold leading-9 tracking-normal">Pilih latihan</h1>
-          <p className="text-sm text-muted-foreground">Pakai program siap latihan atau mulai sesi mandiri</p>
+          <h1 className="page-title">Pilih latihan</h1>
+          <p className="page-description">Pakai program siap latihan atau mulai sesi mandiri</p>
         </div>
       </section>
 
@@ -125,15 +125,13 @@ export function SelectWorkoutPage() {
                         ))}
                       </div>
                     ) : null}
+
+                    <Button className="min-h-12 w-full" size="lg" onClick={() => startSelectedWorkout(workout.id)}>
+                      Mulai program ini
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
                   </CardContent>
                 ) : null}
-
-                <div className="p-4 pt-0">
-                  <Button className="min-h-12 w-full" size="lg" onClick={() => startSelectedWorkout(workout.id)}>
-                    Mulai
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
-                </div>
               </Card>
             );
           })}

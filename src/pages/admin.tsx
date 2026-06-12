@@ -201,8 +201,8 @@ export function AdminPage() {
             <ShieldCheck className="mr-1 h-3 w-3" />
             Admin
           </Badge>
-          <h1 className="text-[2rem] font-bold leading-9">Monitoring</h1>
-          <p className="text-sm leading-6 text-muted-foreground">Dashboard internal GymUp</p>
+          <h1 className="page-title">Monitoring</h1>
+          <p className="page-description">Dashboard internal GymUp</p>
         </section>
 
         <Card className="border-destructive/35 bg-destructive/5">
@@ -233,8 +233,8 @@ export function AdminPage() {
             <ShieldCheck className="mr-1 h-3 w-3" />
             Admin
           </Badge>
-          <h1 className="text-[2rem] font-bold leading-9 lg:text-5xl lg:leading-[3.25rem]">Monitoring</h1>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          <h1 className="page-title">Monitoring</h1>
+          <p className="page-description max-w-2xl">
             Pantau user, sesi, dan gerakan yang dipakai di GymUp
           </p>
         </div>

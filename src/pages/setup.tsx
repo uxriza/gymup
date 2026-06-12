@@ -73,8 +73,8 @@ export function SetupPage() {
     <div className="space-y-5">
       <section className="space-y-2">
         <div className="space-y-1">
-          <h1 className="text-[2rem] font-bold leading-9">Katalog gerakan</h1>
-          <p className="text-muted-foreground">Cari referensi gerakan dan instruksi dasar</p>
+          <h1 className="page-title">Katalog gerakan</h1>
+          <p className="page-description">Cari referensi gerakan dan instruksi dasar</p>
         </div>
       </section>
 
@@ -104,8 +104,8 @@ export function SetupPage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Daftar gerakan</h2>
-          <p className="text-sm text-muted-foreground">{catalogExercises.length} total</p>
+          <h2 className="section-title">Daftar gerakan</h2>
+          <p className="section-description">{catalogExercises.length} total</p>
         </div>
 
         {filteredExercises.length ? (
