@@ -1,28 +1,29 @@
 import { useState } from "react";
-import { differenceInMinutes, endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
-import { id } from "date-fns/locale";
-import { Calendar, CalendarDays, CheckCircle2, Clock3, Dumbbell, ListChecks, Repeat2, Trash2, Trophy } from "lucide-react";
+import { differenceInMinutes, endOfWeek, format, isWithinInterval, startOfWeek, type Locale } from "date-fns";
+import { Calendar, CalendarDays, CheckCircle2, Clock3, Dumbbell, Repeat2, Trash2, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 
-const getDateGroupLabel = (date: Date, now: Date) => {
+const getDateGroupLabel = (date: Date, now: Date, language: "id" | "en", locale: Locale) => {
   const today = format(now, "yyyy-MM-dd");
   const sessionDay = format(date, "yyyy-MM-dd");
   const yesterday = format(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1), "yyyy-MM-dd");
 
-  if (sessionDay === today) return "Hari ini";
-  if (sessionDay === yesterday) return "Kemarin";
-  return format(date, "EEEE, d MMMM yyyy", { locale: id });
+  if (sessionDay === today) return language === "en" ? "Today" : "Hari ini";
+  if (sessionDay === yesterday) return language === "en" ? "Yesterday" : "Kemarin";
+  return format(date, "EEEE, d MMMM yyyy", { locale });
 };
 
 export function HistoryPage() {
   const navigate = useNavigate();
+  const { language, dateLocale } = useI18n();
   const { toast } = useToast();
   const { sessions, exercises, resetHistory } = useGymStore();
   const [resetOpen, setResetOpen] = useState(false);
@@ -41,7 +42,7 @@ export function HistoryPage() {
     0,
   );
   const groupedSessions = sessions.slice(0, 30).reduce<Array<{ label: string; sessions: typeof sessions }>>((groups, session) => {
-    const label = getDateGroupLabel(new Date(session.date), now);
+    const label = getDateGroupLabel(new Date(session.date), now, language, dateLocale);
     const existingGroup = groups.find((group) => group.label === label);
     if (existingGroup) {
       existingGroup.sessions.push(session);
@@ -50,16 +51,81 @@ export function HistoryPage() {
     }
     return groups;
   }, []);
+  const copy = language === "en"
+    ? {
+        title: "History",
+        description: "Workout sessions stored on this device",
+        clearHistory: "Clear history",
+        clearHistoryTitle: "Clear history?",
+        clearHistoryDescription: "All saved workout sessions will be deleted. Your workout programs stay safe.",
+        clearHistoryAction: "Clear history",
+        cancel: "Cancel",
+        clearedTitle: "History cleared",
+        clearedDescription: "All saved workout sessions have been removed",
+        thisWeek: "This week",
+        thisWeekDescription: "Session summary from Monday to Sunday",
+        sessions: "Sessions",
+        minutes: "Minutes",
+        exercises: "Exercises",
+        sessionList: "Session list",
+        storedSessions: (count: number) => `${count} saved sessions`,
+        noSessionTitle: "No sessions yet",
+        noSessionDescription: "Start your first workout and the history will appear here.",
+        startWorkout: "Start workout",
+        duration: "Duration",
+        set: "Set",
+        reps: "Reps",
+        doneAndSkipped: (done: number, skipped: number) => `${done} done · ${skipped} not completed`,
+        fallbackExercise: "Exercise",
+        exerciseSummary: (sets: number, reps: number, weightKg?: number) =>
+          `${sets} sets · ${reps} reps${weightKg !== undefined ? ` · ${weightKg} kg` : ""}`,
+        completed: "Done",
+        skipped: "Not completed",
+        moreExercises: (count: number) => `+${count} more exercises`,
+        minuteSuffix: "min",
+      }
+    : {
+        title: "Riwayat",
+        description: "Sesi latihan yang tersimpan di perangkat ini",
+        clearHistory: "Hapus riwayat",
+        clearHistoryTitle: "Hapus riwayat?",
+        clearHistoryDescription: "Semua sesi latihan yang tersimpan akan dihapus. Program latihan tetap aman",
+        clearHistoryAction: "Hapus riwayat",
+        cancel: "Batal",
+        clearedTitle: "Riwayat dihapus",
+        clearedDescription: "Semua sesi latihan sudah dibersihkan",
+        thisWeek: "Minggu ini",
+        thisWeekDescription: "Ringkasan sesi Senin sampai Minggu",
+        sessions: "Sesi",
+        minutes: "Menit",
+        exercises: "Gerakan",
+        sessionList: "Daftar sesi",
+        storedSessions: (count: number) => `${count} sesi tersimpan`,
+        noSessionTitle: "Belum ada sesi",
+        noSessionDescription: "Mulai latihan pertama kamu, nanti riwayatnya muncul di sini",
+        startWorkout: "Mulai latihan",
+        duration: "Durasi",
+        set: "Set",
+        reps: "Repetisi",
+        doneAndSkipped: (done: number, skipped: number) => `${done} selesai · ${skipped} tidak dikerjakan`,
+        fallbackExercise: "Gerakan",
+        exerciseSummary: (sets: number, reps: number, weightKg?: number) =>
+          `${sets} set · ${reps} repetisi${weightKg !== undefined ? ` · ${weightKg} kg` : ""}`,
+        completed: "Selesai",
+        skipped: "Tidak dikerjakan",
+        moreExercises: (count: number) => `+${count} gerakan lainnya`,
+        minuteSuffix: "menit",
+      };
 
   return (
     <div className="space-y-5">
       <section className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="page-title">Riwayat</h1>
-          <p className="page-description">Sesi latihan yang tersimpan di perangkat ini</p>
+          <h1 className="page-title">{copy.title}</h1>
+          <p className="page-description">{copy.description}</p>
         </div>
         {sessions.length ? (
-          <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label="Hapus riwayat">
+          <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label={copy.clearHistory}>
             <Trash2 className="h-4 w-4" />
           </Button>
         ) : null}
@@ -68,8 +134,8 @@ export function HistoryPage() {
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Hapus riwayat?</DialogTitle>
-            <DialogDescription>Semua sesi latihan yang tersimpan akan dihapus. Program latihan tetap aman</DialogDescription>
+            <DialogTitle>{copy.clearHistoryTitle}</DialogTitle>
+            <DialogDescription>{copy.clearHistoryDescription}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Button
@@ -79,16 +145,16 @@ export function HistoryPage() {
                 resetHistory();
                 setResetOpen(false);
                 toast({
-                  title: "Riwayat dihapus",
-                  description: "Semua sesi latihan sudah dibersihkan",
+                  title: copy.clearedTitle,
+                  description: copy.clearedDescription,
                   variant: "destructive",
                 });
               }}
             >
-              Hapus riwayat
+              {copy.clearHistoryAction}
             </Button>
             <Button className="min-h-12 w-full" variant="secondary" onClick={() => setResetOpen(false)}>
-              Batal
+              {copy.cancel}
             </Button>
           </div>
         </DialogContent>
@@ -96,8 +162,8 @@ export function HistoryPage() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="section-title">Minggu ini</h2>
-          <p className="section-description">Ringkasan sesi Senin sampai Minggu</p>
+          <h2 className="section-title">{copy.thisWeek}</h2>
+          <p className="section-description">{copy.thisWeekDescription}</p>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <Card className="metric-surface border-primary/25">
@@ -107,7 +173,7 @@ export function HistoryPage() {
               </div>
               <div>
                 <p className="metric-value">{weeklySessions.length}</p>
-                <p className="metric-label">Sesi</p>
+                <p className="metric-label">{copy.sessions}</p>
               </div>
             </CardContent>
           </Card>
@@ -118,7 +184,7 @@ export function HistoryPage() {
               </div>
               <div>
                 <p className="metric-value">{weeklyMinutes}</p>
-                <p className="metric-label">Menit</p>
+                <p className="metric-label">{copy.minutes}</p>
               </div>
             </CardContent>
           </Card>
@@ -129,7 +195,7 @@ export function HistoryPage() {
               </div>
               <div>
                 <p className="metric-value">{weeklyCompletedExercises}</p>
-                <p className="metric-label">Gerakan</p>
+                <p className="metric-label">{copy.exercises}</p>
               </div>
             </CardContent>
           </Card>
@@ -137,22 +203,20 @@ export function HistoryPage() {
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="section-title">Daftar sesi</h2>
-            <p className="section-description">{sessions.length} sesi tersimpan</p>
-          </div>
+        <div>
+          <h2 className="section-title">{copy.sessionList}</h2>
+          <p className="section-description">{copy.storedSessions(sessions.length)}</p>
         </div>
 
         {sessions.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>Belum ada sesi</CardTitle>
-              <CardDescription>Mulai latihan pertama kamu, nanti riwayatnya muncul di sini</CardDescription>
+              <CardTitle>{copy.noSessionTitle}</CardTitle>
+              <CardDescription>{copy.noSessionDescription}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="min-h-12 w-full" onClick={() => navigate("/select")}>
-                Mulai latihan
+                {copy.startWorkout}
               </Button>
             </CardContent>
           </Card>
@@ -184,7 +248,7 @@ export function HistoryPage() {
                         <CardTitle className="truncate">{session.workoutName}</CardTitle>
                         <CardDescription className="mt-1 flex items-center gap-2">
                           <Calendar className="h-3.5 w-3.5" />
-                          {format(new Date(session.date), "HH:mm", { locale: id })} · {duration} menit
+                          {format(new Date(session.date), "HH:mm", { locale: dateLocale })} · {duration} {copy.minuteSuffix}
                         </CardDescription>
                       </div>
                       <Badge className="shrink-0 bg-primary/15 text-primary">
@@ -198,30 +262,28 @@ export function HistoryPage() {
                       <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Clock3 className="h-3 w-3" />
-                          Durasi
+                          {copy.duration}
                         </p>
                         <p className="text-lg font-bold">{duration}m</p>
                       </div>
                       <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Dumbbell className="h-3 w-3" />
-                          Set
+                          {copy.set}
                         </p>
                         <p className="text-lg font-bold">{totalSets}</p>
                       </div>
                       <div className="metric-surface border-primary/20 p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Repeat2 className="h-3 w-3" />
-                          Repetisi
+                          {copy.reps}
                         </p>
                         <p className="text-lg font-bold">{totalRep}</p>
                       </div>
                     </div>
 
                     {planned.length ? (
-                      <p className="text-xs text-muted-foreground">
-                        {completed.length} selesai · {planned.length} tidak dikerjakan
-                      </p>
+                      <p className="text-xs text-muted-foreground">{copy.doneAndSkipped(completed.length, planned.length)}</p>
                     ) : null}
 
                     <div className="space-y-2">
@@ -230,11 +292,8 @@ export function HistoryPage() {
                         return (
                           <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 border-border/90 bg-background/42 p-2">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium">{exercise?.name || "Gerakan"}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.actualSets} set · {item.actualReps} repetisi
-                                {item.weightKg !== undefined ? ` · ${item.weightKg} kg` : ""}
-                              </p>
+                              <p className="truncate text-sm font-medium">{exercise?.name || copy.fallbackExercise}</p>
+                              <p className="text-xs text-muted-foreground">{copy.exerciseSummary(item.actualSets, item.actualReps, item.weightKg)}</p>
                             </div>
                             <Badge
                               variant={item.completed ? "default" : "secondary"}
@@ -244,13 +303,13 @@ export function HistoryPage() {
                                 !item.completed && "text-muted-foreground",
                               )}
                             >
-                              {item.completed ? "Selesai" : "Tidak dikerjakan"}
+                              {item.completed ? copy.completed : copy.skipped}
                             </Badge>
                           </div>
                         );
                       })}
                       {session.exercises.length > 4 ? (
-                        <p className="text-xs text-muted-foreground">+{session.exercises.length - 4} gerakan lainnya</p>
+                        <p className="text-xs text-muted-foreground">{copy.moreExercises(session.exercises.length - 4)}</p>
                       ) : null}
                     </div>
                     {session.notes ? <p className="text-sm text-muted-foreground">{session.notes}</p> : null}

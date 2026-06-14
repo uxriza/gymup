@@ -5,6 +5,7 @@ import { App } from "@/App";
 import { AuthProvider } from "@/components/auth-provider";
 import { SyncProvider } from "@/components/sync-provider";
 import { ToastProvider } from "@/components/ui/toast";
+import { I18nProvider } from "@/lib/i18n";
 import { registerServiceWorker } from "@/lib/register-service-worker";
 import { initSentry, Sentry } from "@/lib/sentry";
 import "@/index.css";
@@ -24,15 +25,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </div>
       }
     >
-      <BrowserRouter>
-        <ToastProvider>
-          <AuthProvider>
-            <SyncProvider>
-              <App />
-            </SyncProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </BrowserRouter>
+      <I18nProvider>
+        <BrowserRouter>
+          <ToastProvider>
+            <AuthProvider>
+              <SyncProvider>
+                <App />
+              </SyncProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </BrowserRouter>
+      </I18nProvider>
     </Sentry.ErrorBoundary>
   </React.StrictMode>,
 );

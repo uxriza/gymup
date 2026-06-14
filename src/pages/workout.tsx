@@ -38,6 +38,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { defaultExercises } from "@/data";
+import { useI18n } from "@/lib/i18n";
 import { formatCategoryLabel } from "@/lib/labels";
 import { cn, formatDuration } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
@@ -45,13 +46,25 @@ import type { ActiveExercise, Exercise } from "@/types";
 
 const categoryOrder = ["Semua", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves"];
 
-const statusLabel: Record<ActiveExercise["status"], string> = {
-  planned: "Belum",
-  selected: "Dipilih",
-  active: "Berjalan",
-  resting: "Istirahat",
-  completed: "Selesai",
-  skipped: "Belum",
+const getStatusLabel = (status: ActiveExercise["status"], language: "id" | "en") => {
+  const labels = language === "en"
+    ? {
+        planned: "Planned",
+        selected: "Selected",
+        active: "Active",
+        resting: "Rest",
+        completed: "Done",
+        skipped: "Planned",
+      }
+    : {
+        planned: "Belum",
+        selected: "Dipilih",
+        active: "Berjalan",
+        resting: "Istirahat",
+        completed: "Selesai",
+        skipped: "Belum",
+      };
+  return labels[status];
 };
 
 const statusClass: Record<ActiveExercise["status"], string> = {
@@ -75,7 +88,7 @@ const getWeightOptions = (currentWeight?: number) => {
   return Array.from(new Set(options)).sort((a, b) => a - b);
 };
 
-function ExerciseMedia({ exercise }: { exercise: Exercise }) {
+function ExerciseMedia({ exercise, language }: { exercise: Exercise; language: "id" | "en" }) {
   return (
     <div className="overflow-hidden rounded-md border border-border bg-secondary">
       {exercise.videoUrl ? (
@@ -94,7 +107,7 @@ function ExerciseMedia({ exercise }: { exercise: Exercise }) {
         <img className="aspect-video w-full bg-black object-cover" src={exercise.imageUrl} alt={exercise.name} />
       ) : (
         <div className="flex aspect-video w-full items-center justify-center bg-background text-sm text-muted-foreground">
-          Media gerakan belum tersedia
+          {language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
         </div>
       )}
     </div>
@@ -197,12 +210,23 @@ const localizedInstructions: Record<string, string[]> = {
   ],
 };
 
-const getExerciseInstructions = (exercise: Exercise) => localizedInstructions[exercise.id] ?? exercise.instructions ?? [];
+const getExerciseInstructions = (exercise: Exercise, language: "id" | "en") =>
+  language === "en"
+    ? exercise.instructions ?? localizedInstructions[exercise.id] ?? []
+    : localizedInstructions[exercise.id] ?? exercise.instructions ?? [];
 
 const getSeedExercise = (exercise: Exercise) => defaultExercises.find((item) => item.id === exercise.id) ?? exercise;
 
-function ExerciseInfo({ exercise, compact = false }: { exercise: Exercise; compact?: boolean }) {
-  const instructions = getExerciseInstructions(exercise);
+function ExerciseInfo({
+  exercise,
+  compact = false,
+  language,
+}: {
+  exercise: Exercise;
+  compact?: boolean;
+  language: "id" | "en";
+}) {
+  const instructions = getExerciseInstructions(exercise, language);
 
   return (
     <div className={cn(compact ? "space-y-3" : "space-y-4")}>
@@ -219,7 +243,7 @@ function ExerciseInfo({ exercise, compact = false }: { exercise: Exercise; compa
 
       {instructions.length ? (
         <div className={cn("space-y-2", compact ? "border-t border-border pt-3" : "rounded-md border border-border p-3")}>
-          {!compact ? <p className="text-sm font-semibold">Instruksi gerakan</p> : null}
+          {!compact ? <p className="text-sm font-semibold">{language === "en" ? "Instructions" : "Instruksi gerakan"}</p> : null}
           <ol className={cn("text-sm text-muted-foreground", compact ? "space-y-1.5" : "space-y-2")}>
             {instructions.map((instruction, index) => (
               <li key={`${exercise.id}-${index}`} className="flex gap-2">
@@ -236,6 +260,7 @@ function ExerciseInfo({ exercise, compact = false }: { exercise: Exercise; compa
 
 export function WorkoutPage() {
   const navigate = useNavigate();
+  const { language } = useI18n();
   const { toast } = useToast();
   const {
     activeWorkout,
@@ -364,26 +389,176 @@ export function WorkoutPage() {
   if (!activeWorkout) {
     return (
       <div className="space-y-4">
-        <h1 className="text-[1.875rem] font-bold leading-8">Tidak ada sesi aktif</h1>
-        <Button onClick={() => navigate("/select")}>Pilih latihan</Button>
+        <h1 className="text-[1.875rem] font-bold leading-8">
+          {language === "en" ? "No active session" : "Tidak ada sesi aktif"}
+        </h1>
+        <Button onClick={() => navigate("/select")}>{language === "en" ? "Choose workout" : "Pilih latihan"}</Button>
       </div>
     );
   }
+
+  const copy = language === "en"
+    ? {
+        customWorkout: "Custom workout",
+        sessionSaved: "Session saved",
+        sessionSavedDescription: "Workout history has been updated",
+        warmupTitle: "Warm up first",
+        cooldownTitle: "Cooldown",
+        warmupDescription: "Follow these light instructions before choosing your main exercise",
+        cooldownDescription: "Lower the intensity for a moment before saving the session",
+        startSession: "Start workout session",
+        finishCooldown: "Finish cooldown",
+        done: "Done",
+        sessionExercises: "Session exercises",
+        searchExercise: "Search exercise or equipment",
+        all: "All",
+        logged: (sets: number, reps: number) => `Logged ${sets} sets · ${reps} reps`,
+        select: "Select",
+        completedStats: "Done",
+        totalStats: "Total",
+        remainingStats: "Left",
+        pickExercise: "Choose exercise",
+        setsAndReps: (sets: number, reps: number, category: string) => `${sets} sets x ${reps} reps · ${category}`,
+        recommendation: "Recommended",
+        activeLogged: (sets: number, reps: number) => `Logged ${sets} sets · ${reps} reps`,
+        back: "Back",
+        currentSet: (current: number, targetSets: number, targetReps: number, extra: boolean) =>
+          `Set ${current} · target ${targetSets} sets x ${targetReps} reps${extra ? " · extra set" : ""}`,
+        active: "Active",
+        exerciseDuration: "Exercise time",
+        currentSetLabel: "Current set",
+        trainingWeight: "Training weight",
+        weightHelp: "Uses the last weight you picked",
+        chooseWeight: "Choose weight",
+        noWeight: "No weight yet",
+        currentReps: "Current reps",
+        decreaseReps: "Decrease reps",
+        increaseReps: "Increase reps",
+        rest: "Rest",
+        instructions: "Instructions",
+        finishExercise: "Finish",
+        restPhase: "Rest",
+        beforeSet: (setNumber: number, loggedSets: number) => `Before set ${setNumber} · ${loggedSets} sets logged`,
+        restDone: "Rest complete",
+        restTime: "Rest time",
+        stopTimer: "Stop timer",
+        restTips: "Rest tip",
+        restTipBody: "Take a slow breath, relax your shoulders, and reset your position before the next set",
+        nextSet: "Next set",
+        discard: "Discard",
+        progressLabel: (progress: number) => `${progress}% session progress`,
+        warmupPhase: "Warm-up",
+        cooldownPhase: "Cooldown",
+        workoutPhase: "Workout",
+        startPhase: "Starting phase",
+        endPhase: "Ending phase",
+        sessionComplete: "Exercise complete",
+        sessionCompleteLogged: (sets: number, reps: number) => `${sets} sets · ${reps} reps logged`,
+        finishSession: "Finish session",
+        finishSessionTitle: "Finish session?",
+        finishSessionDescription: (completed: number, total: number, planned: number, isCustom: boolean) =>
+          isCustom
+            ? `${completed} done · ${total} session exercises`
+            : `${completed} done · ${planned} not completed`,
+        sessionNotes: "Session notes",
+        noCompletedWarning: "No exercise has been completed yet. Save this session anyway?",
+        continueWorkout: "Back to workout",
+        saveSession: "Save session",
+        discardSession: "Discard session",
+        discardTitle: "Discard session?",
+        discardDescription: "The active session will be removed and not saved to history",
+        discardedTitle: "Session discarded",
+        discardedDescription: "The active session was removed",
+        cancel: "Cancel",
+      }
+    : {
+        customWorkout: "Latihan mandiri",
+        sessionSaved: "Sesi tersimpan",
+        sessionSavedDescription: "Riwayat latihan sudah diperbarui",
+        warmupTitle: "Pemanasan dulu",
+        cooldownTitle: "Pendinginan",
+        warmupDescription: "Ikuti instruksi ringan ini sebelum memilih gerakan utama",
+        cooldownDescription: "Turunkan intensitas sebentar sebelum menyimpan sesi",
+        startSession: "Mulai sesi latihan",
+        finishCooldown: "Selesai pendinginan",
+        done: "Selesai",
+        sessionExercises: "Gerakan sesi",
+        searchExercise: "Cari gerakan atau alat",
+        all: "Semua",
+        logged: (sets: number, reps: number) => `Tercatat ${sets} set · ${reps} repetisi`,
+        select: "Pilih",
+        completedStats: "Selesai",
+        totalStats: "Total",
+        remainingStats: "Belum",
+        pickExercise: "Pilih gerakan",
+        setsAndReps: (sets: number, reps: number, category: string) => `${sets} set x ${reps} repetisi · ${category}`,
+        recommendation: "Rekomendasi",
+        activeLogged: (sets: number, reps: number) => `Tercatat ${sets} set · ${reps} repetisi`,
+        back: "Kembali",
+        currentSet: (current: number, targetSets: number, targetReps: number, extra: boolean) =>
+          `Set ${current} · target ${targetSets} set x ${targetReps} repetisi${extra ? " · set tambahan" : ""}`,
+        active: "Berjalan",
+        exerciseDuration: "Durasi gerakan",
+        currentSetLabel: "Set berjalan",
+        trainingWeight: "Beban latihan",
+        weightHelp: "Mengikuti beban terakhir yang kamu pakai",
+        chooseWeight: "Pilih beban",
+        noWeight: "Belum ada",
+        currentReps: "Repetisi set ini",
+        decreaseReps: "Kurangi repetisi",
+        increaseReps: "Tambah repetisi",
+        rest: "Istirahat",
+        instructions: "Instruksi",
+        finishExercise: "Akhiri",
+        restPhase: "Istirahat",
+        beforeSet: (setNumber: number, loggedSets: number) => `Sebelum set ${setNumber} · ${loggedSets} set tercatat`,
+        restDone: "Istirahat selesai",
+        restTime: "Waktu istirahat",
+        stopTimer: "Hentikan timer",
+        restTips: "Tips istirahat",
+        restTipBody: "Tarik napas pelan, rilekskan bahu, dan siapkan posisi awal sebelum mulai set berikutnya",
+        nextSet: "Set berikutnya",
+        discard: "Buang",
+        progressLabel: (progress: number) => `${progress}% progres sesi`,
+        warmupPhase: "Pemanasan",
+        cooldownPhase: "Pendinginan",
+        workoutPhase: "Latihan",
+        startPhase: "Tahap awal",
+        endPhase: "Tahap akhir",
+        sessionComplete: "Gerakan selesai",
+        sessionCompleteLogged: (sets: number, reps: number) => `${sets} set · ${reps} repetisi tercatat`,
+        finishSession: "Selesai sesi",
+        finishSessionTitle: "Selesaikan sesi?",
+        finishSessionDescription: (completed: number, total: number, planned: number, isCustom: boolean) =>
+          isCustom
+            ? `${completed} selesai · ${total} gerakan sesi`
+            : `${completed} selesai · ${planned} tidak dikerjakan`,
+        sessionNotes: "Catatan sesi",
+        noCompletedWarning: "Belum ada gerakan yang selesai. Tetap simpan sesi?",
+        continueWorkout: "Kembali ke sesi",
+        saveSession: "Simpan sesi",
+        discardSession: "Buang sesi",
+        discardTitle: "Buang sesi?",
+        discardDescription: "Sesi aktif akan dihapus dan tidak disimpan ke riwayat",
+        discardedTitle: "Sesi dibuang",
+        discardedDescription: "Sesi aktif sudah dihapus",
+        cancel: "Batal",
+      };
 
   const completedCount = activeWorkout.exercises.filter((item) => item.completed).length;
   const plannedCount = activeWorkout.exercises.length - completedCount;
   const totalExerciseCount = activeWorkout.exercises.length;
   const phaseLabel = activeWorkout.phase === "warmup"
-    ? "Pemanasan"
+    ? copy.warmupPhase
     : activeWorkout.phase === "cooldown"
-      ? "Pendinginan"
-      : "Latihan";
-  const pageTitle = activeWorkout.phase === "main" ? "Sesi latihan" : phaseLabel;
+      ? copy.cooldownPhase
+      : copy.workoutPhase;
+  const pageTitle = activeWorkout.phase === "main" ? (language === "en" ? "Workout session" : "Sesi latihan") : phaseLabel;
   const progressLabel = activeWorkout.phase === "main"
-    ? `${progress}% progres sesi`
+    ? copy.progressLabel(progress)
     : activeWorkout.phase === "warmup"
-      ? "Tahap awal"
-      : "Tahap akhir";
+      ? copy.startPhase
+      : copy.endPhase;
   const isRestComplete = activeWorkout.mode === "resting" && restSeconds === 0;
   const isExerciseCompleted = active?.status === "completed";
   const canStartExercise = !isExerciseCompleted;
@@ -395,7 +570,7 @@ export function WorkoutPage() {
     const matchesQuery =
       !normalizedQuery ||
       item.name.toLowerCase().includes(normalizedQuery) ||
-      formatCategoryLabel(item.category).toLowerCase().includes(normalizedQuery) ||
+      formatCategoryLabel(item.category, language).toLowerCase().includes(normalizedQuery) ||
       item.equipment?.some((equipment) => equipment.toLowerCase().includes(normalizedQuery));
 
     return matchesCategory && matchesQuery;
@@ -438,8 +613,8 @@ export function WorkoutPage() {
     finishWorkout(summaryNotes);
     navigate("/history");
     toast({
-      title: "Sesi tersimpan",
-      description: "Riwayat latihan sudah diperbarui",
+      title: copy.sessionSaved,
+      description: copy.sessionSavedDescription,
     });
   };
 
@@ -458,11 +633,9 @@ export function WorkoutPage() {
     items: Exercise[],
   ) => {
     const isWarmup = phase === "warmup";
-    const title = isWarmup ? "Pemanasan dulu" : "Pendinginan";
-    const description = isWarmup
-      ? "Ikuti instruksi ringan ini sebelum memilih gerakan utama"
-      : "Turunkan intensitas sebentar sebelum menyimpan sesi";
-    const buttonLabel = isWarmup ? "Mulai sesi latihan" : "Selesai pendinginan";
+    const title = isWarmup ? copy.warmupTitle : copy.cooldownTitle;
+    const description = isWarmup ? copy.warmupDescription : copy.cooldownDescription;
+    const buttonLabel = isWarmup ? copy.startSession : copy.finishCooldown;
     const onAction = isWarmup ? completeWarmup : () => setShowFinish(true);
 
     return (
@@ -476,7 +649,7 @@ export function WorkoutPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3 pb-24">
-          {items.map((item) => (
+          {items.slice(0, 1).map((item) => (
             <div key={item.id} className="surface-list-item p-4">
               <div className="flex items-start gap-3">
                 <ExerciseThumbnail exercise={item} className="h-14 w-14 rounded-[0.375rem]" />
@@ -484,10 +657,14 @@ export function WorkoutPage() {
                   <div className="min-w-0">
                     <p className="card-heading truncate">{item.name}</p>
                     <p className="section-description">
-                      {item.targetReps >= 45 ? `${item.targetReps} detik` : `${item.targetSets} set x ${item.targetReps} repetisi`}
+                      {item.targetReps >= 45
+                        ? language === "en"
+                          ? `${item.targetReps} sec`
+                          : `${item.targetReps} detik`
+                        : copy.setsAndReps(item.targetSets, item.targetReps, formatCategoryLabel(item.category, language))}
                     </p>
                   </div>
-                  <ExerciseInfo exercise={item} compact />
+                  <ExerciseInfo exercise={item} compact language={language} />
                 </div>
               </div>
             </div>
@@ -513,11 +690,11 @@ export function WorkoutPage() {
     <div className="space-y-4 pb-24">
       <div className="grid grid-cols-2 gap-3">
         <div className="metric-surface p-3">
-          <p className="text-xs text-muted-foreground">Selesai</p>
+          <p className="text-xs text-muted-foreground">{copy.completedStats}</p>
           <p className="text-2xl font-bold">{completedCount}</p>
         </div>
         <div className="metric-surface p-3">
-          <p className="text-xs text-muted-foreground">Gerakan sesi</p>
+          <p className="text-xs text-muted-foreground">{copy.sessionExercises}</p>
           <p className="text-2xl font-bold">{totalExerciseCount}</p>
         </div>
       </div>
@@ -525,7 +702,7 @@ export function WorkoutPage() {
       <section className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-12 pl-9" placeholder="Cari gerakan atau alat" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <Input className="h-12 pl-9" placeholder={copy.searchExercise} value={query} onChange={(event) => setQuery(event.target.value)} />
         </div>
         <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
           {categories.map((category) => {
@@ -539,7 +716,7 @@ export function WorkoutPage() {
                 className="h-11 shrink-0 px-4"
                 onClick={() => setSelectedCategory(category)}
               >
-                {category === "Semua" ? "Semua" : formatCategoryLabel(category)}
+                {category === "Semua" ? copy.all : formatCategoryLabel(category, language)}
               </Button>
             );
           })}
@@ -574,21 +751,21 @@ export function WorkoutPage() {
                     <p className={cn("truncate font-semibold", isCompleted && "text-emerald-100")}>{item.name}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {item.targetSets} set x {item.targetReps} repetisi · {formatCategoryLabel(item.category)}
+                    {copy.setsAndReps(item.targetSets, item.targetReps, formatCategoryLabel(item.category, language))}
                   </p>
                   {activeExercise && (activeExercise.actualSets > 0 || activeExercise.actualReps > 0) ? (
                     <p className={cn("text-xs text-muted-foreground", isCompleted && "font-medium text-emerald-200/90")}>
-                      Tercatat {activeExercise.actualSets} set · {activeExercise.actualReps} repetisi
+                      {copy.logged(activeExercise.actualSets, activeExercise.actualReps)}
                     </p>
                   ) : null}
                   </div>
                 </div>
                 {activeExercise ? (
                   <Badge className={cn("shrink-0", statusClass[activeExercise.status])}>
-                    {statusLabel[activeExercise.status]}
+                    {getStatusLabel(activeExercise.status, language)}
                   </Badge>
                 ) : (
-                  <Badge className="shrink-0 bg-secondary text-muted-foreground">Pilih</Badge>
+                  <Badge className="shrink-0 bg-secondary text-muted-foreground">{copy.select}</Badge>
                 )}
               </div>
             </button>
@@ -602,15 +779,15 @@ export function WorkoutPage() {
     <div className="space-y-4 pb-24">
       <div className="grid grid-cols-3 gap-3">
         <div className="metric-surface p-3">
-          <p className="text-xs text-muted-foreground">Selesai</p>
+          <p className="text-xs text-muted-foreground">{copy.completedStats}</p>
           <p className="text-2xl font-bold">{completedCount}</p>
         </div>
         <div className="metric-surface p-3">
-          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-xs text-muted-foreground">{copy.totalStats}</p>
           <p className="text-2xl font-bold">{totalExerciseCount}</p>
         </div>
         <div className="metric-surface p-3">
-          <p className="text-xs text-muted-foreground">Belum</p>
+          <p className="text-xs text-muted-foreground">{copy.remainingStats}</p>
           <p className="text-2xl font-bold">{plannedCount}</p>
         </div>
       </div>
@@ -649,13 +826,13 @@ export function WorkoutPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>
-                      {item.targetSets} set x {item.targetReps} repetisi · {formatCategoryLabel(item.category)}
+                      {copy.setsAndReps(item.targetSets, item.targetReps, formatCategoryLabel(item.category, language))}
                     </span>
                     {!item.isOptional ? (
                       <span
                         className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 text-primary"
-                        aria-label="Rekomendasi"
-                        title="Rekomendasi"
+                        aria-label={copy.recommendation}
+                        title={copy.recommendation}
                       >
                         <ThumbsUp className="h-3.5 w-3.5" />
                       </span>
@@ -668,13 +845,13 @@ export function WorkoutPage() {
                         activeExercise.status === "completed" && "font-medium text-emerald-200/90",
                       )}
                     >
-                      Tercatat {activeExercise.actualSets} set · {activeExercise.actualReps} repetisi
+                      {copy.activeLogged(activeExercise.actualSets, activeExercise.actualReps)}
                     </p>
                   ) : null}
                   </div>
                 </div>
                 <Badge className={cn("shrink-0", statusClass[activeExercise.status])}>
-                  {statusLabel[activeExercise.status]}
+                  {getStatusLabel(activeExercise.status, language)}
                 </Badge>
               </div>
             </button>
@@ -689,21 +866,21 @@ export function WorkoutPage() {
       <CardHeader>
         <Button className="w-fit px-0 text-muted-foreground" variant="ghost" onClick={returnToExercisePicker}>
           <ArrowLeft className="h-4 w-4" />
-          Pilih gerakan
+          {copy.pickExercise}
         </Button>
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-xl">{exercise.name}</CardTitle>
             <CardDescription>
-              {exercise ? `${exercise.targetSets} set x ${exercise.targetReps} repetisi · ${formatCategoryLabel(exercise.category)}` : null}
+              {exercise ? copy.setsAndReps(exercise.targetSets, exercise.targetReps, formatCategoryLabel(exercise.category, language)) : null}
             </CardDescription>
           </div>
-          <Badge className={cn(statusClass[active.status])}>{statusLabel[active.status]}</Badge>
+          <Badge className={cn(statusClass[active.status])}>{getStatusLabel(active.status, language)}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <ExerciseMedia exercise={exercise} />
-        <ExerciseInfo exercise={exercise} />
+        <ExerciseMedia exercise={exercise} language={language} />
+        <ExerciseInfo exercise={exercise} language={language} />
       </CardContent>
     </Card>
   ) : null;
@@ -714,22 +891,19 @@ export function WorkoutPage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-xl">{exercise.name}</CardTitle>
-            <CardDescription>
-              Set {active.currentSet} · target {exercise.targetSets} set x {exercise.targetReps} repetisi
-              {active.currentSet > exercise.targetSets ? " · set tambahan" : ""}
-            </CardDescription>
+            <CardDescription>{copy.currentSet(active.currentSet, exercise.targetSets, exercise.targetReps, active.currentSet > exercise.targetSets)}</CardDescription>
           </div>
-          <Badge className={cn(statusClass.active)}>Berjalan</Badge>
+          <Badge className={cn(statusClass.active)}>{copy.active}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid grid-cols-2 gap-3">
           <div className="metric-surface p-4">
-            <p className="text-xs text-muted-foreground">Durasi gerakan</p>
+            <p className="text-xs text-muted-foreground">{copy.exerciseDuration}</p>
             <p className="text-3xl font-bold">{formatDuration(activeElapsedSeconds)}</p>
           </div>
           <div className="metric-surface p-4">
-            <p className="text-xs text-muted-foreground">Set berjalan</p>
+            <p className="text-xs text-muted-foreground">{copy.currentSetLabel}</p>
             <p className="text-3xl font-bold">{active.currentSet}</p>
           </div>
         </div>
@@ -737,18 +911,18 @@ export function WorkoutPage() {
         <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <div className="flex flex-col gap-3">
             <div>
-              <p className="text-sm font-semibold">Beban latihan</p>
-              <p className="text-xs text-muted-foreground">Mengikuti beban terakhir yang kamu pakai</p>
+              <p className="text-sm font-semibold">{copy.trainingWeight}</p>
+              <p className="text-xs text-muted-foreground">{copy.weightHelp}</p>
             </div>
             <Select
               value={active.weightKg !== undefined ? String(active.weightKg) : "none"}
               onValueChange={(value) => updateCurrentWeight(value === "none" ? undefined : Number(value))}
             >
-              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base" aria-label="Beban latihan dalam kilogram">
-                <SelectValue placeholder="Pilih beban" />
+              <SelectTrigger className="h-12 w-full justify-between rounded-md border-primary/30 bg-background px-4 text-base" aria-label={copy.trainingWeight}>
+                <SelectValue placeholder={copy.chooseWeight} />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                <SelectItem value="none">Belum ada</SelectItem>
+                <SelectItem value="none">{copy.noWeight}</SelectItem>
                 {getWeightOptions(active.weightKg).map((weight) => (
                   <SelectItem key={weight} value={String(weight)}>
                     {weight} kg
@@ -760,13 +934,13 @@ export function WorkoutPage() {
         </div>
 
         <div className="rounded-md border border-primary/15 bg-card/80 p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-          <p className="text-center text-xs text-muted-foreground">Repetisi set ini</p>
+          <p className="text-center text-xs text-muted-foreground">{copy.currentReps}</p>
           <div className="mt-2 grid grid-cols-[48px_1fr_48px] items-center gap-3">
-            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={removeRep} aria-label="Kurangi repetisi">
+            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={removeRep} aria-label={copy.decreaseReps}>
               <Minus className="h-5 w-5" />
             </Button>
             <p className="text-center text-3xl font-bold">{active.currentReps}</p>
-            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={addRep} aria-label="Tambah repetisi">
+            <Button variant="outline" size="icon" className="h-12 w-12 bg-background" onClick={addRep} aria-label={copy.increaseReps}>
               <Plus className="h-5 w-5" />
             </Button>
           </div>
@@ -779,12 +953,10 @@ export function WorkoutPage() {
     <Card className="animate-workout-card border-primary/30 bg-card/90 shadow-[0_24px_80px_rgb(0_0_0/0.36)]">
       <CardHeader>
         <div className="space-y-2">
-          <p className="eyebrow">Istirahat</p>
+          <p className="eyebrow">{copy.restPhase}</p>
           <div>
             <CardTitle>{exercise.name}</CardTitle>
-            <CardDescription>
-              Sebelum set {active.currentSet + 1} · {active.actualSets} set tercatat
-            </CardDescription>
+            <CardDescription>{copy.beforeSet(active.currentSet + 1, active.actualSets)}</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -792,11 +964,11 @@ export function WorkoutPage() {
         <div className="animate-rest-pulse rounded-[1.25rem] border border-border bg-secondary p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm text-muted-foreground">{isRestComplete ? "Istirahat selesai" : "Waktu istirahat"}</p>
+              <p className="text-sm text-muted-foreground">{isRestComplete ? copy.restDone : copy.restTime}</p>
               <p className="text-5xl font-bold">{formatDuration(restSeconds)}</p>
             </div>
             {!isRestComplete ? (
-              <Button variant="ghost" size="icon" onClick={stopRestTimer} aria-label="Hentikan timer">
+              <Button variant="ghost" size="icon" onClick={stopRestTimer} aria-label={copy.stopTimer}>
                 <Pause className="h-5 w-5" />
               </Button>
             ) : (
@@ -814,10 +986,8 @@ export function WorkoutPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-semibold">Tips istirahat</p>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Tarik napas pelan, rilekskan bahu, dan siapkan posisi awal sebelum mulai set berikutnya.
-              </p>
+              <p className="text-sm font-semibold">{copy.restTips}</p>
+              <p className="text-sm leading-6 text-muted-foreground">{copy.restTipBody}</p>
             </div>
           </div>
         </div>
@@ -825,11 +995,11 @@ export function WorkoutPage() {
         <div className="grid grid-cols-2 gap-3">
           <Button className="h-12" size="lg" onClick={startNextSet}>
             <Play className="h-4 w-4" />
-            Set berikutnya
+            {copy.nextSet}
           </Button>
           <Button className="h-12" size="lg" variant="outline" onClick={completeExerciseWithReward}>
             <Check className="h-4 w-4" />
-            Akhiri
+            {copy.finishExercise}
           </Button>
         </div>
       </CardContent>
@@ -847,9 +1017,9 @@ export function WorkoutPage() {
               {activeWorkout.phase === "main" ? <Badge className="bg-primary/15 text-primary">{phaseLabel}</Badge> : null}
             </div>
           </div>
-          <Button variant="ghost" className="h-10 px-3 text-muted-foreground hover:text-destructive" onClick={() => setShowDiscard(true)} aria-label="Buang sesi">
+          <Button variant="ghost" className="h-10 px-3 text-muted-foreground hover:text-destructive" onClick={() => setShowDiscard(true)} aria-label={copy.discardSession}>
             <X className="h-4 w-4" />
-            Buang
+            {copy.discard}
           </Button>
         </div>
         <Progress value={progress} />
@@ -874,7 +1044,7 @@ export function WorkoutPage() {
               size="lg"
               onClick={requestFinish}
             >
-              Selesai sesi
+              {copy.finishSession}
             </Button>
           </div>
         </div>,
@@ -886,15 +1056,15 @@ export function WorkoutPage() {
           <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
             <Button className="col-span-2 min-h-12 w-full text-base" size="lg" onClick={startRestTimer}>
               <Timer className="h-5 w-5" />
-              Istirahat
+              {copy.rest}
             </Button>
             <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={() => setShowInstructions(true)}>
               <Dumbbell className="h-4 w-4" />
-              Instruksi
+              {copy.instructions}
             </Button>
             <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeExerciseWithReward}>
               <Check className="h-4 w-4" />
-              Akhiri
+              {copy.finishExercise}
             </Button>
           </div>
         </div>,
@@ -906,17 +1076,17 @@ export function WorkoutPage() {
           <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
             <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={returnToExercisePicker}>
               <ArrowLeft className="h-4 w-4" />
-              Kembali
+              {copy.back}
             </Button>
             {isExerciseCompleted ? (
               <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={returnToExercisePicker}>
                 <Check className="h-4 w-4" />
-                Selesai
+                {copy.done}
               </Button>
             ) : (
               <Button className="min-h-12 w-full" size="lg" onClick={startSelectedExercise} disabled={!canStartExercise}>
                 <Play className="h-4 w-4" />
-                Mulai
+                {language === "en" ? "Start" : "Mulai"}
               </Button>
             )}
           </div>
@@ -930,10 +1100,10 @@ export function WorkoutPage() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_rgb(255_122_26/0.34)]">
               <Sparkles className="h-7 w-7" />
             </div>
-            <p className="mt-4 font-display text-2xl font-bold uppercase leading-7">Gerakan selesai</p>
+            <p className="mt-4 font-display text-2xl font-bold uppercase leading-7">{copy.sessionComplete}</p>
             <p className="mt-2 text-base font-semibold">{exerciseReward.name}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {exerciseReward.sets} set · {exerciseReward.reps} repetisi tercatat
+              {copy.sessionCompleteLogged(exerciseReward.sets, exerciseReward.reps)}
             </p>
           </div>
         </div>,
@@ -943,24 +1113,22 @@ export function WorkoutPage() {
       <Dialog open={showFinish} onOpenChange={setShowFinish}>
         <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">
           <DialogHeader className="space-y-2 text-left">
-            <DialogTitle>Selesaikan sesi?</DialogTitle>
+            <DialogTitle>{copy.finishSessionTitle}</DialogTitle>
             <DialogDescription>
-              {activeWorkout.isCustom
-                ? `${completedCount} selesai · ${totalExerciseCount} gerakan sesi`
-                : `${completedCount} selesai · ${plannedCount} tidak dikerjakan`}
+              {copy.finishSessionDescription(completedCount, totalExerciseCount, plannedCount, !!activeWorkout.isCustom)}
             </DialogDescription>
           </DialogHeader>
 
           <Textarea
             className="min-h-24"
-            placeholder="Catatan sesi"
+            placeholder={copy.sessionNotes}
             value={summaryNotes}
             onChange={(event) => setSummaryNotes(event.target.value)}
           />
 
           {completedCount === 0 ? (
             <div className="rounded-md border border-primary/25 bg-primary/10 p-3 text-sm leading-6 text-primary">
-              Belum ada gerakan yang selesai. Tetap simpan sesi?
+              {copy.noCompletedWarning}
             </div>
           ) : null}
 
@@ -975,10 +1143,10 @@ export function WorkoutPage() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
-              Lanjutkan latihan
+              {copy.continueWorkout}
             </Button>
             <Button className="min-h-12 w-full" size="lg" onClick={finishAndNavigate}>
-              Simpan sesi
+              {copy.saveSession}
             </Button>
           </div>
 
@@ -990,13 +1158,13 @@ export function WorkoutPage() {
                 cancelWorkout();
                 navigate("/");
                 toast({
-                  title: "Sesi dibuang",
-                  description: "Sesi aktif tidak disimpan",
+                  title: copy.discardedTitle,
+                  description: copy.discardedDescription,
                   variant: "destructive",
                 });
               }}
             >
-              Buang sesi
+              {copy.discardSession}
             </Button>
           </div>
         </DialogContent>
@@ -1005,14 +1173,12 @@ export function WorkoutPage() {
       <Dialog open={showDiscard} onOpenChange={setShowDiscard}>
         <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">
           <DialogHeader className="space-y-2 text-left">
-            <DialogTitle>Buang sesi?</DialogTitle>
-            <DialogDescription>
-              Sesi aktif akan dihapus dan tidak disimpan ke riwayat
-            </DialogDescription>
+            <DialogTitle>{copy.discardTitle}</DialogTitle>
+            <DialogDescription>{copy.discardDescription}</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <Button className="min-h-12 w-full" variant="outline" onClick={() => setShowDiscard(false)}>
-              Batal
+              {copy.cancel}
             </Button>
             <Button
               className="min-h-12 w-full"
@@ -1022,13 +1188,13 @@ export function WorkoutPage() {
                 cancelWorkout();
                 navigate("/");
                 toast({
-                  title: "Sesi dibuang",
-                  description: "Sesi aktif tidak disimpan",
+                  title: copy.discardedTitle,
+                  description: copy.discardedDescription,
                   variant: "destructive",
                 });
               }}
             >
-              Buang sesi
+              {copy.discardSession}
             </Button>
           </div>
         </DialogContent>
@@ -1039,13 +1205,13 @@ export function WorkoutPage() {
           <DialogHeader>
             <DialogTitle>{exercise?.name}</DialogTitle>
             <DialogDescription>
-              {exercise ? `${exercise.targetSets} set x ${exercise.targetReps} repetisi · ${formatCategoryLabel(exercise.category)}` : null}
+              {exercise ? copy.setsAndReps(exercise.targetSets, exercise.targetReps, formatCategoryLabel(exercise.category, language)) : null}
             </DialogDescription>
           </DialogHeader>
           {exercise ? (
             <div className="space-y-5">
-              <ExerciseMedia exercise={exercise} />
-              <ExerciseInfo exercise={exercise} />
+              <ExerciseMedia exercise={exercise} language={language} />
+              <ExerciseInfo exercise={exercise} language={language} />
             </div>
           ) : null}
         </DialogContent>

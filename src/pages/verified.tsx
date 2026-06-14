@@ -4,6 +4,7 @@ import { Activity, ArrowRight, CheckCircle2, Loader2, MailCheck } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/auth-provider";
+import { useI18n } from "@/lib/i18n";
 
 const getVerificationError = (search: string, hash: string) => {
   const searchParams = new URLSearchParams(search);
@@ -14,18 +15,42 @@ const getVerificationError = (search: string, hash: string) => {
 export function VerifiedPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { language } = useI18n();
   const { loading, user } = useAuth();
   const verificationError = useMemo(
     () => getVerificationError(location.search, location.hash),
     [location.hash, location.search],
   );
+  const copy = language === "en"
+    ? {
+        tagline: "Personal workout tracker",
+        checking: "Checking account",
+        checkingDescription: "Please wait while we verify your email status.",
+        errorTitle: "Verification failed",
+        errorDescription: "This verification link could not be used. Try registering again or request a new link from the sign-in page.",
+        successTitle: "Email verified",
+        successDescription: "Your account is active and ready to store workout progress.",
+        pendingTitle: "Check account status",
+        pendingDescription: "Your email was opened. Sign in to continue to GymUp.",
+        openApp: "Open GymUp",
+        signIn: "Sign in",
+      }
+    : {
+        tagline: "Catatan latihan pribadi",
+        checking: "Memeriksa akun",
+        checkingDescription: "Tunggu sebentar, kami sedang mengecek status verifikasi email kamu.",
+        errorTitle: "Verifikasi belum berhasil",
+        errorDescription: "Link verifikasi tidak bisa dipakai. Coba daftar ulang atau minta link baru dari halaman masuk.",
+        successTitle: "Email berhasil diverifikasi",
+        successDescription: "Akun kamu sudah aktif dan siap dipakai untuk menyimpan progres latihan.",
+        pendingTitle: "Cek status akun",
+        pendingDescription: "Email sudah dibuka. Silakan masuk untuk melanjutkan ke GymUp.",
+        openApp: "Buka GymUp",
+        signIn: "Masuk",
+      };
 
-  const title = verificationError ? "Verifikasi belum berhasil" : user ? "Email berhasil diverifikasi" : "Cek status akun";
-  const description = verificationError
-    ? "Link verifikasi tidak bisa dipakai. Coba daftar ulang atau minta link baru dari halaman masuk"
-    : user
-      ? "Akun kamu sudah aktif dan siap dipakai untuk menyimpan progres latihan"
-      : "Email sudah dibuka. Silakan masuk untuk melanjutkan ke GymUp";
+  const title = verificationError ? copy.errorTitle : user ? copy.successTitle : copy.pendingTitle;
+  const description = verificationError ? copy.errorDescription : user ? copy.successDescription : copy.pendingDescription;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -38,7 +63,7 @@ export function VerifiedPage() {
             </span>
             <span>
               <span className="font-display block text-base font-bold uppercase tracking-normal">GymUp</span>
-              <span className="block text-xs text-muted-foreground">Catatan latihan pribadi</span>
+              <span className="block text-xs text-muted-foreground">{copy.tagline}</span>
             </span>
           </div>
         </div>
@@ -57,9 +82,9 @@ export function VerifiedPage() {
               )}
             </div>
             <div className="space-y-1.5">
-              <CardTitle className="page-title">{loading ? "Memeriksa akun" : title}</CardTitle>
+              <CardTitle className="page-title">{loading ? copy.checking : title}</CardTitle>
               <CardDescription className="page-description">
-                {loading ? "Tunggu sebentar, kami sedang mengecek status verifikasi email kamu" : description}
+                {loading ? copy.checkingDescription : description}
               </CardDescription>
             </div>
           </CardHeader>
@@ -68,14 +93,14 @@ export function VerifiedPage() {
             {!loading && user ? (
               <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
                 <ArrowRight className="h-4 w-4" />
-                Buka GymUp
+                {copy.openApp}
               </Button>
             ) : null}
 
             {!loading && !user ? (
               <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
                 <ArrowRight className="h-4 w-4" />
-                Masuk
+                {copy.signIn}
               </Button>
             ) : null}
           </CardContent>

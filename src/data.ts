@@ -182,6 +182,7 @@ export const defaultExercises: Exercise[] = [
     notes: "Gerakan untuk bahu belakang dan stabilitas tulang belikat. Cocok sebagai gerakan tambahan pada sesi tarik.",
     equipment: ["Kabel", "Tali kabel"],
     updatedAt: "2026-04-15T22:23:54.320038+02:00",
+    imageUrl: "https://cdn.mos.cms.futurecdn.net/gWPK4bnmBf5M4vPQi6v6JR.jpg",
     videoUrl: "https://wger.de/media/exercise-video/222/245a824b-cd39-45f2-b251-2c0b7efead0d.MOV",
     instructions: [
       "Pasang tali di kabel setinggi wajah atau dada atas.",
@@ -352,6 +353,7 @@ export const defaultExercises: Exercise[] = [
     notes: "Latihan otot bokong dengan fokus meluruskan pinggul. Gunakan bantalan palang agar lebih nyaman.",
     equipment: ["Barbel", "Bangku"],
     updatedAt: "2026-04-15T22:23:54.183961+02:00",
+    imageUrl: "https://media.self.com/photos/626abcbdb2f1b9f02e220a68/4:3/w_2560,c_limit/Jowan-hip-thrust.jpg",
     videoUrl: "https://wger.de/media/exercise-video/294/45bacf4b-1bb6-4d47-8bd1-9f00eddd4019.MOV",
     instructions: [
       "Sandarkan punggung atas pada bangku dan letakkan palang di atas pinggul.",

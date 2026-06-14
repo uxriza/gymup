@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { defaultExercises } from "@/data";
+import { useI18n } from "@/lib/i18n";
 import { formatCategoryLabel } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
@@ -15,8 +16,36 @@ const order = ["push", "pull", "legs"];
 
 export function SelectWorkoutPage() {
   const navigate = useNavigate();
+  const { language } = useI18n();
   const { workouts, exercises, startWorkout, startCustomWorkout } = useGymStore();
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
+  const copy = language === "en"
+    ? {
+        back: "Home",
+        eyebrow: "Start workout",
+        title: "Choose workout",
+        description: "Use a ready program or start a custom session",
+        program: "Program",
+        manual: "Custom",
+        exerciseCount: (count: number) => `${count} exercises`,
+        startThisProgram: "Start this program",
+        customTitle: "Custom workout",
+        customDescription: "Start an empty session, then choose exercises one by one inside the workout flow.",
+        startWorkout: "Start workout",
+      }
+    : {
+        back: "Beranda",
+        eyebrow: "Mulai sesi latihan",
+        title: "Pilih latihan",
+        description: "Pakai program siap latihan atau mulai sesi mandiri",
+        program: "Program",
+        manual: "Mandiri",
+        exerciseCount: (count: number) => `${count} gerakan`,
+        startThisProgram: "Mulai program ini",
+        customTitle: "Latihan mandiri",
+        customDescription: "Mulai sesi kosong, lalu pilih gerakan satu per satu di dalam sesi latihan.",
+        startWorkout: "Mulai latihan",
+      };
 
   const catalogExercises = useMemo(
     () => exercises.map((exercise) => defaultExercises.find((item) => item.id === exercise.id) ?? exercise),
@@ -46,24 +75,24 @@ export function SelectWorkoutPage() {
   return (
     <div className="space-y-5">
       <section className="space-y-4">
-        <Button className="min-h-11 w-fit px-0 text-muted-foreground" variant="ghost" onClick={() => navigate("/")}> 
+        <Button className="min-h-11 w-fit px-0 text-muted-foreground" variant="ghost" onClick={() => navigate("/")}>
           <ArrowLeft className="h-4 w-4" />
-          Beranda
+          {copy.back}
         </Button>
         <div className="space-y-2">
           <p className="eyebrow flex items-center gap-2">
             <ListChecks className="h-4 w-4" />
-            Mulai sesi latihan
+            {copy.eyebrow}
           </p>
-          <h1 className="page-title">Pilih latihan</h1>
-          <p className="page-description">Pakai program siap latihan atau mulai sesi mandiri</p>
+          <h1 className="page-title">{copy.title}</h1>
+          <p className="page-description">{copy.description}</p>
         </div>
       </section>
 
       <Tabs defaultValue="program" className="space-y-5">
         <TabsList className="grid h-11 w-full grid-cols-2">
-          <TabsTrigger className="h-9" value="program">Program</TabsTrigger>
-          <TabsTrigger className="h-9" value="manual">Mandiri</TabsTrigger>
+          <TabsTrigger className="h-9" value="program">{copy.program}</TabsTrigger>
+          <TabsTrigger className="h-9" value="manual">{copy.manual}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="program" className="space-y-3">
@@ -86,9 +115,7 @@ export function SelectWorkoutPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <CardTitle className="truncate">{workout.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {workoutExercises.length} gerakan
-                        </CardDescription>
+                        <CardDescription className="mt-1">{copy.exerciseCount(workoutExercises.length)}</CardDescription>
                       </div>
                       <ChevronDown
                         className={cn("h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200", isExpanded && "rotate-180 text-primary")}
@@ -108,7 +135,7 @@ export function SelectWorkoutPage() {
                               {index + 1}. {exercise!.name}
                             </p>
                             <p className="truncate text-xs text-muted-foreground">
-                              {exercise!.targetSets} x {exercise!.targetReps} · {formatCategoryLabel(exercise!.category)}
+                              {exercise!.targetSets} x {exercise!.targetReps} · {formatCategoryLabel(exercise!.category, language)}
                             </p>
                           </div>
                         </div>
@@ -127,7 +154,7 @@ export function SelectWorkoutPage() {
                     ) : null}
 
                     <Button className="min-h-12 w-full" size="lg" onClick={() => startSelectedWorkout(workout.id)}>
-                      Mulai program ini
+                      {copy.startThisProgram}
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                   </CardContent>
@@ -140,14 +167,12 @@ export function SelectWorkoutPage() {
         <TabsContent value="manual" className="space-y-4">
           <Card className="border-primary/10 bg-card/88">
             <CardHeader>
-              <CardTitle>Latihan mandiri</CardTitle>
-              <CardDescription>
-                Mulai sesi kosong, lalu pilih gerakan satu per satu di dalam sesi latihan.
-              </CardDescription>
+              <CardTitle>{copy.customTitle}</CardTitle>
+              <CardDescription>{copy.customDescription}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="min-h-12 w-full" size="lg" onClick={startManualWorkout}>
-                Mulai latihan
+                {copy.startWorkout}
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </CardContent>

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { differenceInCalendarDays, format, subDays } from "date-fns";
-import { id } from "date-fns/locale";
 import { AlertTriangle, CalendarDays, CheckCircle2, Clock3, Dumbbell, Loader2, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/auth-provider";
+import { useI18n } from "@/lib/i18n";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 type ProfileRow = {
@@ -55,14 +55,6 @@ const countBy = <T,>(items: T[], getKey: (item: T) => string) => {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 };
 
-const formatLastSeen = (value: string) => {
-  const date = new Date(value);
-  const days = differenceInCalendarDays(new Date(), date);
-  if (days === 0) return "Hari ini";
-  if (days === 1) return "Kemarin";
-  return `${days} hari lalu`;
-};
-
 function MetricCard({
   icon: Icon,
   label,
@@ -90,10 +82,84 @@ function MetricCard({
 export function AdminPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { language, dateLocale } = useI18n();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState<AdminData>({ profiles: [], sessions: [], exercises: [] });
+  const copy = language === "en"
+    ? {
+        today: "Today",
+        yesterday: "Yesterday",
+        daysAgo: (days: number) => `${days} days ago`,
+        admin: "Admin",
+        monitoring: "Monitoring",
+        internalDashboard: "Internal GymUp dashboard",
+        setupIncomplete: "Setup is incomplete",
+        accessDenied: "Access denied",
+        setupDescription: "The dashboard could not be loaded yet. Make sure the admin schema has been applied in Supabase",
+        deniedDescription: "This account is not in the admin allowlist yet. Add the email in Supabase first",
+        backToApp: "Back to app",
+        totalUsers: "Total users",
+        active7Days: "Active in 7 days",
+        active30Days: "Active in 30 days",
+        totalSessions: "Total sessions",
+        trainingMinutes: "Training minutes",
+        completedExercises: "Completed exercises",
+        activeUsers: "Active users",
+        activeUsersDescription: (count: number) => `${count} users active in the last 30 days`,
+        noSyncedUsers: "No synced users yet",
+        popularPrograms: "Popular programs",
+        popularProgramsDescription: "Most frequently completed programs",
+        noSessions: "No sessions yet",
+        sessionSuffix: "sessions",
+        popularExercises: "Popular exercises",
+        popularExercisesDescription: "Most frequently completed exercises",
+        noCompletedExercises: "No completed exercises yet",
+        completedSuffix: "done",
+        recentSessions: "Recent sessions",
+        recentSessionsDescription: (count: number) => `${count} sessions stored in analytics`,
+        userFallback: "User",
+        exerciseSuffix: "exercises",
+        setSuffix: "sets",
+        repSuffix: "reps",
+      }
+    : {
+        today: "Hari ini",
+        yesterday: "Kemarin",
+        daysAgo: (days: number) => `${days} hari lalu`,
+        admin: "Admin",
+        monitoring: "Monitoring",
+        internalDashboard: "Dashboard internal GymUp",
+        setupIncomplete: "Setup belum lengkap",
+        accessDenied: "Akses ditolak",
+        setupDescription: "Dashboard belum bisa dimuat. Pastikan schema admin sudah dijalankan di Supabase",
+        deniedDescription: "Email akun ini belum masuk daftar admin. Tambahkan email ke allowlist lewat Supabase",
+        backToApp: "Kembali ke app",
+        totalUsers: "Total user",
+        active7Days: "Aktif 7 hari",
+        active30Days: "Aktif 30 hari",
+        totalSessions: "Total sesi",
+        trainingMinutes: "Menit latihan",
+        completedExercises: "Gerakan selesai",
+        activeUsers: "User aktif",
+        activeUsersDescription: (count: number) => `${count} user aktif dalam 30 hari terakhir`,
+        noSyncedUsers: "Belum ada user yang tersinkron",
+        popularPrograms: "Program populer",
+        popularProgramsDescription: "Program paling sering diselesaikan",
+        noSessions: "Belum ada sesi",
+        sessionSuffix: "sesi",
+        popularExercises: "Gerakan populer",
+        popularExercisesDescription: "Gerakan paling sering selesai",
+        noCompletedExercises: "Belum ada gerakan selesai",
+        completedSuffix: "selesai",
+        recentSessions: "Sesi terbaru",
+        recentSessionsDescription: (count: number) => `${count} sesi tersimpan di analytics`,
+        userFallback: "User",
+        exerciseSuffix: "gerakan",
+        setSuffix: "set",
+        repSuffix: "rep",
+      };
 
   useEffect(() => {
     if (!supabase || !isSupabaseConfigured || !user?.id) {
@@ -149,7 +215,7 @@ export function AdminPage() {
         }
       } catch {
         if (!cancelled) {
-          setError("Dashboard belum bisa dimuat. Pastikan schema admin sudah dijalankan di Supabase");
+          setError(copy.setupDescription);
           setLoading(false);
         }
       }
@@ -185,6 +251,14 @@ export function AdminPage() {
     };
   }, [data]);
 
+  const formatLastSeen = (value: string) => {
+    const date = new Date(value);
+    const days = differenceInCalendarDays(new Date(), date);
+    if (days === 0) return copy.today;
+    if (days === 1) return copy.yesterday;
+    return copy.daysAgo(days);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[55vh] items-center justify-center">
@@ -199,10 +273,10 @@ export function AdminPage() {
         <section className="space-y-2">
           <Badge className="bg-primary/15 text-primary">
             <ShieldCheck className="mr-1 h-3 w-3" />
-            Admin
+            {copy.admin}
           </Badge>
-          <h1 className="page-title">Monitoring</h1>
-          <p className="page-description">Dashboard internal GymUp</p>
+          <h1 className="page-title">{copy.monitoring}</h1>
+          <p className="page-description">{copy.internalDashboard}</p>
         </section>
 
         <Card className="border-destructive/35 bg-destructive/5">
@@ -210,14 +284,14 @@ export function AdminPage() {
             <div className="flex h-11 w-11 items-center justify-center rounded-md bg-destructive/15 text-destructive">
               <AlertTriangle className="h-5 w-5" />
             </div>
-            <CardTitle>{error ? "Setup belum lengkap" : "Akses ditolak"}</CardTitle>
+            <CardTitle>{error ? copy.setupIncomplete : copy.accessDenied}</CardTitle>
             <CardDescription>
-              {error || "Email akun ini belum masuk daftar admin. Tambahkan email ke allowlist lewat Supabase"}
+              {error || copy.deniedDescription}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="min-h-12 w-full" variant="secondary" onClick={() => navigate("/")}>
-              Kembali ke app
+              {copy.backToApp}
             </Button>
           </CardContent>
         </Card>
@@ -231,32 +305,32 @@ export function AdminPage() {
         <div className="space-y-2">
           <Badge className="bg-primary/15 text-primary">
             <ShieldCheck className="mr-1 h-3 w-3" />
-            Admin
+            {copy.admin}
           </Badge>
-          <h1 className="page-title">Monitoring</h1>
+          <h1 className="page-title">{copy.monitoring}</h1>
           <p className="page-description max-w-2xl">
-            Pantau user, sesi, dan gerakan yang dipakai di GymUp
+            {copy.internalDashboard}
           </p>
         </div>
         <Button variant="secondary" className="w-full lg:w-auto" onClick={() => navigate("/")}>
-          Kembali ke app
+          {copy.backToApp}
         </Button>
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <MetricCard icon={UsersRound} label="Total user" value={data.profiles.length} />
-        <MetricCard icon={CalendarDays} label="Aktif 7 hari" value={stats.active7} />
-        <MetricCard icon={UsersRound} label="Aktif 30 hari" value={stats.active30} />
-        <MetricCard icon={Dumbbell} label="Total sesi" value={data.sessions.length} />
-        <MetricCard icon={Clock3} label="Menit latihan" value={stats.totalMinutes} />
-        <MetricCard icon={CheckCircle2} label="Gerakan selesai" value={stats.completedExercises} />
+        <MetricCard icon={UsersRound} label={copy.totalUsers} value={data.profiles.length} />
+        <MetricCard icon={CalendarDays} label={copy.active7Days} value={stats.active7} />
+        <MetricCard icon={UsersRound} label={copy.active30Days} value={stats.active30} />
+        <MetricCard icon={Dumbbell} label={copy.totalSessions} value={data.sessions.length} />
+        <MetricCard icon={Clock3} label={copy.trainingMinutes} value={stats.totalMinutes} />
+        <MetricCard icon={CheckCircle2} label={copy.completedExercises} value={stats.completedExercises} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr_0.85fr]">
         <Card className="border-primary/25 bg-[linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(18_20_24/0.96)_64%,rgb(255_122_26/0.045)_100%)]">
           <CardHeader>
-            <CardTitle>User aktif</CardTitle>
-            <CardDescription>{stats.active30} user aktif dalam 30 hari terakhir</CardDescription>
+            <CardTitle>{copy.activeUsers}</CardTitle>
+            <CardDescription>{copy.activeUsersDescription(stats.active30)}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {data.profiles.slice(0, 7).map((profile) => (
@@ -270,47 +344,47 @@ export function AdminPage() {
                 </Badge>
               </div>
             ))}
-            {data.profiles.length === 0 ? <p className="text-sm text-muted-foreground">Belum ada user yang tersinkron</p> : null}
+            {data.profiles.length === 0 ? <p className="text-sm text-muted-foreground">{copy.noSyncedUsers}</p> : null}
           </CardContent>
         </Card>
 
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Program populer</CardTitle>
-            <CardDescription>Program paling sering diselesaikan</CardDescription>
+            <CardTitle>{copy.popularPrograms}</CardTitle>
+            <CardDescription>{copy.popularProgramsDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {stats.popularPrograms.map((item) => (
               <div key={item.name} className="flex items-center justify-between rounded-md border border-border/80 bg-secondary/40 p-3">
                 <p className="truncate text-sm font-medium">{item.name}</p>
-                <Badge className="bg-primary/15 text-primary">{item.count} sesi</Badge>
+                <Badge className="bg-primary/15 text-primary">{item.count} {copy.sessionSuffix}</Badge>
               </div>
             ))}
-            {stats.popularPrograms.length === 0 ? <p className="text-sm text-muted-foreground">Belum ada sesi</p> : null}
+            {stats.popularPrograms.length === 0 ? <p className="text-sm text-muted-foreground">{copy.noSessions}</p> : null}
           </CardContent>
         </Card>
 
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Gerakan populer</CardTitle>
-            <CardDescription>Gerakan paling sering selesai</CardDescription>
+            <CardTitle>{copy.popularExercises}</CardTitle>
+            <CardDescription>{copy.popularExercisesDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {stats.popularExercises.map((item) => (
               <div key={item.name} className="flex items-center justify-between rounded-md border border-border/80 bg-secondary/40 p-3">
                 <p className="truncate text-sm font-medium">{item.name}</p>
-                <Badge className="bg-primary/15 text-primary">{item.count} selesai</Badge>
+                <Badge className="bg-primary/15 text-primary">{item.count} {copy.completedSuffix}</Badge>
               </div>
             ))}
-            {stats.popularExercises.length === 0 ? <p className="text-sm text-muted-foreground">Belum ada gerakan selesai</p> : null}
+            {stats.popularExercises.length === 0 ? <p className="text-sm text-muted-foreground">{copy.noCompletedExercises}</p> : null}
           </CardContent>
         </Card>
       </section>
 
       <Card>
         <CardHeader>
-          <CardTitle>Sesi terbaru</CardTitle>
-          <CardDescription>{data.sessions.length} sesi tersimpan di analytics</CardDescription>
+          <CardTitle>{copy.recentSessions}</CardTitle>
+          <CardDescription>{copy.recentSessionsDescription(data.sessions.length)}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 lg:grid-cols-2">
           {stats.recentSessions.map((session) => {
@@ -321,7 +395,7 @@ export function AdminPage() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{session.workout_name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {profile?.display_name || profile?.email || "User"} · {format(new Date(session.started_at), "d MMM, HH:mm", { locale: id })}
+                      {profile?.display_name || profile?.email || copy.userFallback} · {format(new Date(session.started_at), "d MMM, HH:mm", { locale: dateLocale })}
                     </p>
                   </div>
                   <Badge variant="secondary" className="shrink-0 text-muted-foreground">
@@ -329,14 +403,14 @@ export function AdminPage() {
                   </Badge>
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.completed_exercise_count}/{session.total_exercise_count} gerakan</span>
-                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.total_sets} set</span>
-                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.total_reps} rep</span>
+                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.completed_exercise_count}/{session.total_exercise_count} {copy.exerciseSuffix}</span>
+                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.total_sets} {copy.setSuffix}</span>
+                  <span className="rounded-md bg-secondary/50 px-2 py-1">{session.total_reps} {copy.repSuffix}</span>
                 </div>
               </div>
             );
           })}
-          {stats.recentSessions.length === 0 ? <p className="text-sm text-muted-foreground">Belum ada sesi terbaru</p> : null}
+          {stats.recentSessions.length === 0 ? <p className="text-sm text-muted-foreground">{copy.noSessions}</p> : null}
         </CardContent>
       </Card>
     </div>
