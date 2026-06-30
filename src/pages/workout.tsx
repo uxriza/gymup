@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExerciseMedia } from "@/components/exercise-media";
 import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import {
   Dialog,
@@ -87,32 +88,6 @@ const getWeightOptions = (currentWeight?: number) => {
   const options = currentWeight !== undefined ? [...baseWeightOptions, currentWeight] : baseWeightOptions;
   return Array.from(new Set(options)).sort((a, b) => a - b);
 };
-
-function ExerciseMedia({ exercise, language }: { exercise: Exercise; language: "id" | "en" }) {
-  return (
-    <div className="overflow-hidden rounded-md border border-border bg-secondary">
-      {exercise.videoUrl ? (
-        <video
-          className="aspect-video w-full bg-black object-cover"
-          src={exercise.videoUrl}
-          poster={exercise.imageUrl}
-          controls
-          autoPlay
-          loop
-          playsInline
-          muted
-          preload="metadata"
-        />
-      ) : exercise.imageUrl ? (
-        <img className="aspect-video w-full bg-black object-cover" src={exercise.imageUrl} alt={exercise.name} />
-      ) : (
-        <div className="flex aspect-video w-full items-center justify-center bg-background text-sm text-muted-foreground">
-          {language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
-        </div>
-      )}
-    </div>
-  );
-}
 
 const localizedInstructions: Record<string, string[]> = {
   "bench-press": [
@@ -879,7 +854,10 @@ export function WorkoutPage() {
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <ExerciseMedia exercise={exercise} language={language} />
+        <ExerciseMedia
+          exercise={exercise}
+          emptyLabel={language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
+        />
         <ExerciseInfo exercise={exercise} language={language} />
       </CardContent>
     </Card>
@@ -1210,7 +1188,10 @@ export function WorkoutPage() {
           </DialogHeader>
           {exercise ? (
             <div className="space-y-5">
-              <ExerciseMedia exercise={exercise} language={language} />
+              <ExerciseMedia
+                exercise={exercise}
+                emptyLabel={language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
+              />
               <ExerciseInfo exercise={exercise} language={language} />
             </div>
           ) : null}

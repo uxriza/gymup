@@ -1,8 +1,54 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { defaultExercises, defaultWorkouts } from "@/data";
+import { captureSentryMessage } from "@/lib/sentry";
 import type { ActiveWorkout, CompletedExercise, Exercise, Session, Workout } from "@/types";
 import { uid } from "@/lib/utils";
+
+const isSeedItem = <T extends { id: string }>(item: unknown): item is T =>
+  Boolean(item && typeof item === "object" && "id" in item && typeof (item as { id?: unknown }).id === "string");
+
+const mergeSeedItemsById = <T extends { id: string }>(seedItems: T[], storedItems?: T[]) => {
+  const itemsById = new Map<string, T>();
+  seedItems.forEach((item) => itemsById.set(item.id, item));
+
+  const validStoredItems = storedItems?.filter(isSeedItem<T>) ?? [];
+  validStoredItems.forEach((item) => itemsById.set(item.id, item));
+
+  return Array.from(itemsById.values());
+};
+
+const normalizeSeedState = (
+  state?: Partial<Pick<GymState, "exercises" | "workouts" | "sessions">>,
+  source: "persist" | "sync" | "unknown" = "unknown",
+) => {
+  const inputExercises = Array.isArray(state?.exercises) ? state.exercises : [];
+  const inputWorkouts = Array.isArray(state?.workouts) ? state.workouts : [];
+  const validInputExercises = inputExercises.filter(isSeedItem<Exercise>);
+  const validInputWorkouts = inputWorkouts.filter(isSeedItem<Workout>);
+  const normalizedExercises = mergeSeedItemsById(defaultExercises, inputExercises);
+  const normalizedWorkouts = mergeSeedItemsById(defaultWorkouts, inputWorkouts);
+  const sessions = Array.isArray(state?.sessions) ? state.sessions : [];
+  const usedExerciseFallback = inputExercises.length === 0 || validInputExercises.length !== inputExercises.length;
+  const usedWorkoutFallback = inputWorkouts.length === 0 || validInputWorkouts.length !== inputWorkouts.length;
+
+  if ((inputExercises.length === 0 || inputWorkouts.length === 0 || usedExerciseFallback || usedWorkoutFallback) && state) {
+    captureSentryMessage("GymUp seed fallback applied", {
+      source,
+      inputExerciseCount: inputExercises.length,
+      inputWorkoutCount: inputWorkouts.length,
+      normalizedExerciseCount: normalizedExercises.length,
+      normalizedWorkoutCount: normalizedWorkouts.length,
+      sessionCount: sessions.length,
+    });
+  }
+
+  return {
+    exercises: normalizedExercises,
+    workouts: normalizedWorkouts,
+    sessions,
+  };
+};
 
 const resetTransientExercises = (activeWorkout: ActiveWorkout, selectedIndex: number) =>
   activeWorkout.exercises.map((exercise, index) => {
@@ -445,12 +491,13 @@ export const useGymStore = create<GymState>()(
       },
       cancelWorkout: () => set({ activeWorkout: undefined }),
       replaceSyncedState: (state) =>
-        set((currentState) => ({
-          exercises: state.exercises,
-          workouts: state.workouts,
-          sessions: state.sessions,
-          activeWorkout: currentState.activeWorkout,
-        })),
+        set((currentState) => {
+          const normalizedState = normalizeSeedState(state, "sync");
+          return {
+            ...normalizedState,
+            activeWorkout: currentState.activeWorkout,
+          };
+        }),
       resetLocalState: () =>
         set({
           exercises: defaultExercises,
@@ -475,13 +522,13 @@ export const useGymStore = create<GymState>()(
     }),
     {
       name: "gymup-store",
-      version: 10,
+      version: 11,
       migrate: (persistedState) => {
         const state = persistedState as Partial<GymState> | undefined;
+        const normalizedState = normalizeSeedState(state, "persist");
         return {
           ...state,
-          exercises: defaultExercises,
-          workouts: defaultWorkouts,
+          ...normalizedState,
           activeWorkout: state?.activeWorkout,
         };
       },

@@ -26,4 +26,13 @@ export function setSentryUser(userId?: string | null) {
   Sentry.setUser(userId ? { id: userId } : null);
 }
 
+export function captureSentryMessage(message: string, extras?: Record<string, unknown>) {
+  if (!sentryDsn) return;
+
+  Sentry.captureMessage(message, {
+    level: "warning",
+    extra: extras,
+  });
+}
+
 export { Sentry };

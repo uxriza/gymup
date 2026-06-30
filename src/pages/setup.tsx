@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ExerciseMedia } from "@/components/exercise-media";
 import { ExerciseThumbnail } from "@/components/exercise-thumbnail";
 import { Input } from "@/components/ui/input";
 import { defaultExercises } from "@/data";
@@ -13,32 +14,6 @@ import { useGymStore } from "@/store/gym-store";
 import type { Exercise } from "@/types";
 
 const categoryOrder = ["Semua", "Warmup", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves", "Cooldown", "Custom"];
-
-function ExerciseMedia({ exercise, emptyLabel }: { exercise: Exercise; emptyLabel: string }) {
-  return (
-    <div className="overflow-hidden rounded-md border border-border bg-secondary">
-      {exercise.videoUrl ? (
-        <video
-          className="aspect-video w-full bg-black object-cover"
-          src={exercise.videoUrl}
-          poster={exercise.imageUrl}
-          controls
-          autoPlay
-          loop
-          playsInline
-          muted
-          preload="metadata"
-        />
-      ) : exercise.imageUrl ? (
-        <img className="aspect-video w-full bg-black object-cover" src={exercise.imageUrl} alt={exercise.name} />
-      ) : (
-        <div className="flex aspect-video w-full items-center justify-center bg-background text-sm text-muted-foreground">
-          {emptyLabel}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function SetupPage() {
   const { language } = useI18n();
