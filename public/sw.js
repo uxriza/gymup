@@ -1,4 +1,4 @@
-const CACHE_NAME = "gymup-shell-v1";
+const CACHE_NAME = "gymup-shell-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/pwa-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -18,9 +18,25 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isNavigationRequest = event.request.mode === "navigate";
+
+  if (!isSameOrigin) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  if (!isNavigationRequest) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request)),
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(event.request).catch(() =>
-      caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("/")),
+      caches.match("/"),
     ),
   );
 });
