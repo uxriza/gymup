@@ -9,6 +9,17 @@ type ExerciseMediaProps = {
   className?: string;
 };
 
+const isLikelyPlayableVideo = (videoUrl?: string) => {
+  if (!videoUrl) return false;
+
+  try {
+    const pathname = new URL(videoUrl).pathname.toLowerCase();
+    return pathname.endsWith(".mp4") || pathname.endsWith(".webm");
+  } catch {
+    return false;
+  }
+};
+
 export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMediaProps) {
   const [imageRetryCount, setImageRetryCount] = useState(0);
   const [videoRetryCount, setVideoRetryCount] = useState(0);
@@ -24,15 +35,17 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
     setVideoTimedOut(false);
   }, [exercise.id, exercise.imageUrl, exercise.videoUrl]);
 
+  const canRenderVideo = isLikelyPlayableVideo(exercise.videoUrl);
+
   useEffect(() => {
-    if (!exercise.videoUrl || hasVideoError || videoTimedOut) return undefined;
+    if (!canRenderVideo || hasVideoError || videoTimedOut) return undefined;
 
     const timeoutId = window.setTimeout(() => {
       setVideoTimedOut(true);
     }, 2500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [exercise.videoUrl, hasVideoError, videoRetryCount, videoTimedOut]);
+  }, [canRenderVideo, hasVideoError, videoRetryCount, videoTimedOut]);
 
   const handleImageError = () => {
     if (imageRetryCount < 1) {
@@ -51,7 +64,7 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
     setHasVideoError(true);
   };
 
-  const showVideo = Boolean(exercise.videoUrl && !hasVideoError && !videoTimedOut);
+  const showVideo = Boolean(canRenderVideo && !hasVideoError && !videoTimedOut);
   const showImage = Boolean(exercise.imageUrl && !hasImageError);
 
   return (
