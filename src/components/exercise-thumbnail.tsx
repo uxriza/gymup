@@ -25,7 +25,7 @@ export function ExerciseThumbnail({ exercise, className }: ExerciseThumbnailProp
           className="h-full w-full object-contain p-1"
           src={exercise.imageUrl}
           alt=""
-          loading="lazy"
+          decoding="async"
           onError={() => setHasError(true)}
         />
       ) : (

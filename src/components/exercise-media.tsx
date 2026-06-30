@@ -14,13 +14,25 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
   const [videoRetryCount, setVideoRetryCount] = useState(0);
   const [hasImageError, setHasImageError] = useState(false);
   const [hasVideoError, setHasVideoError] = useState(false);
+  const [videoTimedOut, setVideoTimedOut] = useState(false);
 
   useEffect(() => {
     setImageRetryCount(0);
     setVideoRetryCount(0);
     setHasImageError(false);
     setHasVideoError(false);
+    setVideoTimedOut(false);
   }, [exercise.id, exercise.imageUrl, exercise.videoUrl]);
+
+  useEffect(() => {
+    if (!exercise.videoUrl || hasVideoError || videoTimedOut) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setVideoTimedOut(true);
+    }, 2500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [exercise.videoUrl, hasVideoError, videoRetryCount, videoTimedOut]);
 
   const handleImageError = () => {
     if (imageRetryCount < 1) {
@@ -33,12 +45,13 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
   const handleVideoError = () => {
     if (videoRetryCount < 1) {
       setVideoRetryCount((count) => count + 1);
+      setVideoTimedOut(false);
       return;
     }
     setHasVideoError(true);
   };
 
-  const showVideo = Boolean(exercise.videoUrl && !hasVideoError);
+  const showVideo = Boolean(exercise.videoUrl && !hasVideoError && !videoTimedOut);
   const showImage = Boolean(exercise.imageUrl && !hasImageError);
 
   return (
@@ -56,6 +69,8 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
           muted
           preload="metadata"
           onError={handleVideoError}
+          onCanPlay={() => setVideoTimedOut(false)}
+          onLoadedData={() => setVideoTimedOut(false)}
         />
       ) : showImage ? (
         <img
