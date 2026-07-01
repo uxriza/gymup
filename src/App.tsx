@@ -142,14 +142,14 @@ export function App() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="app-gym-background" aria-hidden="true" />
 
-      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-background/76 backdrop-blur-xl">
         <div className={cn("mx-auto flex items-center justify-between px-4 py-3", isAdminRoute ? "max-w-7xl sm:px-6 lg:px-8" : "max-w-[480px]")}>
           <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_8px_20px_rgb(0_0_0/0.24)]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#ff922e_0%,#ff6a18_62%,#ffa24a_100%)] text-primary-foreground shadow-[0_0_22px_rgb(255_106_24/0.24)]">
               <Activity className="h-5 w-5" />
             </span>
             <span>
-              <span className="font-display block text-base font-bold uppercase">GymUp</span>
+              <span className="font-display block text-base font-bold uppercase tracking-normal">GymUp</span>
               <span className="block max-w-40 truncate text-xs text-muted-foreground">
                 {copy.tagline}
               </span>
@@ -210,7 +210,7 @@ export function App() {
         className={cn(
           "relative mx-auto px-4 pt-5",
           isAdminRoute ? "max-w-7xl pb-10 sm:px-6 lg:px-8" : "max-w-[480px]",
-          !isAdminRoute && (showBottomNav ? "pb-20" : "pb-8"),
+          !isAdminRoute && (showBottomNav ? "pb-24" : "pb-8"),
         )}
       >
         <div key={location.pathname} className="animate-page-transition">
@@ -263,20 +263,20 @@ export function App() {
       </main>
 
       {showBottomNav ? (
-        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/92 backdrop-blur-xl">
-          <div className="mx-auto grid max-w-[480px] grid-cols-3 gap-1 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-1.5">
+        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background">
+          <div className="mx-auto grid max-w-[480px] grid-cols-3 px-3 pb-[max(34px,env(safe-area-inset-bottom))] pt-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex min-h-10 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-medium text-muted-foreground transition-colors",
-                    isActive && "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.28)]",
+                    "flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-xs font-medium text-muted-foreground transition-all",
+                    isActive && "bg-primary/15 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.24)]",
                   )
                 }
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
                 {item.label}
               </NavLink>
             ))}

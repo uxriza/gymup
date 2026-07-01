@@ -29,6 +29,15 @@ const getSnapshot = (): SyncState => {
   };
 };
 
+const mergeSessions = (remoteSessions: Session[], localSessions: Session[]) => {
+  const sessionsById = new Map<string, Session>();
+  remoteSessions.forEach((session) => sessionsById.set(session.id, session));
+  localSessions.forEach((session) => sessionsById.set(session.id, session));
+  return Array.from(sessionsById.values()).sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+};
+
 const normalizeRemoteState = (remoteState: Partial<SyncState> | null | undefined): SyncState => ({
   exercises: mergeById(remoteState?.exercises ?? [], defaultExercises),
   workouts: mergeById(remoteState?.workouts ?? [], defaultWorkouts),
@@ -36,6 +45,15 @@ const normalizeRemoteState = (remoteState: Partial<SyncState> | null | undefined
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   ),
 });
+
+const mergeRemoteWithLocalState = (remoteState: Partial<SyncState> | null | undefined, localState: SyncState): SyncState => {
+  const normalizedRemoteState = normalizeRemoteState(remoteState);
+  return {
+    exercises: mergeById(normalizedRemoteState.exercises, localState.exercises),
+    workouts: mergeById(normalizedRemoteState.workouts, localState.workouts),
+    sessions: mergeSessions(normalizedRemoteState.sessions, localState.sessions),
+  };
+};
 
 const getEmptyAccountState = (): SyncState => ({
   exercises: defaultExercises,
@@ -79,10 +97,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
     const startSync = async () => {
       await upsertAnalyticsProfile(user).catch(notifySyncError);
-
-      isApplyingRemoteState = true;
-      useGymStore.getState().replaceSyncedState(getEmptyAccountState());
-      isApplyingRemoteState = false;
+      const localSnapshot = getSnapshot();
 
       const remoteResult = await supabaseClient
         .from("gymup_sync_states")
@@ -92,34 +107,23 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
       if (remoteResult.error) {
         notifySyncError();
-        isApplyingRemoteState = true;
-        useGymStore.getState().replaceSyncedState(getEmptyAccountState());
-        isApplyingRemoteState = false;
-        return useGymStore.subscribe((state) => {
-          if (isApplyingRemoteState) return;
-          window.clearTimeout(syncTimer);
-          syncTimer = window.setTimeout(() => {
-            void saveState(user.id, {
-              exercises: state.exercises,
-              workouts: state.workouts,
-              sessions: state.sessions,
-            }).catch(notifySyncError);
-          }, 800);
-        });
+        return undefined;
       }
 
       if (remoteResult.data?.state) {
-        const mergedState = normalizeRemoteState(remoteResult.data.state as Partial<SyncState>);
+        const mergedState = mergeRemoteWithLocalState(remoteResult.data.state as Partial<SyncState>, localSnapshot);
         isApplyingRemoteState = true;
         useGymStore.getState().replaceSyncedState(mergedState);
         isApplyingRemoteState = false;
         await saveState(user.id, mergedState).catch(notifySyncError);
       } else {
-        const emptyAccountState = getEmptyAccountState();
+        const initialState = localSnapshot.sessions.length || localSnapshot.workouts.length !== defaultWorkouts.length || localSnapshot.exercises.length !== defaultExercises.length
+          ? localSnapshot
+          : getEmptyAccountState();
         isApplyingRemoteState = true;
-        useGymStore.getState().replaceSyncedState(emptyAccountState);
+        useGymStore.getState().replaceSyncedState(initialState);
         isApplyingRemoteState = false;
-        await saveState(user.id, emptyAccountState).catch(notifySyncError);
+        await saveState(user.id, initialState).catch(notifySyncError);
       }
 
       return useGymStore.subscribe((state) => {

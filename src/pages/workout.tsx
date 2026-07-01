@@ -69,12 +69,12 @@ const getStatusLabel = (status: ActiveExercise["status"], language: "id" | "en")
 };
 
 const statusClass: Record<ActiveExercise["status"], string> = {
-  planned: "border border-primary/70 bg-transparent text-primary",
-  selected: "bg-primary/15 text-primary",
+  planned: "bg-secondary text-muted-foreground",
+  selected: "bg-primary/10 text-primary",
   active: "bg-primary text-primary-foreground",
-  resting: "border border-primary/60 bg-transparent text-primary",
-  completed: "bg-emerald-400 text-emerald-950",
-  skipped: "border border-border bg-transparent text-muted-foreground",
+  resting: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  completed: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  skipped: "bg-muted text-muted-foreground",
 };
 
 const baseWeightOptions = [
@@ -204,7 +204,7 @@ function ExerciseInfo({
   const instructions = getExerciseInstructions(exercise, language);
 
   return (
-    <div className={cn(compact ? "space-y-3" : "space-y-4")}>
+    <div className="space-y-4">
       {exercise.equipment?.length ? (
         <div className="flex flex-wrap gap-2">
           {exercise.equipment.slice(0, 4).map((item) => (
@@ -936,10 +936,11 @@ export function WorkoutPage() {
             <CardTitle>{exercise.name}</CardTitle>
             <CardDescription>{copy.beforeSet(active.currentSet + 1, active.actualSets)}</CardDescription>
           </div>
+          <Badge className={cn(statusClass.resting)}>{language === "en" ? "Rest" : "Istirahat"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="animate-rest-pulse rounded-[1.25rem] border border-border bg-secondary p-5">
+        <div className="animate-rest-pulse rounded-md border border-primary/20 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">{isRestComplete ? copy.restDone : copy.restTime}</p>
@@ -958,9 +959,9 @@ export function WorkoutPage() {
           <Progress value={restDurationSeconds ? ((restDurationSeconds - restSeconds) / restDurationSeconds) * 100 : 100} className="mt-4 bg-orange-500/20" />
         </div>
 
-        <div className="rounded-[1.25rem] border border-border bg-card p-4">
+        <div className="rounded-md border border-primary/15 bg-card/80 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
           <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="space-y-1">
@@ -989,9 +990,9 @@ export function WorkoutPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="page-description">{sessionName}</p>
+            <p className="text-sm text-muted-foreground">{sessionName}</p>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              <h1 className="page-title">{pageTitle}</h1>
+              <h1 className="text-[1.875rem] font-bold leading-8">{pageTitle}</h1>
               {activeWorkout.phase === "main" ? <Badge className="bg-primary/15 text-primary">{phaseLabel}</Badge> : null}
             </div>
           </div>

@@ -43,7 +43,7 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "Avenir Next", "Avenir", "SF Pro Text", "Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Avenir Next", "Avenir", "SF Pro Text", "Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "SFMono-Regular", "monospace"],
       },
     },

@@ -4,14 +4,14 @@ import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Download, 
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/components/auth-provider";
 import { useI18n } from "@/lib/i18n";
 import { getWeekdayShortLabels } from "@/lib/labels";
 import { useGymStore } from "@/store/gym-store";
-import { cn } from "@/lib/utils";
 import type { Exercise } from "@/types";
+import { cn } from "@/lib/utils";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -231,7 +231,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <section className="space-y-4">
         <div className="space-y-1">
           <div className="min-w-0 space-y-1">
@@ -289,11 +289,11 @@ export function HomePage() {
         {!isInstalled ? (
           <button
             type="button"
-            className="flex w-full items-center justify-between gap-3 rounded-[1.25rem] border border-white/[0.08] bg-card/80 p-3.5 text-left transition-colors hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex w-full items-center justify-between gap-3 rounded-md border border-border/80 bg-card/70 p-3 text-left transition-colors hover:bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-ring"
             onClick={handleInstallShortcut}
           >
             <span className="flex min-w-0 items-center gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <Download className="h-5 w-5" />
               </span>
               <span className="min-w-0">
@@ -335,7 +335,7 @@ export function HomePage() {
 
         {latestSession ? (
           <Card>
-            <CardContent className="space-y-4 p-4">
+            <CardHeader className="space-y-4 p-4">
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -348,28 +348,40 @@ export function HomePage() {
                   <Badge className="shrink-0 bg-primary text-primary-foreground">{completedRatio}%</Badge>
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-secondary/55">
-                <div className="px-3 py-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-primary/15 text-primary">
+                  {latestCompletedExercises.length} {language === "en" ? "done" : "selesai"}
+                </Badge>
+                <Badge variant="secondary" className="text-muted-foreground">
+                  {latestSession.exercises.length} {language === "en" ? "total exercises" : "total gerakan"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock3 className="h-3 w-3 text-primary" />
                     {copy.duration}
                   </p>
-                  <p className="mt-1 text-xl font-bold leading-none">{latestDuration}m</p>
+                  <p className="relative text-2xl font-bold">{latestDuration}m</p>
                 </div>
-                <div className="px-3 py-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.055)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
                     <Dumbbell className="h-3 w-3 text-primary" />
                     {copy.set}
                   </p>
-                  <p className="mt-1 text-xl font-bold leading-none">{latestSets}</p>
+                  <p className="relative text-2xl font-bold">{latestSets}</p>
                 </div>
-                <div className="px-3 py-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.05)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
+                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
                     <Repeat2 className="h-3 w-3 text-primary" />
                     {copy.rep}
                   </p>
-                  <p className="mt-1 text-xl font-bold leading-none">{latestRep}</p>
+                  <p className="relative text-2xl font-bold">{latestRep}</p>
                 </div>
               </div>
 
@@ -399,9 +411,9 @@ export function HomePage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-white/[0.08] bg-card/80">
+          <Card className="border-primary/10 bg-card/80">
             <CardContent className="space-y-3 p-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <Dumbbell className="h-5 w-5" />
               </div>
               <div>
@@ -430,7 +442,7 @@ export function HomePage() {
               type="button"
               variant="ghost"
               size="icon"
-              className="glass-pill h-11 w-11"
+              className="h-11 w-11"
               onClick={() => setDisplayedMonth((current) => subMonths(current, 1))}
               aria-label={copy.previousMonth}
             >
@@ -443,7 +455,7 @@ export function HomePage() {
               type="button"
               variant="ghost"
               size="icon"
-              className="glass-pill h-11 w-11"
+              className="h-11 w-11"
               onClick={() => setDisplayedMonth((current) => addMonths(current, 1))}
               disabled={!canGoToNextMonth}
               aria-label={copy.nextMonth}
@@ -453,16 +465,16 @@ export function HomePage() {
           </div>
         </div>
         <Card>
-          <CardContent className="space-y-3 p-4">
-            <div className="grid grid-cols-7 gap-2 text-center text-[9px] font-medium uppercase text-muted-foreground">
+          <CardContent className="space-y-2 p-3">
+            <div className="grid grid-cols-7 gap-1.5 text-center text-[9px] font-medium text-muted-foreground">
               {weekdayLabels.map((day, index) => (
                 <span key={`${day}-${index}`}>{day}</span>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1.5">
               {monthGridDays.map((day, index) => {
                 if (!day) {
-                  return <span key={`empty-${index}`} className="h-8 rounded-xl" aria-hidden="true" />;
+                  return <span key={`empty-${index}`} className="h-7 rounded-md" aria-hidden="true" />;
                 }
 
                 const count = getSessionCountForDay(day);
@@ -474,7 +486,7 @@ export function HomePage() {
                     role="img"
                     aria-label={label}
                     title={label}
-                    className={cn("h-8 rounded-xl border shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]", getActivityCellClass(count))}
+                    className={cn("h-7 rounded-md border shadow-sm", getActivityCellClass(count))}
                   />
                 );
               })}

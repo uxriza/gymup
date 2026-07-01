@@ -80,7 +80,7 @@ export function SelectWorkoutPage() {
           {copy.back}
         </Button>
         <div className="space-y-2">
-          <p className="eyebrow flex items-center gap-2">
+          <p className="flex items-center gap-2 text-sm text-primary">
             <ListChecks className="h-4 w-4" />
             {copy.eyebrow}
           </p>
@@ -158,6 +158,15 @@ export function SelectWorkoutPage() {
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                   </CardContent>
+                ) : null}
+
+                {!isExpanded ? (
+                  <div className="p-4 pt-0">
+                    <Button className="min-h-12 w-full" size="lg" onClick={() => startSelectedWorkout(workout.id)}>
+                      {copy.startThisProgram}
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </div>
                 ) : null}
               </Card>
             );

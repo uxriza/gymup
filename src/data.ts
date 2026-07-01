@@ -1,6 +1,7 @@
 import type { Exercise, Workout } from "@/types";
+import { resolveExerciseImageUrl } from "@/lib/exercise-media";
 
-export const defaultExercises: Exercise[] = [
+const seedExercises: Exercise[] = [
   {
     id: "bench-press",
     name: "Bench Press",
@@ -847,3 +848,8 @@ export const defaultWorkouts: Workout[] = [
     cooldownIds: ["full-body-stretch"],
   },
 ];
+
+export const defaultExercises: Exercise[] = seedExercises.map((exercise) => ({
+  ...exercise,
+  imageUrl: resolveExerciseImageUrl(exercise.imageUrl),
+}));

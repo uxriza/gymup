@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Dumbbell } from "lucide-react";
+import { resolveExerciseImageUrl } from "@/lib/exercise-media";
 import { cn } from "@/lib/utils";
 import type { Exercise } from "@/types";
 
@@ -13,14 +14,16 @@ const isLikelyPlayableVideo = (videoUrl?: string) => {
   if (!videoUrl) return false;
 
   try {
-    const pathname = new URL(videoUrl).pathname.toLowerCase();
-    return pathname.endsWith(".mp4") || pathname.endsWith(".webm");
+    const parsedUrl = new URL(videoUrl);
+    const pathname = parsedUrl.pathname.toLowerCase();
+    return parsedUrl.origin === window.location.origin && (pathname.endsWith(".mp4") || pathname.endsWith(".webm"));
   } catch {
     return false;
   }
 };
 
 export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMediaProps) {
+  const resolvedImageUrl = resolveExerciseImageUrl(exercise.imageUrl);
   const [imageRetryCount, setImageRetryCount] = useState(0);
   const [videoRetryCount, setVideoRetryCount] = useState(0);
   const [hasImageError, setHasImageError] = useState(false);
@@ -33,7 +36,7 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
     setHasImageError(false);
     setHasVideoError(false);
     setVideoTimedOut(false);
-  }, [exercise.id, exercise.imageUrl, exercise.videoUrl]);
+  }, [exercise.id, resolvedImageUrl, exercise.videoUrl]);
 
   const canRenderVideo = isLikelyPlayableVideo(exercise.videoUrl);
 
@@ -65,7 +68,7 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
   };
 
   const showVideo = Boolean(canRenderVideo && !hasVideoError && !videoTimedOut);
-  const showImage = Boolean(exercise.imageUrl && !hasImageError);
+  const showImage = Boolean(resolvedImageUrl && !hasImageError);
 
   return (
     <div className={cn("overflow-hidden rounded-md border border-border bg-secondary", className)}>
@@ -74,7 +77,7 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
           key={`${exercise.videoUrl ?? "video"}-${videoRetryCount}`}
           className="aspect-video w-full bg-black object-cover"
           src={exercise.videoUrl}
-          poster={showImage ? exercise.imageUrl : undefined}
+          poster={showImage ? resolvedImageUrl : undefined}
           controls
           autoPlay
           loop
@@ -87,9 +90,9 @@ export function ExerciseMedia({ exercise, emptyLabel, className }: ExerciseMedia
         />
       ) : showImage ? (
         <img
-          key={`${exercise.imageUrl ?? "image"}-${imageRetryCount}`}
+          key={`${resolvedImageUrl ?? "image"}-${imageRetryCount}`}
           className="aspect-video w-full bg-black object-cover"
-          src={exercise.imageUrl}
+          src={resolvedImageUrl}
           alt={exercise.name}
           onError={handleImageError}
         />

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dumbbell } from "lucide-react";
+import { resolveExerciseImageUrl } from "@/lib/exercise-media";
 import { cn } from "@/lib/utils";
 import type { Exercise } from "@/types";
 
@@ -9,8 +10,9 @@ type ExerciseThumbnailProps = {
 };
 
 export function ExerciseThumbnail({ exercise, className }: ExerciseThumbnailProps) {
+  const resolvedImageUrl = resolveExerciseImageUrl(exercise.imageUrl);
   const [hasError, setHasError] = useState(false);
-  const showImage = Boolean(exercise.imageUrl && !hasError);
+  const showImage = Boolean(resolvedImageUrl && !hasError);
 
   return (
     <div
@@ -23,7 +25,7 @@ export function ExerciseThumbnail({ exercise, className }: ExerciseThumbnailProp
       {showImage ? (
         <img
           className="h-full w-full object-contain p-1"
-          src={exercise.imageUrl}
+          src={resolvedImageUrl}
           alt=""
           decoding="async"
           onError={() => setHasError(true)}
