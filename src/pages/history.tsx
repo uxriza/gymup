@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { differenceInMinutes, endOfWeek, format, isWithinInterval, startOfWeek, type Locale } from "date-fns";
-import { Calendar, CalendarDays, CheckCircle2, Clock3, Dumbbell, Repeat2, Trash2, Trophy } from "lucide-react";
+import { differenceInMinutes, format, type Locale } from "date-fns";
+import { Calendar, Clock3, Dumbbell, Repeat2, Trash2, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n";
+import { hasMeaningfulSessionProgress } from "@/lib/session-utils";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
@@ -27,21 +28,9 @@ export function HistoryPage() {
   const { toast } = useToast();
   const { sessions, exercises, resetHistory } = useGymStore();
   const [resetOpen, setResetOpen] = useState(false);
+  const meaningfulSessions = sessions.filter(hasMeaningfulSessionProgress);
   const now = new Date();
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-  const weeklySessions = sessions.filter((session) =>
-    isWithinInterval(new Date(session.date), { start: weekStart, end: weekEnd }),
-  );
-  const weeklyMinutes = weeklySessions.reduce(
-    (total, session) => total + Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1),
-    0,
-  );
-  const weeklyCompletedExercises = weeklySessions.reduce(
-    (total, session) => total + session.exercises.filter((exercise) => exercise.completed).length,
-    0,
-  );
-  const groupedSessions = sessions.slice(0, 30).reduce<Array<{ label: string; sessions: typeof sessions }>>((groups, session) => {
+  const groupedSessions = meaningfulSessions.slice(0, 30).reduce<Array<{ label: string; sessions: typeof sessions }>>((groups, session) => {
     const label = getDateGroupLabel(new Date(session.date), now, language, dateLocale);
     const existingGroup = groups.find((group) => group.label === label);
     if (existingGroup) {
@@ -62,15 +51,10 @@ export function HistoryPage() {
         cancel: "Cancel",
         clearedTitle: "History cleared",
         clearedDescription: "All saved workout sessions have been removed",
-        thisWeek: "This week",
-        thisWeekDescription: "Session summary from Monday to Sunday",
-        sessions: "Sessions",
-        minutes: "Minutes",
-        exercises: "Exercises",
         sessionList: "Session list",
         storedSessions: (count: number) => `${count} saved sessions`,
-        noSessionTitle: "No sessions yet",
-        noSessionDescription: "Start your first workout and the history will appear here.",
+        noSessionTitle: "No completed sessions yet",
+        noSessionDescription: "Finish at least one exercise and your training history will show up here.",
         startWorkout: "Start workout",
         duration: "Duration",
         set: "Set",
@@ -94,15 +78,10 @@ export function HistoryPage() {
         cancel: "Batal",
         clearedTitle: "Riwayat dihapus",
         clearedDescription: "Semua sesi latihan sudah dibersihkan",
-        thisWeek: "Minggu ini",
-        thisWeekDescription: "Ringkasan sesi Senin sampai Minggu",
-        sessions: "Sesi",
-        minutes: "Menit",
-        exercises: "Gerakan",
         sessionList: "Daftar sesi",
         storedSessions: (count: number) => `${count} sesi tersimpan`,
-        noSessionTitle: "Belum ada sesi",
-        noSessionDescription: "Mulai latihan pertama kamu, nanti riwayatnya muncul di sini",
+        noSessionTitle: "Belum ada sesi dengan progres",
+        noSessionDescription: "Selesaikan minimal satu gerakan, nanti riwayat latihanmu muncul di sini",
         startWorkout: "Mulai latihan",
         duration: "Durasi",
         set: "Set",
@@ -162,53 +141,11 @@ export function HistoryPage() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="section-title">{copy.thisWeek}</h2>
-          <p className="section-description">{copy.thisWeekDescription}</p>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="metric-surface border-primary/25">
-            <CardContent className="relative z-10 space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <CalendarDays className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="metric-value">{weeklySessions.length}</p>
-                <p className="metric-label">{copy.sessions}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="metric-surface border-primary/25">
-            <CardContent className="relative z-10 space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <Clock3 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="metric-value">{weeklyMinutes}</p>
-                <p className="metric-label">{copy.minutes}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="metric-surface border-primary/25">
-            <CardContent className="relative z-10 space-y-2 p-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="metric-value">{weeklyCompletedExercises}</p>
-                <p className="metric-label">{copy.exercises}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <div>
           <h2 className="section-title">{copy.sessionList}</h2>
-          <p className="section-description">{copy.storedSessions(sessions.length)}</p>
+          <p className="section-description">{copy.storedSessions(meaningfulSessions.length)}</p>
         </div>
 
-        {sessions.length === 0 ? (
+        {meaningfulSessions.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>{copy.noSessionTitle}</CardTitle>
@@ -239,7 +176,7 @@ export function HistoryPage() {
               return (
                 <Card
                   key={session.id}
-                  className="relative overflow-hidden border-primary/25 bg-[linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(18_20_24/0.96)_64%,rgb(255_122_26/0.045)_100%)] shadow-[0_18px_54px_rgb(0_0_0/0.24)]"
+                  className="relative overflow-hidden border-border/80 bg-[linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(18_20_24/0.96)_64%,rgb(255_122_26/0.045)_100%)] shadow-[0_18px_54px_rgb(0_0_0/0.24)]"
                 >
                   <div className="pointer-events-none absolute -right-16 top-8 h-32 w-32 rounded-full bg-primary/6 blur-2xl" aria-hidden="true" />
                   <CardHeader className="relative z-10 space-y-3">
@@ -259,21 +196,21 @@ export function HistoryPage() {
                   </CardHeader>
                   <CardContent className="relative z-10 space-y-4">
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="metric-surface border-primary/20 p-2">
+                      <div className="metric-surface p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Clock3 className="h-3 w-3" />
                           {copy.duration}
                         </p>
                         <p className="text-lg font-bold">{duration}m</p>
                       </div>
-                      <div className="metric-surface border-primary/20 p-2">
+                      <div className="metric-surface p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Dumbbell className="h-3 w-3" />
                           {copy.set}
                         </p>
                         <p className="text-lg font-bold">{totalSets}</p>
                       </div>
-                      <div className="metric-surface border-primary/20 p-2">
+                      <div className="metric-surface p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Repeat2 className="h-3 w-3" />
                           {copy.reps}

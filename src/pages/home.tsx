@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { addMonths, differenceInMinutes, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth, isWithinInterval, startOfMonth, subMonths } from "date-fns";
-import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, Play, Repeat2, Share2 } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, ListChecks, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useAuth } from "@/components/auth-provider";
 import { useI18n } from "@/lib/i18n";
 import { getWeekdayShortLabels } from "@/lib/labels";
+import { hasMeaningfulSessionProgress } from "@/lib/session-utils";
 import { useGymStore } from "@/store/gym-store";
 import type { Exercise } from "@/types";
 import { cn } from "@/lib/utils";
@@ -36,13 +37,14 @@ export function HomePage() {
   const navigate = useNavigate();
   const { language, dateLocale } = useI18n();
   const { displayName } = useAuth();
-  const { sessions, exercises, workouts, activeWorkout } = useGymStore();
+  const { sessions, exercises, workouts, activeWorkout, startWorkout } = useGymStore();
   const [now, setNow] = useState(() => new Date());
   const [displayedMonth, setDisplayedMonth] = useState(() => new Date());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
-  const latestSession = sessions[0];
+  const meaningfulSessions = sessions.filter(hasMeaningfulSessionProgress);
+  const latestSession = meaningfulSessions[0] ?? sessions[0];
   const latestWorkoutIndex = latestSession
     ? workouts.findIndex((workout) => workout.id === latestSession.workoutId)
     : -1;
@@ -53,12 +55,10 @@ export function HomePage() {
   const latestDuration = latestSession
     ? Math.max(differenceInMinutes(new Date(latestSession.endTime), new Date(latestSession.startTime)), 1)
     : 0;
-  const latestSets = latestSession?.exercises.reduce((total, item) => total + item.actualSets, 0) ?? 0;
-  const latestRep = latestSession?.exercises.reduce((total, item) => total + item.actualReps, 0) ?? 0;
   const monthStart = startOfMonth(displayedMonth);
   const monthEnd = endOfMonth(displayedMonth);
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  const monthlySessions = sessions.filter((session) =>
+  const monthlySessions = meaningfulSessions.filter((session) =>
     isWithinInterval(new Date(session.date), { start: monthStart, end: monthEnd }),
   );
   const monthlyActiveDays = monthDays.filter((day) =>
@@ -86,35 +86,27 @@ export function HomePage() {
     ? {
         fallbackTitle: "Welcome to GymUp",
         greetingPrefix: "Hi",
-        descriptionLoggedIn: "Get your next session ready and keep today’s training rhythm.",
         descriptionLoggedOut: "Track daily workouts with a mobile-first flow that stays focused and easy to use.",
-        heroTitle: activeWorkout ? "Keep your session moving" : "Start today’s session",
-        heroBody: activeWorkout
-          ? "Your session is still active. Open it again and continue without starting over."
-          : recommendedWorkout
-            ? "Follow the planned order, keep your tempo, and save the session when you finish."
-            : "Choose a program, follow the moves, and save your training progress.",
-        heroCta: activeWorkout ? "Continue" : "Start now",
-        freeWorkout: "Free workout",
-        min: "min",
-        exercises: "exercises",
-        sets: "sets",
-        reps: "reps",
+        suggestedLabel: "Suggested for today",
+        suggestedTitle: "Suggested workout",
+        suggestedFallback: "Choose your workout",
+        suggestedDescription: "Based on your latest session",
+        suggestedReason: "Ready to continue with a familiar focus and manageable duration.",
+        suggestedSummary: (exerciseCount: number, minutes: number) => `${exerciseCount} exercises · about ${minutes} min`,
+        takeSuggested: "Start workout",
+        startWorkout: "Choose program",
         addToHome: "Add to home screen",
         addToHomeDescription: "Open GymUp like an app from your phone home screen",
         activeSession: "Active session",
         activeSessionDescription: "Return to this session before opening another workout page",
+        continueSession: "Continue session",
         latestActivity: "Latest activity",
         latestActivityDescription: "Your most recent completed session",
         history: "History",
+        latestSummary: (done: number, total: number) => `${done}/${total} exercises completed`,
         duration: "Duration",
-        set: "Set",
-        rep: "Reps",
-        mainExercise: "Main exercises",
-        fallbackExercise: "Exercise",
-        exerciseSummary: (sets: number, reps: number, weightKg?: number) =>
-          `${sets} sets · ${reps} reps${weightKg !== undefined ? ` · ${weightKg} kg` : ""}`,
-        moreExercises: (count: number) => `+${count} more exercises`,
+        completedCount: "Completed",
+        totalExercises: "Total exercises",
         noLatestCompleted: "No completed exercise in the latest program yet",
         noSessionTitle: "No completed session yet",
         noSessionDescription: "Start your first workout and the latest progress will show up here.",
@@ -139,35 +131,27 @@ export function HomePage() {
     : {
         fallbackTitle: "Welcome to GymUp",
         greetingPrefix: "Halo",
-        descriptionLoggedIn: "Siapkan sesi berikutnya dan jaga ritme latihanmu hari ini.",
         descriptionLoggedOut: "Catat latihan harian dengan tampilan yang fokus, padat, dan mudah dipakai di mobile.",
-        heroTitle: activeWorkout ? "Lanjutkan ritme latihan" : "Mulai sesi hari ini",
-        heroBody: activeWorkout
-          ? "Sesi kamu masih aktif. Buka lagi dan teruskan progres tanpa mulai dari awal."
-          : recommendedWorkout
-            ? "Ikuti urutan gerakan, jaga tempo, lalu simpan progres sesi."
-            : "Pilih program, ikuti gerakan, lalu simpan progres latihanmu.",
-        heroCta: activeWorkout ? "Lanjutkan" : "Mulai sekarang",
-        freeWorkout: "Latihan bebas",
-        min: "min",
-        exercises: "gerakan",
-        sets: "set",
-        reps: "rep",
+        suggestedLabel: "Rekomendasi hari ini",
+        suggestedTitle: "Latihan rekomendasi",
+        suggestedFallback: "Pilih latihanmu",
+        suggestedDescription: "Berdasarkan sesi terakhirmu",
+        suggestedReason: "Cocok untuk lanjut dari ritme terakhir dengan durasi yang tetap ringan.",
+        suggestedSummary: (exerciseCount: number, minutes: number) => `${exerciseCount} gerakan · sekitar ${minutes} menit`,
+        takeSuggested: "Mulai latihan ini",
+        startWorkout: "Pilih program",
         addToHome: "Tambah ke layar utama",
         addToHomeDescription: "Buka GymUp seperti aplikasi dari layar utama HP",
         activeSession: "Sesi aktif",
         activeSessionDescription: "Lanjutkan sesi sebelum membuka halaman latihan lain",
+        continueSession: "Lanjutkan sesi",
         latestActivity: "Aktivitas terbaru",
         latestActivityDescription: "Program dan progres sesi terbaru",
         history: "Riwayat",
+        latestSummary: (done: number, total: number) => `${done}/${total} gerakan selesai`,
         duration: "Durasi",
-        set: "Set",
-        rep: "Rep",
-        mainExercise: "Gerakan utama",
-        fallbackExercise: "Gerakan",
-        exerciseSummary: (sets: number, reps: number, weightKg?: number) =>
-          `${sets} set · ${reps} repetisi${weightKg !== undefined ? ` · ${weightKg} kg` : ""}`,
-        moreExercises: (count: number) => `+${count} gerakan lainnya`,
+        completedCount: "Selesai",
+        totalExercises: "Total gerakan",
         noLatestCompleted: "Belum ada gerakan selesai di program terakhir",
         noSessionTitle: "Belum ada sesi selesai",
         noSessionDescription: "Mulai latihan pertama kamu, nanti progres terakhir akan muncul di sini.",
@@ -230,6 +214,16 @@ export function HomePage() {
     setInstallGuideOpen(true);
   };
 
+  const handleTakeSuggestedWorkout = () => {
+    if (!recommendedWorkout) {
+      navigate("/select");
+      return;
+    }
+
+    startWorkout(recommendedWorkout.id);
+    navigate("/workout");
+  };
+
   return (
     <div className="space-y-6">
       <section className="space-y-4">
@@ -239,49 +233,39 @@ export function HomePage() {
               <CalendarDays className="h-3.5 w-3.5" />
               {format(now, "EEEE, d MMM", { locale: dateLocale })} · {format(now, "HH:mm")}
             </p>
-            <h1 className="page-title max-w-[17rem]">
+            <h1 className="font-display text-[1.5rem] font-bold uppercase leading-[0.96] text-foreground sm:text-[1.65rem]">
               {displayName ? `${copy.greetingPrefix}, ${displayName}` : copy.fallbackTitle}
             </h1>
-            <p className="page-description max-w-[18rem]">
-              {displayName ? copy.descriptionLoggedIn : copy.descriptionLoggedOut}
-            </p>
+            {!displayName ? <p className="page-description">{copy.descriptionLoggedOut}</p> : null}
           </div>
         </div>
 
-        <div className="feature-surface overflow-hidden p-0">
-          <div className="relative min-h-[21rem]">
-            <div
-              className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgb(9_11_15/0.06)_0%,rgb(9_11_15/0.34)_62%,rgb(24_27_34)_100%),url('/gym-header.png')] bg-cover bg-[center_34%]"
-              aria-hidden="true"
-            />
-            <div className="relative flex min-h-[21rem] flex-col justify-end p-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-primary">{recommendedWorkout?.name ?? copy.freeWorkout}</p>
-                  <h2 className="font-display text-[2rem] font-bold uppercase leading-none">{copy.heroTitle}</h2>
-                  <p className="page-description">{copy.heroBody}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-full bg-secondary px-3 py-1.5">
-                    <strong className="font-semibold text-foreground">{estimatedMinutes}</strong> {copy.min}
-                  </span>
-                  <span className="rounded-full bg-secondary px-3 py-1.5">
-                    <strong className="font-semibold text-foreground">{recommendedMainExercises.length || "--"}</strong> {copy.exercises}
-                  </span>
-                  <span className="rounded-full bg-secondary px-3 py-1.5">
-                    <strong className="font-semibold text-foreground">{planSets || "--"}</strong> {copy.sets}
-                  </span>
-                  <span className="rounded-full bg-secondary px-3 py-1.5">
-                    <strong className="font-semibold text-foreground">{planReps || "--"}</strong> {copy.reps}
-                  </span>
-                </div>
-
-                <Button className="h-12 w-full text-sm font-semibold" size="lg" onClick={() => navigate(activeWorkout ? "/workout" : "/select")}>
-                  <Play className="h-4 w-4" />
-                  {copy.heroCta}
-                </Button>
+        <div className="rounded-xl border border-border/80 bg-card/92 p-5 shadow-[0_20px_56px_rgb(0_0_0/0.28)]">
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <p className="eyebrow text-primary">{copy.suggestedLabel}</p>
+              <div className="space-y-2">
+                <h2 className="section-title text-[2rem]">{recommendedWorkout?.name ?? copy.suggestedFallback}</h2>
+                {recommendedWorkout ? <p className="text-[0.86rem] leading-5 text-muted-foreground">{copy.suggestedDescription}</p> : null}
               </div>
+              {recommendedWorkout ? (
+                <div className="space-y-3">
+                  <p className="max-w-[26rem] text-[0.95rem] leading-6 text-foreground/88">{copy.suggestedReason}</p>
+                  <div className="inline-flex rounded-md border border-border bg-secondary/55 px-3 py-2 text-[0.84rem] text-muted-foreground">
+                    {copy.suggestedSummary(recommendedMainExercises.length, estimatedMinutes)}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              <Button className="h-12 w-full" size="lg" onClick={handleTakeSuggestedWorkout}>
+                <Dumbbell className="h-4 w-4" />
+                {copy.takeSuggested}
+              </Button>
+              <Button className="h-12 w-full" size="lg" variant="secondary" onClick={() => navigate("/select")}>
+                <ListChecks className="h-4 w-4" />
+                {copy.startWorkout}
+              </Button>
             </div>
           </div>
         </div>
@@ -296,9 +280,9 @@ export function HomePage() {
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <Download className="h-5 w-5" />
               </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-medium">{copy.addToHome}</span>
-                <span className="block text-xs text-muted-foreground">{copy.addToHomeDescription}</span>
+              <span className="min-w-0 space-y-0.5">
+                <span className="block text-[0.98rem] font-medium leading-5 text-foreground">{copy.addToHome}</span>
+                <span className="block text-[0.84rem] leading-5 text-muted-foreground">{copy.addToHomeDescription}</span>
               </span>
             </span>
             <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -315,7 +299,7 @@ export function HomePage() {
               <p className="section-description mt-1">{copy.activeSessionDescription}</p>
             </div>
             <Button className="w-full" size="lg" onClick={() => navigate("/workout")}>
-              {copy.heroCta}
+              {copy.continueSession}
             </Button>
           </CardContent>
         </Card>
@@ -335,7 +319,7 @@ export function HomePage() {
 
         {latestSession ? (
           <Card>
-            <CardHeader className="space-y-4 p-4">
+            <CardHeader className="space-y-3 p-4">
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -345,69 +329,42 @@ export function HomePage() {
                       {format(new Date(latestSession.date), "EEEE, d MMM, HH:mm", { locale: dateLocale })}
                     </CardDescription>
                   </div>
-                  <Badge className="shrink-0 bg-primary text-primary-foreground">{completedRatio}%</Badge>
+                  <Badge className="shrink-0 border border-primary/20 bg-primary/10 text-[0.7rem] font-medium text-primary">
+                    {completedRatio}%
+                  </Badge>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-primary/15 text-primary">
-                  {latestCompletedExercises.length} {language === "en" ? "done" : "selesai"}
-                </Badge>
-                <Badge variant="secondary" className="text-muted-foreground">
-                  {latestSession.exercises.length} {language === "en" ? "total exercises" : "total gerakan"}
-                </Badge>
+                <p className="text-sm leading-5 text-muted-foreground">
+                  {copy.latestSummary(latestCompletedExercises.length, latestSession.exercises.length)}
+                </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.06)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
-                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="metric-surface p-3">
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock3 className="h-3 w-3 text-primary" />
                     {copy.duration}
                   </p>
-                  <p className="relative text-2xl font-bold">{latestDuration}m</p>
+                  <p className="text-2xl font-bold">{latestDuration}m</p>
                 </div>
-                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.055)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
-                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
-                    <Dumbbell className="h-3 w-3 text-primary" />
-                    {copy.set}
+                <div className="metric-surface p-3">
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <ListChecks className="h-3 w-3 text-primary" />
+                    {copy.totalExercises}
                   </p>
-                  <p className="relative text-2xl font-bold">{latestSets}</p>
+                  <p className="text-2xl font-bold">{latestSession.exercises.length}</p>
                 </div>
-                <div className="relative overflow-hidden rounded-md border border-primary/15 bg-[linear-gradient(115deg,rgb(22_24_28/0.96)_0%,rgb(30_33_39/0.92)_64%,rgb(255_122_26/0.05)_100%)] p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-                  <div className="pointer-events-none absolute -right-5 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-primary/8 blur-xl" aria-hidden="true" />
-                  <p className="relative flex items-center gap-1 text-xs text-muted-foreground">
-                    <Repeat2 className="h-3 w-3 text-primary" />
-                    {copy.rep}
+                <div className="metric-surface p-3">
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-3 w-3 text-primary" />
+                    {copy.completedCount}
                   </p>
-                  <p className="relative text-2xl font-bold">{latestRep}</p>
+                  <p className="text-2xl font-bold">{latestCompletedExercises.length}</p>
                 </div>
               </div>
-
-              {latestCompletedExercises.length ? (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">{copy.mainExercise}</p>
-                  <div className="space-y-2">
-                    {latestCompletedExercises.slice(0, 3).map((item) => {
-                      const exercise = exercises.find((candidate) => candidate.id === item.exerciseId);
-                      return (
-                        <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 px-3 py-2.5">
-                          <p className="truncate text-sm font-medium">{exercise?.name || copy.fallbackExercise}</p>
-                          <p className="shrink-0 text-xs text-muted-foreground">
-                            {copy.exerciseSummary(item.actualSets, item.actualReps, item.weightKg)}
-                          </p>
-                        </div>
-                      );
-                    })}
-                    {latestCompletedExercises.length > 3 ? (
-                      <p className="text-xs text-muted-foreground">{copy.moreExercises(latestCompletedExercises.length - 3)}</p>
-                    ) : null}
-                  </div>
-                </div>
-              ) : (
+              {!latestCompletedExercises.length ? (
                 <p className="border-t border-border pt-3 text-sm text-muted-foreground">{copy.noLatestCompleted}</p>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         ) : (
@@ -431,31 +388,31 @@ export function HomePage() {
         )}
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="section-title">{copy.monthlyActivity}</h2>
-            <p className="section-description">{copy.monthlyActivityDescription(monthlyActiveDays, monthlySessions.length)}</p>
+            <h2 className="font-display text-[1.05rem] font-bold uppercase leading-none text-foreground/82">{copy.monthlyActivity}</h2>
+            <p className="text-[0.84rem] leading-5 text-muted-foreground">{copy.monthlyActivityDescription(monthlyActiveDays, monthlySessions.length)}</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-11 w-11"
+              className="h-9 w-9"
               onClick={() => setDisplayedMonth((current) => subMonths(current, 1))}
               aria-label={copy.previousMonth}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <p className="min-w-20 text-center text-xs font-medium uppercase text-muted-foreground">
+            <p className="min-w-20 text-center text-[0.72rem] font-medium uppercase text-muted-foreground">
               {format(displayedMonth, "MMM yyyy", { locale: dateLocale })}
             </p>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-11 w-11"
+              className="h-9 w-9"
               onClick={() => setDisplayedMonth((current) => addMonths(current, 1))}
               disabled={!canGoToNextMonth}
               aria-label={copy.nextMonth}
@@ -464,7 +421,7 @@ export function HomePage() {
             </Button>
           </div>
         </div>
-        <Card>
+        <Card className="border-border/70 bg-card/72 shadow-none">
           <CardContent className="space-y-2 p-3">
             <div className="grid grid-cols-7 gap-1.5 text-center text-[9px] font-medium text-muted-foreground">
               {weekdayLabels.map((day, index) => (

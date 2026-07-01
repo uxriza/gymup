@@ -1,6 +1,6 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Activity, Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Trash2, UserRound } from "lucide-react";
+import { Activity, Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 import { useAuth } from "@/components/auth-provider";
@@ -35,10 +35,12 @@ export function App() {
   const { authEnabled, loading, user, displayName, updateName, signOut } = useAuth();
   const { activeWorkout, workouts, cancelWorkout, resetLocalState } = useGymStore();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileName, setProfileName] = useState(displayName);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState("");
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const activeWorkoutName = workouts.find((workout) => workout.id === activeWorkout?.workoutId)?.name;
   const isAdminRoute = location.pathname === "/admin";
   const isLockedRoute = Boolean(activeWorkout && location.pathname !== "/workout");
@@ -83,6 +85,11 @@ export function App() {
         logoutFailedTitle: "Unable to sign out",
         logoutFailedDescription: "Try again shortly",
         logoutAction: "Sign out",
+        menuAria: "Open menu",
+        menuTitle: "Menu",
+        menuDescription: "Language and account options",
+        languageLabel: "Language",
+        accountLabel: "Account",
       }
     : {
         tagline: "Catatan latihan pribadi",
@@ -112,7 +119,25 @@ export function App() {
         logoutFailedTitle: "Belum bisa keluar",
         logoutFailedDescription: "Coba lagi sebentar",
         logoutAction: "Keluar",
+        menuAria: "Buka menu",
+        menuTitle: "Menu",
+        menuDescription: "Atur bahasa dan opsi akun",
+        languageLabel: "Bahasa",
+        accountLabel: "Akun",
       };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+    return () => window.removeEventListener("mousedown", handlePointerDown);
+  }, [menuOpen]);
 
   if (authEnabled && loading) {
     return (
@@ -142,8 +167,24 @@ export function App() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="app-gym-background" aria-hidden="true" />
 
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-background/76 backdrop-blur-xl">
-        <div className={cn("mx-auto flex items-center justify-between px-4 py-3", isAdminRoute ? "max-w-7xl sm:px-6 lg:px-8" : "max-w-[480px]")}>
+      {authEnabled && menuOpen ? (
+        <button
+          type="button"
+          aria-label="Close menu overlay"
+          className="fixed inset-0 z-20 bg-black/50 backdrop-blur-[1px]"
+          onClick={() => setMenuOpen(false)}
+        />
+      ) : null}
+
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-background">
+        <div
+          ref={menuRef}
+          className={cn(
+            "relative mx-auto px-4 py-3",
+            isAdminRoute ? "max-w-7xl sm:px-6 lg:px-8" : "max-w-[480px]",
+          )}
+        >
+          <div className="flex items-center justify-between">
           <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#ff922e_0%,#ff6a18_62%,#ffa24a_100%)] text-primary-foreground shadow-[0_0_22px_rgb(255_106_24/0.24)]">
               <Activity className="h-5 w-5" />
@@ -157,50 +198,67 @@ export function App() {
           </button>
           {authEnabled ? (
             <div className="flex items-center gap-1">
-              <div className="inline-flex h-10 items-center rounded-full border border-border bg-card/80 p-1">
-                <button
-                  type="button"
-                  className={cn(
-                    "rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors",
-                    language === "id" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                  )}
-                  onClick={() => setLanguage("id")}
-                  aria-label="Bahasa Indonesia"
-                >
-                  ID
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors",
-                    language === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                  )}
-                  onClick={() => setLanguage("en")}
-                  aria-label="English"
-                >
-                  EN
-                </button>
-              </div>
-              <Button
-                variant="ghost"
-                className="h-10 px-3"
-                aria-label={copy.editNameAria}
-                onClick={() => {
-                  setProfileName(displayName);
-                  setProfileError("");
-                  setProfileOpen(true);
-                }}
-              >
-                <UserRound className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={copy.logoutAria}
-                onClick={() => setLogoutOpen(true)}
+                aria-label={copy.menuAria}
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((open) => !open)}
               >
-                <LogOut className="h-4 w-4" />
+                {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </Button>
+            </div>
+          ) : null}
+          </div>
+          {authEnabled && menuOpen ? (
+            <div className="absolute left-4 right-4 top-[calc(100%-2px)] z-40 rounded-b-lg border border-t-0 border-border bg-card p-3 shadow-[0_18px_44px_rgb(0_0_0/0.32)]">
+              <div className="space-y-3">
+                <div className="space-y-2 px-1 pt-1">
+                  <p className="text-[0.68rem] font-medium uppercase tracking-wide text-muted-foreground">{copy.languageLabel}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={language === "id" ? "secondary" : "outline"}
+                      className="h-10 w-full"
+                      onClick={() => setLanguage("id")}
+                    >
+                      ID
+                    </Button>
+                    <Button
+                      variant={language === "en" ? "secondary" : "outline"}
+                      className="h-10 w-full"
+                      onClick={() => setLanguage("en")}
+                    >
+                      EN
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-1 border-t border-border pt-3">
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setProfileName(displayName);
+                      setProfileError("");
+                      setProfileOpen(true);
+                    }}
+                  >
+                    <UserRound className="h-4 w-4 text-muted-foreground" />
+                    {copy.editNameTitle}
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setLogoutOpen(true);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 text-muted-foreground" />
+                    {copy.logoutAction}
+                  </button>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>

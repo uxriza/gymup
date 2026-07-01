@@ -117,9 +117,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         isApplyingRemoteState = false;
         await saveState(user.id, mergedState).catch(notifySyncError);
       } else {
-        const initialState = localSnapshot.sessions.length || localSnapshot.workouts.length !== defaultWorkouts.length || localSnapshot.exercises.length !== defaultExercises.length
-          ? localSnapshot
-          : getEmptyAccountState();
+        const initialState = localSnapshot;
         isApplyingRemoteState = true;
         useGymStore.getState().replaceSyncedState(initialState);
         isApplyingRemoteState = false;
