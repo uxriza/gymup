@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { format } from "date-fns";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,9 +8,7 @@ import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 
 const HomePage = lazy(() => import("@/pages/home").then((module) => ({ default: module.HomePage })));
@@ -17,6 +16,7 @@ const SelectWorkoutPage = lazy(() => import("@/pages/select-workout").then((modu
 const WorkoutPage = lazy(() => import("@/pages/workout").then((module) => ({ default: module.WorkoutPage })));
 const HistoryPage = lazy(() => import("@/pages/history").then((module) => ({ default: module.HistoryPage })));
 const SetupPage = lazy(() => import("@/pages/setup").then((module) => ({ default: module.SetupPage })));
+const ProfilePage = lazy(() => import("@/pages/profile").then((module) => ({ default: module.ProfilePage })));
 const AuthPage = lazy(() => import("@/pages/auth").then((module) => ({ default: module.AuthPage })));
 const VerifiedPage = lazy(() => import("@/pages/verified").then((module) => ({ default: module.VerifiedPage })));
 const AdminPage = lazy(() => import("@/pages/admin").then((module) => ({ default: module.AdminPage })));
@@ -30,16 +30,13 @@ const PageLoader = () => (
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language, setLanguage } = useI18n();
+  const { language, setLanguage, dateLocale } = useI18n();
   const { toast } = useToast();
-  const { authEnabled, loading, user, displayName, updateName, signOut } = useAuth();
+  const { authEnabled, loading, user, signOut } = useAuth();
   const { activeWorkout, workouts, cancelWorkout, resetLocalState } = useGymStore();
+  const [now, setNow] = useState(() => new Date());
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [profileName, setProfileName] = useState(displayName);
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [profileError, setProfileError] = useState("");
   const menuRef = useRef<HTMLDivElement | null>(null);
   const activeWorkoutName = workouts.find((workout) => workout.id === activeWorkout?.workoutId)?.name;
   const isAdminRoute = location.pathname === "/admin";
@@ -50,11 +47,13 @@ export function App() {
         { to: "/", label: "Train", icon: Dumbbell },
         { to: "/history", label: "History", icon: History },
         { to: "/setup", label: "Exercises", icon: ListChecks },
+        { to: "/profile", label: "Profile", icon: UserRound },
       ]
     : [
         { to: "/", label: "Latihan", icon: Dumbbell },
         { to: "/history", label: "Riwayat", icon: History },
         { to: "/setup", label: "Gerakan", icon: ListChecks },
+        { to: "/profile", label: "Profil", icon: UserRound },
       ];
   const copy = language === "en"
     ? {
@@ -90,6 +89,7 @@ export function App() {
         menuDescription: "Language and account options",
         languageLabel: "Language",
         accountLabel: "Account",
+        profilePage: "Profile",
       }
     : {
         tagline: "Catatan latihan pribadi",
@@ -124,7 +124,13 @@ export function App() {
         menuDescription: "Atur bahasa dan opsi akun",
         languageLabel: "Bahasa",
         accountLabel: "Akun",
+        profilePage: "Profil",
       };
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -196,6 +202,12 @@ export function App() {
               </span>
             </span>
           </button>
+          <div className="flex items-center gap-2">
+            {!isAdminRoute ? (
+              <span className="rounded-md border border-border/70 bg-card/70 px-2.5 py-1 text-[0.68rem] font-medium uppercase leading-none text-muted-foreground">
+                {format(now, "EEE, d MMM · HH:mm", { locale: dateLocale })}
+              </span>
+            ) : null}
           {authEnabled ? (
             <div className="flex items-center gap-1">
               <Button
@@ -209,6 +221,7 @@ export function App() {
               </Button>
             </div>
           ) : null}
+          </div>
           </div>
           {authEnabled && menuOpen ? (
             <div className="absolute left-4 right-4 top-[calc(100%-2px)] z-40 rounded-b-lg border border-t-0 border-border bg-card p-3 shadow-[0_18px_44px_rgb(0_0_0/0.32)]">
@@ -238,13 +251,11 @@ export function App() {
                     className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                     onClick={() => {
                       setMenuOpen(false);
-                      setProfileName(displayName);
-                      setProfileError("");
-                      setProfileOpen(true);
+                      navigate("/profile");
                     }}
                   >
                     <UserRound className="h-4 w-4 text-muted-foreground" />
-                    {copy.editNameTitle}
+                    {copy.profilePage}
                   </button>
                   <button
                     type="button"
@@ -312,6 +323,7 @@ export function App() {
             <Route path="/summary" element={<Navigate to="/history" replace />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/setup" element={<SetupPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/verified" element={<VerifiedPage />} />
             <Route path="/admin" element={<AdminPage />} />
           </Routes>
@@ -322,14 +334,17 @@ export function App() {
 
       {showBottomNav ? (
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background">
-          <div className="mx-auto grid max-w-[480px] grid-cols-3 px-3 pb-[max(34px,env(safe-area-inset-bottom))] pt-2">
+          <div
+            className="mx-auto grid max-w-[480px] items-center px-4 pb-[max(28px,env(safe-area-inset-bottom))] pt-3"
+            style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+          >
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-xs font-medium text-muted-foreground transition-all",
+                    "mx-auto inline-flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-4 text-xs font-medium text-muted-foreground transition-all",
                     isActive && "bg-primary/15 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.24)]",
                   )
                 }
@@ -341,82 +356,6 @@ export function App() {
           </div>
         </nav>
       ) : null}
-
-      <Dialog
-        open={profileOpen}
-        onOpenChange={(open) => {
-          setProfileOpen(open);
-          if (!open) {
-            setProfileError("");
-          }
-        }}
-      >
-        <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle>{copy.editNameTitle}</DialogTitle>
-            <DialogDescription>{copy.editNameDescription}</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="rounded-md border border-border bg-secondary/40 p-3">
-              <p className="text-xs text-muted-foreground">{copy.accountEmail}</p>
-              <p className="mt-1 truncate text-sm font-medium">{user?.email ?? "-"}</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="profile-name">{copy.name}</Label>
-              <Input
-                id="profile-name"
-                className="h-12"
-                value={profileName}
-                placeholder={copy.yourName}
-                aria-invalid={Boolean(profileError)}
-                onChange={(event) => {
-                  setProfileName(event.target.value);
-                  setProfileError("");
-                }}
-              />
-            </div>
-            {profileError ? (
-              <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm leading-5 text-destructive">{profileError}</p>
-            ) : null}
-            <div className="grid grid-cols-2 gap-3">
-              <Button className="min-h-12 w-full" variant="outline" onClick={() => setProfileOpen(false)}>
-                {copy.cancel}
-              </Button>
-              <Button
-                className="min-h-12 w-full"
-                disabled={profileSaving}
-                onClick={async () => {
-                  const trimmedName = profileName.trim();
-                  if (trimmedName.length < 2) {
-                    setProfileError(copy.invalidName);
-                    return;
-                  }
-
-                  setProfileSaving(true);
-                  setProfileError("");
-                  try {
-                    await updateName(trimmedName);
-                    setProfileName(trimmedName);
-                    setProfileOpen(false);
-                    toast({
-                      title: copy.nameSavedTitle,
-                      description: copy.nameSavedDescription,
-                    });
-                  } catch {
-                    setProfileError(copy.nameFailed);
-                  } finally {
-                    setProfileSaving(false);
-                  }
-                }}
-              >
-                {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {copy.save}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="w-[calc(100vw-32px)] max-w-sm rounded-lg p-5">

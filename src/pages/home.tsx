@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { addMonths, differenceInMinutes, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth, isWithinInterval, startOfMonth, subMonths } from "date-fns";
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, ListChecks, Share2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Download, Dumbbell, ListChecks, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,6 @@ export function HomePage() {
   const { language, dateLocale } = useI18n();
   const { displayName } = useAuth();
   const { sessions, exercises, workouts, activeWorkout, startWorkout } = useGymStore();
-  const [now, setNow] = useState(() => new Date());
   const [displayedMonth, setDisplayedMonth] = useState(() => new Date());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
@@ -68,7 +67,7 @@ export function HomePage() {
   const monthGridDays = [...Array.from({ length: monthStartOffset }, () => null), ...monthDays];
   const getSessionCountForDay = (day: Date) =>
     monthlySessions.filter((session) => isSameDay(new Date(session.date), day)).length;
-  const canGoToNextMonth = !isSameMonth(displayedMonth, now);
+  const canGoToNextMonth = !isSameMonth(displayedMonth, new Date());
   const recommendedExercises = recommendedWorkout
     ? recommendedWorkout.exerciseIds
         .map((exerciseId) => exercises.find((exercise) => exercise.id === exerciseId))
@@ -90,8 +89,6 @@ export function HomePage() {
         suggestedLabel: "Suggested for today",
         suggestedTitle: "Suggested workout",
         suggestedFallback: "Choose your workout",
-        suggestedDescription: "Based on your latest session",
-        suggestedReason: "Ready to continue with a familiar focus and manageable duration.",
         suggestedSummary: (exerciseCount: number, minutes: number) => `${exerciseCount} exercises · about ${minutes} min`,
         takeSuggested: "Start workout",
         startWorkout: "Choose program",
@@ -103,7 +100,6 @@ export function HomePage() {
         latestActivity: "Latest activity",
         latestActivityDescription: "Your most recent completed session",
         history: "History",
-        latestSummary: (done: number, total: number) => `${done}/${total} exercises completed`,
         duration: "Duration",
         completedCount: "Completed",
         totalExercises: "Total exercises",
@@ -135,8 +131,6 @@ export function HomePage() {
         suggestedLabel: "Rekomendasi hari ini",
         suggestedTitle: "Latihan rekomendasi",
         suggestedFallback: "Pilih latihanmu",
-        suggestedDescription: "Berdasarkan sesi terakhirmu",
-        suggestedReason: "Cocok untuk lanjut dari ritme terakhir dengan durasi yang tetap ringan.",
         suggestedSummary: (exerciseCount: number, minutes: number) => `${exerciseCount} gerakan · sekitar ${minutes} menit`,
         takeSuggested: "Mulai latihan ini",
         startWorkout: "Pilih program",
@@ -148,7 +142,6 @@ export function HomePage() {
         latestActivity: "Aktivitas terbaru",
         latestActivityDescription: "Program dan progres sesi terbaru",
         history: "Riwayat",
-        latestSummary: (done: number, total: number) => `${done}/${total} gerakan selesai`,
         duration: "Durasi",
         completedCount: "Selesai",
         totalExercises: "Total gerakan",
@@ -173,11 +166,6 @@ export function HomePage() {
         androidStep2: "Pilih “Pasang aplikasi” atau “Tambahkan ke layar utama”",
         androidStep3: "Setelah terpasang, GymUp bisa dibuka dari layar utama",
       };
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -225,19 +213,13 @@ export function HomePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <div className="min-w-0 space-y-1">
-            <p className="flex items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
-              {format(now, "EEEE, d MMM", { locale: dateLocale })} · {format(now, "HH:mm")}
-            </p>
-            <h1 className="font-display text-[1.5rem] font-bold uppercase leading-[0.96] text-foreground sm:text-[1.65rem]">
-              {displayName ? `${copy.greetingPrefix}, ${displayName}` : copy.fallbackTitle}
-            </h1>
-            {!displayName ? <p className="page-description">{copy.descriptionLoggedOut}</p> : null}
-          </div>
+    <div className="space-y-7 pb-10">
+      <section className="space-y-5">
+        <div className="min-w-0 space-y-2">
+          <h1 className="font-display text-[1.5rem] font-bold uppercase leading-[0.96] text-foreground sm:text-[1.65rem]">
+            {displayName ? `${copy.greetingPrefix}, ${displayName}` : copy.fallbackTitle}
+          </h1>
+          {!displayName ? <p className="page-description">{copy.descriptionLoggedOut}</p> : null}
         </div>
 
         <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/92 p-5 shadow-[0_20px_56px_rgb(0_0_0/0.28)]">
@@ -253,16 +235,14 @@ export function HomePage() {
               opacity: 0.92,
             }}
           />
-          <div className="relative space-y-5">
-            <div className="space-y-3">
+          <div className="relative space-y-6">
+            <div className="space-y-4">
               <p className="eyebrow text-primary">{copy.suggestedLabel}</p>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h2 className="section-title text-[2rem]">{recommendedWorkout?.name ?? copy.suggestedFallback}</h2>
-                {recommendedWorkout ? <p className="text-[0.86rem] leading-5 text-muted-foreground">{copy.suggestedDescription}</p> : null}
               </div>
               {recommendedWorkout ? (
-                <div className="space-y-3">
-                  <p className="max-w-[26rem] text-[0.95rem] leading-6 text-foreground/88">{copy.suggestedReason}</p>
+                <div>
                   <div className="inline-flex rounded-md border border-border bg-secondary/55 px-3 py-2 text-[0.84rem] text-muted-foreground">
                     {copy.suggestedSummary(recommendedMainExercises.length, estimatedMinutes)}
                   </div>
@@ -317,7 +297,7 @@ export function HomePage() {
         </Card>
       ) : null}
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="section-title">{copy.latestActivity}</h2>
@@ -345,29 +325,26 @@ export function HomePage() {
                     {completedRatio}%
                   </Badge>
                 </div>
-                <p className="text-sm leading-5 text-muted-foreground">
-                  {copy.latestSummary(latestCompletedExercises.length, latestSession.exercises.length)}
-                </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="metric-surface p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="metric-surface grid grid-cols-3 divide-x divide-border/80 overflow-hidden">
+                <div className="flex min-h-[92px] flex-col justify-between p-3">
+                  <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
                     <Clock3 className="h-3 w-3 text-primary" />
                     {copy.duration}
                   </p>
                   <p className="text-2xl font-bold">{latestDuration}m</p>
                 </div>
-                <div className="metric-surface p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex min-h-[92px] flex-col justify-between p-3">
+                  <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
                     <ListChecks className="h-3 w-3 text-primary" />
                     {copy.totalExercises}
                   </p>
                   <p className="text-2xl font-bold">{latestSession.exercises.length}</p>
                 </div>
-                <div className="metric-surface p-3">
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex min-h-[92px] flex-col justify-between p-3">
+                  <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary" />
                     {copy.completedCount}
                   </p>
@@ -400,11 +377,11 @@ export function HomePage() {
         )}
       </section>
 
-      <section className="space-y-1.5">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="font-display text-[1.05rem] font-bold uppercase leading-none text-foreground/82">{copy.monthlyActivity}</h2>
-            <p className="text-[0.84rem] leading-5 text-muted-foreground">{copy.monthlyActivityDescription(monthlyActiveDays, monthlySessions.length)}</p>
+      <section className="space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="section-title">{copy.monthlyActivity}</h2>
+            <p className="section-description">{copy.monthlyActivityDescription(monthlyActiveDays, monthlySessions.length)}</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Button

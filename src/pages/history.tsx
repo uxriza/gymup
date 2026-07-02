@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { differenceInMinutes, format, type Locale } from "date-fns";
-import { Calendar, CheckCircle2, Clock3, TimerOff, Trash2, Trophy } from "lucide-react";
+import { CheckCircle2, Clock3, TimerOff, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export function HistoryPage() {
   const copy = language === "en"
     ? {
         title: "History",
-        description: "Workout sessions stored on this device",
+        description: (count: number) => `${count} saved sessions`,
         clearHistory: "Clear history",
         clearHistoryTitle: "Clear history?",
         clearHistoryDescription: "All saved workout sessions will be deleted. Your workout programs stay safe.",
@@ -52,7 +52,6 @@ export function HistoryPage() {
         clearedTitle: "History cleared",
         clearedDescription: "All saved workout sessions have been removed",
         sessionList: "Session list",
-        storedSessions: (count: number) => `${count} saved sessions`,
         noSessionTitle: "No completed sessions yet",
         noSessionDescription: "Finish at least one exercise and your training history will show up here.",
         startWorkout: "Start workout",
@@ -67,10 +66,11 @@ export function HistoryPage() {
         skipped: "Not completed",
         moreExercises: (count: number) => `+${count} more exercises`,
         minuteSuffix: "min",
+        totalExercises: "Total exercises",
       }
     : {
         title: "Riwayat",
-        description: "Sesi latihan yang tersimpan di perangkat ini",
+        description: (count: number) => `${count} sesi tersimpan`,
         clearHistory: "Hapus riwayat",
         clearHistoryTitle: "Hapus riwayat?",
         clearHistoryDescription: "Semua sesi latihan yang tersimpan akan dihapus. Program latihan tetap aman",
@@ -79,7 +79,6 @@ export function HistoryPage() {
         clearedTitle: "Riwayat dihapus",
         clearedDescription: "Semua sesi latihan sudah dibersihkan",
         sessionList: "Daftar sesi",
-        storedSessions: (count: number) => `${count} sesi tersimpan`,
         noSessionTitle: "Belum ada sesi dengan progres",
         noSessionDescription: "Selesaikan minimal satu gerakan, nanti riwayat latihanmu muncul di sini",
         startWorkout: "Mulai latihan",
@@ -94,14 +93,15 @@ export function HistoryPage() {
         skipped: "Tidak dikerjakan",
         moreExercises: (count: number) => `+${count} gerakan lainnya`,
         minuteSuffix: "menit",
+        totalExercises: "Total gerakan",
       };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7 pb-20">
       <section className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="page-title">{copy.title}</h1>
-          <p className="page-description">{copy.description}</p>
+          <p className="page-description">{copy.description(meaningfulSessions.length)}</p>
         </div>
         {sessions.length ? (
           <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" onClick={() => setResetOpen(true)} aria-label={copy.clearHistory}>
@@ -139,12 +139,7 @@ export function HistoryPage() {
         </DialogContent>
       </Dialog>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="section-title">{copy.sessionList}</h2>
-          <p className="section-description">{copy.storedSessions(meaningfulSessions.length)}</p>
-        </div>
-
+      <section className="space-y-4">
         {meaningfulSessions.length === 0 ? (
           <Card>
             <CardHeader>
@@ -160,9 +155,11 @@ export function HistoryPage() {
         ) : null}
 
         {groupedSessions.map((group) => (
-          <div key={group.label} className="space-y-3">
-            <div className="flex items-center gap-3 pt-1">
-              <p className="shrink-0 text-sm font-medium text-muted-foreground">{group.label}</p>
+          <div key={group.label} className="space-y-4">
+            <div className="flex items-center gap-3 pt-2">
+              <p className="shrink-0 text-sm font-medium text-muted-foreground">
+                {group.sessions[0] ? `${group.label} · ${format(new Date(group.sessions[0].date), "HH:mm", { locale: dateLocale })}` : group.label}
+              </p>
               <div className="h-px flex-1 bg-border" />
             </div>
 
@@ -171,54 +168,48 @@ export function HistoryPage() {
               const planned = session.exercises.filter((item) => !item.completed);
               const performedExercises = session.exercises.filter((item) => item.actualSets > 0 || item.actualReps > 0);
               const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
+              const completedRatio = session.exercises.length ? Math.round((completed.length / session.exercises.length) * 100) : 0;
 
               return (
-                <Card
-                  key={session.id}
-                  className="relative overflow-hidden border-border/80 bg-[linear-gradient(135deg,rgb(13_14_16/0.98)_0%,rgb(18_20_24/0.96)_64%,rgb(255_122_26/0.045)_100%)] shadow-[0_18px_54px_rgb(0_0_0/0.24)]"
-                >
-                  <div className="pointer-events-none absolute -right-16 top-8 h-32 w-32 rounded-full bg-primary/6 blur-2xl" aria-hidden="true" />
-                  <CardHeader className="relative z-10 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
+                <Card key={session.id}>
+                  <CardHeader className="space-y-3 p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <CardTitle className="truncate">{session.workoutName}</CardTitle>
-                        <CardDescription className="mt-1 flex items-center gap-2">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {format(new Date(session.date), "HH:mm", { locale: dateLocale })}
-                        </CardDescription>
+                        <CardTitle className="truncate text-lg">{session.workoutName}</CardTitle>
                       </div>
-                      <Badge className="shrink-0 bg-primary/15 text-primary">
-                        <Trophy className="mr-1 h-3 w-3" />
-                        {completed.length}/{session.exercises.length}
+                      <Badge className="shrink-0 border border-primary/20 bg-primary/10 text-[0.7rem] font-medium text-primary">
+                        {completedRatio}%
                       </Badge>
+                      </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="relative z-10 space-y-4">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="metric-surface p-2">
-                        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Clock3 className="h-3 w-3" />
+                  <CardContent className="space-y-5">
+                    <div className="metric-surface grid grid-cols-3 divide-x divide-border/80 overflow-hidden">
+                      <div className="flex min-h-[92px] flex-col justify-between p-3">
+                        <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
+                          <Clock3 className="h-3 w-3 text-primary" />
                           {copy.duration}
                         </p>
-                        <p className="text-lg font-bold">{duration}m</p>
+                        <p className="text-2xl font-bold">{duration}m</p>
                       </div>
-                      <div className="metric-surface p-2">
-                        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <CheckCircle2 className="h-3 w-3" />
+                      <div className="flex min-h-[92px] flex-col justify-between p-3">
+                        <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
+                          <CheckCircle2 className="h-3 w-3 text-primary" />
                           {copy.completed}
                         </p>
-                        <p className="text-lg font-bold">{completed.length}</p>
+                        <p className="text-2xl font-bold">{completed.length}</p>
                       </div>
-                      <div className="metric-surface p-2">
-                        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <TimerOff className="h-3 w-3" />
-                          {copy.skipped}
+                      <div className="flex min-h-[92px] flex-col justify-between p-3">
+                        <p className="flex min-h-[2rem] items-start gap-1 text-[11px] uppercase leading-4 text-muted-foreground">
+                          <TimerOff className="h-3 w-3 text-primary" />
+                          {copy.totalExercises}
                         </p>
-                        <p className="text-lg font-bold">{planned.length}</p>
+                        <p className="text-2xl font-bold">{session.exercises.length}</p>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {performedExercises.slice(0, 4).map((item) => {
                         const exercise = exercises.find((candidate) => candidate.id === item.exerciseId);
                         return (

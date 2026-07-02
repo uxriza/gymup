@@ -83,15 +83,15 @@ export function SetupPage() {
   }, [catalogExercises, language, query, selectedCategory]);
 
   return (
-    <div className="space-y-5">
-      <section className="space-y-2">
-        <div className="space-y-1">
+    <div className="space-y-7 pb-20">
+      <section className="space-y-3">
+        <div className="space-y-2">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-description">{copy.description}</p>
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input className="h-12 border-white/10 bg-card/80 pl-9" placeholder={copy.searchPlaceholder} value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -118,7 +118,7 @@ export function SetupPage() {
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="section-title">{copy.listTitle}</h2>
           <p className="section-description">{copy.total(catalogExercises.length)}</p>
@@ -132,10 +132,10 @@ export function SetupPage() {
               className="surface-list-item min-h-24 w-full p-4 text-left focus:outline-none focus:ring-2 focus:ring-ring"
               onClick={() => setSelectedExercise(exercise)}
             >
-              <div className="flex min-w-0 items-start gap-3">
+              <div className="flex min-w-0 items-start gap-4">
                 <ExerciseThumbnail exercise={exercise} className="h-16 w-16" />
-                <div className="min-w-0 space-y-2">
-                  <div className="space-y-1">
+                <div className="min-w-0 space-y-3">
+                  <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <p className="truncate font-semibold">{exercise.name}</p>
                       {hasVideoGuide(exercise) ? (
