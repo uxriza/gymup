@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Video } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,13 @@ import { Input } from "@/components/ui/input";
 import { defaultExercises } from "@/data";
 import { useI18n } from "@/lib/i18n";
 import { formatCategoryLabel } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 import type { Exercise } from "@/types";
 
 const categoryOrder = ["Semua", "Warmup", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Calves", "Cooldown", "Custom"];
+
+const hasVideoGuide = (exercise: Exercise) => Boolean(exercise.videoUrl);
 
 export function SetupPage() {
   const { language } = useI18n();
@@ -35,6 +38,8 @@ export function SetupPage() {
         instructions: "Instructions",
         noInstructions: "Instructions are not available for this exercise yet",
         noMedia: "Exercise media is not available yet",
+        retryMedia: "Retry video",
+        videoError: "The video could not be loaded right now",
       }
     : {
         title: "Katalog gerakan",
@@ -49,6 +54,8 @@ export function SetupPage() {
         instructions: "Instruksi",
         noInstructions: "Instruksi belum tersedia untuk gerakan ini",
         noMedia: "Media gerakan belum tersedia",
+        retryMedia: "Coba lagi",
+        videoError: "Video belum berhasil dimuat",
       };
 
   const catalogExercises = useMemo(
@@ -96,9 +103,12 @@ export function SetupPage() {
               <Button
                 key={category}
                 type="button"
-                variant={selected ? "default" : "secondary"}
+                variant="secondary"
                 size="sm"
-                className="h-11 shrink-0 px-4"
+                className={cn(
+                  "h-11 shrink-0 px-4",
+                  selected && "border border-primary/35 bg-secondary/95 text-foreground ring-1 ring-primary/20",
+                )}
                 onClick={() => setSelectedCategory(category)}
               >
                 {category === "Semua" ? copy.all : formatCategoryLabel(category, language)}
@@ -126,7 +136,18 @@ export function SetupPage() {
                 <ExerciseThumbnail exercise={exercise} className="h-16 w-16" />
                 <div className="min-w-0 space-y-2">
                   <div className="space-y-1">
-                    <p className="truncate font-semibold">{exercise.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-semibold">{exercise.name}</p>
+                      {hasVideoGuide(exercise) ? (
+                        <span
+                          className={cn("inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-sky-500/15 text-sky-200")}
+                          aria-label={language === "en" ? "Video guide" : "Ada video"}
+                          title={language === "en" ? "Video guide" : "Ada video"}
+                        >
+                          <Video className="h-3.5 w-3.5" />
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="text-sm text-muted-foreground">{copy.summary(exercise)}</p>
                   </div>
                   {exercise.equipment?.length ? (
@@ -161,7 +182,12 @@ export function SetupPage() {
                 <DialogDescription>{copy.summary(selectedExercise)}</DialogDescription>
               </DialogHeader>
 
-              <ExerciseMedia exercise={selectedExercise} emptyLabel={copy.noMedia} />
+              <ExerciseMedia
+                exercise={selectedExercise}
+                emptyLabel={copy.noMedia}
+                retryLabel={copy.retryMedia}
+                videoErrorLabel={copy.videoError}
+              />
 
               {selectedExercise.equipment?.length ? (
                 <div className="flex flex-wrap gap-2">

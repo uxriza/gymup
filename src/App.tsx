@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Activity, Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
+import { Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 import { useAuth } from "@/components/auth-provider";
@@ -186,8 +186,8 @@ export function App() {
         >
           <div className="flex items-center justify-between">
           <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
-            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#ff922e_0%,#ff6a18_62%,#ffa24a_100%)] text-primary-foreground shadow-[0_0_22px_rgb(255_106_24/0.24)]">
-              <Activity className="h-5 w-5" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-secondary shadow-[0_0_22px_rgb(255_106_24/0.16)]">
+              <img src="/pwa-icon.svg" alt="GymUp" className="h-full w-full object-cover" />
             </span>
             <span>
               <span className="font-display block text-base font-bold uppercase tracking-normal">GymUp</span>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronRight, Dumbbell, ListChecks } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Dumbbell, ListChecks, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 
 const order = ["push", "pull", "legs"];
+const hasVideoGuide = (videoUrl?: string) => Boolean(videoUrl);
 
 export function SelectWorkoutPage() {
   const navigate = useNavigate();
@@ -131,9 +132,20 @@ export function SelectWorkoutPage() {
                         <div key={exercise!.id} className="surface-list-item flex items-center gap-3 px-3 py-2">
                           <ExerciseThumbnail exercise={exercise!} className="h-12 w-12 rounded-[0.375rem]" />
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">
-                              {index + 1}. {exercise!.name}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-medium">
+                                {index + 1}. {exercise!.name}
+                              </p>
+                              {hasVideoGuide(exercise!.videoUrl) ? (
+                                <span
+                                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-sky-500/15 text-sky-200"
+                                  aria-label={language === "en" ? "Video guide" : "Ada video"}
+                                  title={language === "en" ? "Video guide" : "Ada video"}
+                                >
+                                  <Video className="h-3.5 w-3.5" />
+                                </span>
+                              ) : null}
+                            </div>
                             <p className="truncate text-xs text-muted-foreground">
                               {exercise!.targetSets} x {exercise!.targetReps} · {formatCategoryLabel(exercise!.category, language)}
                             </p>

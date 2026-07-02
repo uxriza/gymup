@@ -12,6 +12,7 @@ import {
   Sparkles,
   ThumbsUp,
   Timer,
+  Video,
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -88,6 +89,18 @@ const getWeightOptions = (currentWeight?: number) => {
   const options = currentWeight !== undefined ? [...baseWeightOptions, currentWeight] : baseWeightOptions;
   return Array.from(new Set(options)).sort((a, b) => a - b);
 };
+
+const hasVideoGuide = (exercise: Exercise) => Boolean(exercise.videoUrl);
+
+const getMediaGuideLabel = (exercise: Exercise, language: "id" | "en") =>
+  hasVideoGuide(exercise)
+    ? language === "en" ? "Video guide" : "Ada video"
+    : "";
+
+const getMediaGuideClassName = (exercise: Exercise) =>
+  hasVideoGuide(exercise)
+    ? "bg-sky-500/15 text-sky-200"
+    : "";
 
 const localizedInstructions: Record<string, string[]> = {
   "bench-press": [
@@ -393,6 +406,8 @@ export function WorkoutPage() {
         totalStats: "Total",
         remainingStats: "Left",
         pickExercise: "Choose exercise",
+        retryMedia: "Retry video",
+        videoError: "The video could not be loaded right now",
         setsAndReps: (sets: number, reps: number, category: string) => `${sets} sets x ${reps} reps · ${category}`,
         recommendation: "Recommended",
         activeLogged: (sets: number, reps: number) => `Logged ${sets} sets · ${reps} reps`,
@@ -466,6 +481,8 @@ export function WorkoutPage() {
         totalStats: "Total",
         remainingStats: "Belum",
         pickExercise: "Pilih gerakan",
+        retryMedia: "Coba lagi",
+        videoError: "Video belum berhasil dimuat",
         setsAndReps: (sets: number, reps: number, category: string) => `${sets} set x ${reps} repetisi · ${category}`,
         recommendation: "Rekomendasi",
         activeLogged: (sets: number, reps: number) => `Tercatat ${sets} set · ${reps} repetisi`,
@@ -630,7 +647,18 @@ export function WorkoutPage() {
                 <ExerciseThumbnail exercise={item} className="h-14 w-14 rounded-[0.375rem]" />
                 <div className="min-w-0 flex-1 space-y-3">
                   <div className="min-w-0">
-                    <p className="card-heading truncate">{item.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="card-heading truncate">{item.name}</p>
+                      {hasVideoGuide(item) ? (
+                        <span
+                          className={cn("inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md", getMediaGuideClassName(item))}
+                          aria-label={getMediaGuideLabel(item, language)}
+                          title={getMediaGuideLabel(item, language)}
+                        >
+                          <Video className="h-3.5 w-3.5" />
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="section-description">
                       {item.targetReps >= 45
                         ? language === "en"
@@ -728,6 +756,17 @@ export function WorkoutPage() {
                   <p className="text-sm text-muted-foreground">
                     {copy.setsAndReps(item.targetSets, item.targetReps, formatCategoryLabel(item.category, language))}
                   </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {hasVideoGuide(item) ? (
+                      <span
+                        className={cn("inline-flex h-7 w-7 items-center justify-center rounded-md", getMediaGuideClassName(item))}
+                        aria-label={getMediaGuideLabel(item, language)}
+                        title={getMediaGuideLabel(item, language)}
+                      >
+                        <Video className="h-3.5 w-3.5" />
+                      </span>
+                    ) : null}
+                  </div>
                   {activeExercise && (activeExercise.actualSets > 0 || activeExercise.actualReps > 0) ? (
                     <p className={cn("text-xs text-muted-foreground", isCompleted && "font-medium text-emerald-200/90")}>
                       {copy.logged(activeExercise.actualSets, activeExercise.actualReps)}
@@ -803,6 +842,15 @@ export function WorkoutPage() {
                     <span>
                       {copy.setsAndReps(item.targetSets, item.targetReps, formatCategoryLabel(item.category, language))}
                     </span>
+                    {hasVideoGuide(item) ? (
+                      <span
+                        className={cn("inline-flex h-7 w-7 items-center justify-center rounded-md", getMediaGuideClassName(item))}
+                        aria-label={getMediaGuideLabel(item, language)}
+                        title={getMediaGuideLabel(item, language)}
+                      >
+                        <Video className="h-3.5 w-3.5" />
+                      </span>
+                    ) : null}
                     {!item.isOptional ? (
                       <span
                         className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 text-primary"
@@ -857,6 +905,8 @@ export function WorkoutPage() {
         <ExerciseMedia
           exercise={exercise}
           emptyLabel={language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
+          retryLabel={copy.retryMedia}
+          videoErrorLabel={copy.videoError}
         />
         <ExerciseInfo exercise={exercise} language={language} />
       </CardContent>
@@ -1192,6 +1242,8 @@ export function WorkoutPage() {
               <ExerciseMedia
                 exercise={exercise}
                 emptyLabel={language === "en" ? "Exercise media is not available yet" : "Media gerakan belum tersedia"}
+                retryLabel={copy.retryMedia}
+                videoErrorLabel={copy.videoError}
               />
               <ExerciseInfo exercise={exercise} language={language} />
             </div>

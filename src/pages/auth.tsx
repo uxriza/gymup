@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Activity, ArrowRight, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -177,8 +177,8 @@ export function AuthPage() {
       <header className="sticky top-0 z-20 border-b border-white/10 bg-background/76 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[480px] items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2 text-left">
-            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#ff922e_0%,#ff6a18_62%,#ffa24a_100%)] text-primary-foreground shadow-[0_0_22px_rgb(255_106_24/0.24)]">
-              <Activity className="h-5 w-5" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-secondary shadow-[0_0_22px_rgb(255_106_24/0.16)]">
+              <img src="/pwa-icon.svg" alt="GymUp" className="h-full w-full object-cover" />
             </span>
             <span>
               <span className="font-display block text-base font-bold uppercase tracking-normal">GymUp</span>

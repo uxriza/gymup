@@ -13,7 +13,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Barbel", "Bangku"],
     updatedAt: "2026-04-15T22:23:56.330863+02:00",
     imageUrl: "https://wger.de/media/exercise-images/192/Bench-press-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/73/cfb72002-898f-443a-a124-a0bce8a2e6ad.MP4",
+    videoUrl: "/media/exercise-videos/bench-press.mp4",
     instructions: [
       "Berbaring di bangku dengan posisi palang tepat di atas garis mata.",
       "Pijakkan kaki kuat di lantai dan pegang palang sedikit lebih lebar dari bahu.",
@@ -32,7 +32,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Dumbel", "Bangku miring"],
     updatedAt: "2026-04-15T22:23:56.012930+02:00",
     imageUrl: "https://wger.de/media/exercise-images/16/Incline-press-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/537/b9c937e9-daeb-42a9-be8e-7a77e368478c.MOV",
+    videoUrl: "/media/exercise-videos/incline-bench-press-dumbel.mp4",
     instructions: [
       "Atur bangku miring sekitar 30 sampai 45 derajat.",
       "Pegang dumbel di samping dada dengan pergelangan tetap netral.",
@@ -51,7 +51,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Dumbel"],
     updatedAt: "2026-04-15T22:23:55.654931+02:00",
     imageUrl: "https://wger.de/media/exercise-images/123/dumbel-shoulder-press-large-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/567/64f33c19-1d96-4b7c-af17-6c6a4941c614.MOV",
+    videoUrl: "/media/exercise-videos/shoulder-press-dumbels.mp4",
     instructions: [
       "Duduk atau berdiri dengan punggung tegak dan otot inti aktif.",
       "Angkat dumbel setinggi bahu dengan telapak tangan menghadap depan.",
@@ -70,7 +70,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Dumbel"],
     updatedAt: "2026-04-15T22:23:55.570498+02:00",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/35/Dumbbell-lateral-raises-2.png",
-    videoUrl: "https://wger.de/media/exercise-video/348/de69928a-8a35-4096-821c-1f46de5e0e03.MOV",
+    videoUrl: "/media/exercise-videos/lateral-raises.mp4",
     instructions: [
       "Berdiri tegak dengan dumbel di sisi tubuh.",
       "Tekuk siku sedikit dan jaga bahu tetap rileks.",
@@ -89,7 +89,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Berat badan"],
     updatedAt: "2026-04-15T22:23:54.045674+02:00",
     imageUrl: "https://wger.de/media/exercise-images/194/34600351-8b0b-4cb0-8daa-583537be15b0.png",
-    videoUrl: "https://wger.de/media/exercise-video/194/d039ec90-474d-47a9-a3ad-bf0b00828c82.MP4",
+    videoUrl: "/media/exercise-videos/dips.mp4",
     instructions: [
       "Pegang palang sejajar dan angkat tubuh sampai lengan menopang badan.",
       "Condongkan badan sedikit ke depan dan jaga bahu tetap stabil.",
@@ -108,7 +108,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Bangku", "Dumbel"],
     updatedAt: "2026-04-15T22:23:56.016514+02:00",
     imageUrl: "https://wger.de/media/exercise-images/97/Dumbbell-bench-press-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/75/080c799b-8afd-4130-8d72-9cef0cd79f54.MOV",
+    videoUrl: "/media/exercise-videos/benchpress-dumbels.mp4",
     instructions: [
       "Berbaring di bangku dengan dumbel di samping dada.",
       "Jaga kaki menapak dan bahu tetap menempel di bangku.",
@@ -127,7 +127,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Palang pull-up"],
     updatedAt: "2026-04-15T22:23:56.751242+02:00",
     imageUrl: "https://wger.de/media/exercise-images/475/b0554016-16fd-4dbe-be47-a2a17d16ae0e.jpg",
-    videoUrl: "https://wger.de/media/exercise-video/475/83067ffe-ccb9-4e22-8507-5131b211ce74.MOV",
+    videoUrl: "/media/exercise-videos/pull-ups.mp4",
     instructions: [
       "Pegang palang dengan pegangan sedikit lebih lebar dari bahu.",
       "Aktifkan punggung dengan menarik bahu turun terlebih dahulu.",
@@ -146,7 +146,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Mesin pull-up bantuan"],
     updatedAt: "2026-04-15T22:23:55.167004+02:00",
     imageUrl: "https://wger.de/media/exercise-images/475/b0554016-16fd-4dbe-be47-a2a17d16ae0e.jpg",
-    videoUrl: "https://wger.de/media/exercise-video/477/2e23bb52-2782-40c8-bf88-fa2d2e2a9a0d.MOV",
+    videoUrl: "/media/exercise-videos/pull-ups-on-machine.mp4",
     instructions: [
       "Atur beban bantuan sesuai kemampuan.",
       "Pegang pegangan dengan kuat dan posisikan lutut atau kaki pada bantalan.",
@@ -165,7 +165,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Kabel tarik"],
     updatedAt: "2026-04-15T22:23:55.425143+02:00",
     imageUrl: "https://wger.de/media/exercise-images/512/b938437e-ff00-4679-9036-acb41bb28bbd.png",
-    videoUrl: "https://wger.de/media/exercise-video/512/fff4c294-93f0-4926-b3a2-bf59ad4afaa5.MOV",
+    videoUrl: "/media/exercise-videos/rowing-seated-narrow-pegangan.mp4",
     instructions: [
       "Duduk tegak dengan kaki menapak pada pijakan.",
       "Pegang pegangan sempit dan jaga dada terbuka.",
@@ -184,7 +184,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Kabel", "Tali kabel"],
     updatedAt: "2026-04-15T22:23:54.320038+02:00",
     imageUrl: "https://cdn.mos.cms.futurecdn.net/gWPK4bnmBf5M4vPQi6v6JR.jpg",
-    videoUrl: "https://wger.de/media/exercise-video/222/245a824b-cd39-45f2-b251-2c0b7efead0d.MOV",
+    videoUrl: "/media/exercise-videos/facepull.mp4",
     instructions: [
       "Pasang tali di kabel setinggi wajah atau dada atas.",
       "Pegang tali dan mundur sampai kabel tegang.",
@@ -203,7 +203,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Barbel"],
     updatedAt: "2026-04-15T22:23:55.375060+02:00",
     imageUrl: "https://wger.de/media/exercise-images/74/Bicep-curls-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/91/483f4bff-e108-41f1-8e7b-0caf24952552.MOV",
+    videoUrl: "/media/exercise-videos/biceps-curls-with-barbell.mp4",
     instructions: [
       "Pegang barbel selebar bahu dengan telapak tangan menghadap atas.",
       "Jaga punggung tegak dan siku tetap dekat badan.",
@@ -222,7 +222,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Dumbel"],
     updatedAt: "2026-04-15T22:23:54.216768+02:00",
     imageUrl: "https://wger.de/media/exercise-images/86/Bicep-hammer-curl-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/272/df069052-2173-4f24-855f-a0eebe729f24.MOV",
+    videoUrl: "/media/exercise-videos/hammer-curls.mp4",
     instructions: [
       "Pegang dumbel di sisi tubuh dengan telapak tangan saling menghadap.",
       "Jaga siku dekat badan dan bahu tidak ikut naik.",
@@ -241,7 +241,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Barbel"],
     updatedAt: "2026-04-15T22:23:55.585492+02:00",
     imageUrl: "https://wger.de/media/exercise-images/191/Front-squat-1-857x1024.png",
-    videoUrl: "https://wger.de/media/exercise-video/257/ad8ac7d9-b04d-415f-ae0e-837942ce2840.MOV",
+    videoUrl: "/media/exercise-videos/front-squats.mp4",
     instructions: [
       "Letakkan palang di depan bahu dengan siku terangkat.",
       "Buka kaki selebar bahu dan jaga otot inti aktif.",
@@ -260,7 +260,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Barbel"],
     updatedAt: "2026-04-15T22:23:55.433530+02:00",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/58/Romanian-deadlift-2.png",
-    videoUrl: "https://wger.de/media/exercise-video/507/307e7276-a14d-4ea0-b579-f5b0dbc6f5af.MOV",
+    videoUrl: "/media/exercise-videos/romanian-deadlift.mp4",
     instructions: [
       "Pegang barbel di depan paha dengan punggung netral.",
       "Dorong pinggul ke belakang sambil menurunkan palang mengikuti paha.",
@@ -279,7 +279,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Mesin leg press"],
     updatedAt: "2026-04-15T22:23:55.074837+02:00",
     imageUrl: "https://wger.de/media/exercise-images/371/d2136f96-3a43-4d4c-9944-1919c4ca1ce1.webp",
-    videoUrl: "https://wger.de/media/exercise-video/371/6aae16b4-01b9-4eb4-935c-3250f84d2c59.MOV",
+    videoUrl: "/media/exercise-videos/leg-press.mp4",
     instructions: [
       "Duduk di mesin dengan punggung menempel penuh pada sandaran.",
       "Letakkan kaki di pijakan selebar bahu.",
@@ -298,7 +298,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Dumbel"],
     updatedAt: "2026-04-15T22:23:56.366370+02:00",
     imageUrl: "https://wger.de/media/exercise-images/113/Walking-lunges-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/206/47a65c45-6fd1-4181-b71a-3a6c882e516b.MOV",
+    videoUrl: "/media/exercise-videos/dumbel-lunges-walking.mp4",
     instructions: [
       "Pegang dumbel di sisi tubuh dan berdiri tegak.",
       "Langkahkan satu kaki ke depan dengan jarak cukup panjang.",
@@ -317,7 +317,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Mesin leg curl"],
     updatedAt: "2026-04-15T22:23:53.335983+02:00",
     imageUrl: "https://wger.de/media/exercise-images/117/seated-leg-curl-large-1.png",
-    videoUrl: "https://wger.de/media/exercise-video/366/43df4b79-d4c3-4fbf-bcb5-e0d825b84120.MOV",
+    videoUrl: "/media/exercise-videos/leg-curls-sitting.mp4",
     instructions: [
       "Atur bantalan mesin sesuai tinggi kaki.",
       "Duduk dengan pinggul dan punggung menempel stabil.",
@@ -336,7 +336,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Mesin latihan betis"],
     updatedAt: "2026-04-15T22:23:56.267867+02:00",
     imageUrl: "https://wger.de/media/exercise-images/622/9a429bd0-afd3-4ad0-8043-e9beec901c81.jpeg",
-    videoUrl: "https://wger.de/media/exercise-video/622/35b7b625-77fd-4c09-8c57-3ad0f2f23175.MOV",
+    videoUrl: "/media/exercise-videos/standing-calf-raises.mp4",
     instructions: [
       "Berdiri di mesin latihan betis dengan posisi tubuh tegak.",
       "Turunkan tumit sampai betis terasa meregang.",
@@ -355,7 +355,7 @@ const seedExercises: Exercise[] = [
     equipment: ["Barbel", "Bangku"],
     updatedAt: "2026-04-15T22:23:54.183961+02:00",
     imageUrl: "https://media.self.com/photos/626abcbdb2f1b9f02e220a68/4:3/w_2560,c_limit/Jowan-hip-thrust.jpg",
-    videoUrl: "https://wger.de/media/exercise-video/294/45bacf4b-1bb6-4d47-8bd1-9f00eddd4019.MOV",
+    videoUrl: "/media/exercise-videos/hip-thrust.mp4",
     instructions: [
       "Sandarkan punggung atas pada bangku dan letakkan palang di atas pinggul.",
       "Posisikan kaki di lantai dengan lutut menekuk nyaman.",
