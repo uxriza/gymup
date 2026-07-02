@@ -39,6 +39,7 @@ export function ExerciseMedia({ exercise, emptyLabel, retryLabel, videoErrorLabe
   }, [exercise.id, resolvedImageUrl, exercise.videoUrl]);
 
   const canRenderVideo = isLikelyPlayableVideo(exercise.videoUrl);
+  const isIllustrationImage = resolvedImageUrl?.toLowerCase().endsWith(".svg") ?? false;
 
   const handleImageError = () => {
     if (imageRetryCount < 1) {
@@ -99,7 +100,10 @@ export function ExerciseMedia({ exercise, emptyLabel, retryLabel, videoErrorLabe
       ) : showImage ? (
         <img
           key={`${resolvedImageUrl ?? "image"}-${imageRetryCount}`}
-          className="aspect-video w-full bg-black object-cover"
+          className={cn(
+            "aspect-video w-full",
+            isIllustrationImage ? "bg-white object-contain p-4" : "bg-black object-cover",
+          )}
           src={resolvedImageUrl}
           alt={exercise.name}
           onError={handleImageError}

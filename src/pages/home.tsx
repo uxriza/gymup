@@ -240,8 +240,20 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/80 bg-card/92 p-5 shadow-[0_20px_56px_rgb(0_0_0/0.28)]">
-          <div className="space-y-5">
+        <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/92 p-5 shadow-[0_20px_56px_rgb(0_0_0/0.28)]">
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgb(10 12 17 / 0.18) 0%, rgb(13 16 22 / 0.34) 26%, rgb(14 17 23 / 0.82) 58%, rgb(15 18 24 / 0.96) 100%), linear-gradient(90deg, rgb(15 18 24 / 0.94) 0%, rgb(15 18 24 / 0.56) 36%, rgb(15 18 24 / 0.16) 68%, rgb(15 18 24 / 0.06) 100%), url('/gym-header.png')",
+              backgroundPosition: "center, center, center top",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover, cover, cover",
+              opacity: 0.92,
+            }}
+          />
+          <div className="relative space-y-5">
             <div className="space-y-3">
               <p className="eyebrow text-primary">{copy.suggestedLabel}</p>
               <div className="space-y-2">

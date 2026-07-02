@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft,
@@ -282,6 +282,7 @@ export function WorkoutPage() {
     sets: number;
     reps: number;
   } | null>(null);
+  const alertedRestStartRef = useRef<string | null>(null);
 
   const workout = workouts.find((item) => item.id === activeWorkout?.workoutId);
   const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan mandiri";
@@ -365,6 +366,63 @@ export function WorkoutPage() {
     return () => window.clearTimeout(timeout);
   }, [exerciseReward]);
 
+  useEffect(() => {
+    const playRestCompleteSound = async () => {
+      try {
+        const AudioContextClass = window.AudioContext ?? (window as typeof window & {
+          webkitAudioContext?: typeof AudioContext;
+        }).webkitAudioContext;
+
+        if (!AudioContextClass) return;
+
+        const audioContext = new AudioContextClass();
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.18);
+
+        gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.42);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.42);
+        oscillator.onended = () => {
+          void audioContext.close();
+        };
+      } catch {
+        // Ignore autoplay and audio-context failures; timer should still complete visually.
+      }
+    };
+
+    const restStart = activeWorkout?.restStartedAt ?? null;
+    if (activeWorkout?.mode !== "resting" || !restStart) {
+      alertedRestStartRef.current = null;
+      return;
+    }
+
+    if (restSeconds > 0) {
+      if (alertedRestStartRef.current !== restStart) {
+        alertedRestStartRef.current = null;
+      }
+      return;
+    }
+
+    if (alertedRestStartRef.current === restStart) return;
+
+    alertedRestStartRef.current = restStart;
+    void playRestCompleteSound();
+  }, [activeWorkout?.mode, activeWorkout?.restStartedAt, restSeconds]);
+
   const progress = useMemo(() => {
     if (!activeWorkout) return 0;
     if (activeWorkout.phase === "warmup") return 0;
@@ -428,7 +486,8 @@ export function WorkoutPage() {
         instructions: "Instructions",
         finishExercise: "Finish",
         restPhase: "Rest",
-        beforeSet: (setNumber: number, loggedSets: number) => `Before set ${setNumber} · ${loggedSets} sets logged`,
+        beforeSet: (setNumber: number) => `Before set ${setNumber}`,
+        loggedSets: (loggedSets: number) => `${loggedSets} sets logged`,
         restDone: "Rest complete",
         restTime: "Rest time",
         stopTimer: "Stop timer",
@@ -450,6 +509,7 @@ export function WorkoutPage() {
           isCustom
             ? `${completed} done · ${total} session exercises`
             : `${completed} done · ${planned} not completed`,
+        backToSession: "Back to session",
         sessionNotes: "Session notes",
         noCompletedWarning: "No exercise has been completed yet. Save this session anyway?",
         continueWorkout: "Back to workout",
@@ -503,7 +563,8 @@ export function WorkoutPage() {
         instructions: "Instruksi",
         finishExercise: "Akhiri",
         restPhase: "Istirahat",
-        beforeSet: (setNumber: number, loggedSets: number) => `Sebelum set ${setNumber} · ${loggedSets} set tercatat`,
+        beforeSet: (setNumber: number) => `Sebelum set ${setNumber}`,
+        loggedSets: (loggedSets: number) => `${loggedSets} set tercatat`,
         restDone: "Istirahat selesai",
         restTime: "Waktu istirahat",
         stopTimer: "Hentikan timer",
@@ -525,6 +586,7 @@ export function WorkoutPage() {
           isCustom
             ? `${completed} selesai · ${total} gerakan sesi`
             : `${completed} selesai · ${planned} tidak dikerjakan`,
+        backToSession: "Kembali ke sesi",
         sessionNotes: "Catatan sesi",
         noCompletedWarning: "Belum ada gerakan yang selesai. Tetap simpan sesi?",
         continueWorkout: "Kembali ke sesi",
@@ -540,12 +602,11 @@ export function WorkoutPage() {
   const completedCount = activeWorkout.exercises.filter((item) => item.completed).length;
   const plannedCount = activeWorkout.exercises.length - completedCount;
   const totalExerciseCount = activeWorkout.exercises.length;
-  const phaseLabel = activeWorkout.phase === "warmup"
-    ? copy.warmupPhase
-    : activeWorkout.phase === "cooldown"
-      ? copy.cooldownPhase
-      : copy.workoutPhase;
-  const pageTitle = activeWorkout.phase === "main" ? (language === "en" ? "Workout session" : "Sesi latihan") : phaseLabel;
+  const pageTitle = activeWorkout.phase === "main"
+    ? (language === "en" ? "Workout session" : "Sesi latihan")
+    : activeWorkout.phase === "warmup"
+      ? copy.warmupPhase
+      : copy.cooldownPhase;
   const progressLabel = activeWorkout.phase === "main"
     ? copy.progressLabel(progress)
     : activeWorkout.phase === "warmup"
@@ -676,7 +737,13 @@ export function WorkoutPage() {
 
         {createPortal(
           <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
-            <div className="mx-auto w-full max-w-[480px]">
+            <div className={cn("mx-auto w-full max-w-[480px]", isWarmup ? "" : "grid grid-cols-2 gap-3")}>
+              {!isWarmup ? (
+                <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={returnToMainSession}>
+                  <ArrowLeft className="h-4 w-4" />
+                  {copy.backToSession}
+                </Button>
+              ) : null}
               <Button className="min-h-12 w-full" size="lg" onClick={onAction}>
                 {isWarmup ? <Play className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                 {buttonLabel}
@@ -982,11 +1049,14 @@ export function WorkoutPage() {
       <CardHeader>
         <div className="space-y-2">
           <p className="eyebrow">{copy.restPhase}</p>
-          <div>
+          <div className="space-y-1">
             <CardTitle>{exercise.name}</CardTitle>
-            <CardDescription>{copy.beforeSet(active.currentSet + 1, active.actualSets)}</CardDescription>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span>{copy.beforeSet(active.currentSet + 1)}</span>
+              <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+              <span>{copy.loggedSets(active.actualSets)}</span>
+            </div>
           </div>
-          <Badge className={cn(statusClass.resting)}>{language === "en" ? "Rest" : "Istirahat"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -1020,17 +1090,6 @@ export function WorkoutPage() {
             </div>
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button className="h-12" size="lg" onClick={startNextSet}>
-            <Play className="h-4 w-4" />
-            {copy.nextSet}
-          </Button>
-          <Button className="h-12" size="lg" variant="outline" onClick={completeExerciseWithReward}>
-            <Check className="h-4 w-4" />
-            {copy.finishExercise}
-          </Button>
-        </div>
       </CardContent>
     </Card>
   ) : null;
@@ -1041,9 +1100,8 @@ export function WorkoutPage() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">{sessionName}</p>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
+            <div className="mt-1">
               <h1 className="text-[1.875rem] font-bold leading-8">{pageTitle}</h1>
-              {activeWorkout.phase === "main" ? <Badge className="bg-primary/15 text-primary">{phaseLabel}</Badge> : null}
             </div>
           </div>
           <Button variant="ghost" className="h-10 px-3 text-muted-foreground hover:text-destructive" onClick={() => setShowDiscard(true)} aria-label={copy.discardSession}>
@@ -1090,6 +1148,22 @@ export function WorkoutPage() {
             <Button className="min-h-12 w-full" size="lg" variant="secondary" onClick={() => setShowInstructions(true)}>
               <Dumbbell className="h-4 w-4" />
               {copy.instructions}
+            </Button>
+            <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeExerciseWithReward}>
+              <Check className="h-4 w-4" />
+              {copy.finishExercise}
+            </Button>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
+      {activeWorkout.phase === "main" && activeWorkout.mode === "resting" ? createPortal(
+        <div className="premium-dock fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-4 pb-[max(34px,env(safe-area-inset-bottom))] pt-3">
+          <div className="mx-auto grid w-full max-w-[480px] grid-cols-2 gap-3">
+            <Button className="min-h-12 w-full text-base" size="lg" onClick={startNextSet}>
+              <Play className="h-4 w-4" />
+              {copy.nextSet}
             </Button>
             <Button className="min-h-12 w-full" size="lg" variant="outline" onClick={completeExerciseWithReward}>
               <Check className="h-4 w-4" />

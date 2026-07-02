@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { differenceInMinutes, format, type Locale } from "date-fns";
-import { Calendar, Clock3, Dumbbell, Repeat2, Trash2, Trophy } from "lucide-react";
+import { Calendar, CheckCircle2, Clock3, TimerOff, Trash2, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -169,8 +169,7 @@ export function HistoryPage() {
             {group.sessions.map((session) => {
               const completed = session.exercises.filter((item) => item.completed);
               const planned = session.exercises.filter((item) => !item.completed);
-              const totalSets = session.exercises.reduce((total, item) => total + item.actualSets, 0);
-              const totalRep = session.exercises.reduce((total, item) => total + item.actualReps, 0);
+              const performedExercises = session.exercises.filter((item) => item.actualSets > 0 || item.actualReps > 0);
               const duration = Math.max(differenceInMinutes(new Date(session.endTime), new Date(session.startTime)), 1);
 
               return (
@@ -185,7 +184,7 @@ export function HistoryPage() {
                         <CardTitle className="truncate">{session.workoutName}</CardTitle>
                         <CardDescription className="mt-1 flex items-center gap-2">
                           <Calendar className="h-3.5 w-3.5" />
-                          {format(new Date(session.date), "HH:mm", { locale: dateLocale })} · {duration} {copy.minuteSuffix}
+                          {format(new Date(session.date), "HH:mm", { locale: dateLocale })}
                         </CardDescription>
                       </div>
                       <Badge className="shrink-0 bg-primary/15 text-primary">
@@ -205,26 +204,22 @@ export function HistoryPage() {
                       </div>
                       <div className="metric-surface p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Dumbbell className="h-3 w-3" />
-                          {copy.set}
+                          <CheckCircle2 className="h-3 w-3" />
+                          {copy.completed}
                         </p>
-                        <p className="text-lg font-bold">{totalSets}</p>
+                        <p className="text-lg font-bold">{completed.length}</p>
                       </div>
                       <div className="metric-surface p-2">
                         <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Repeat2 className="h-3 w-3" />
-                          {copy.reps}
+                          <TimerOff className="h-3 w-3" />
+                          {copy.skipped}
                         </p>
-                        <p className="text-lg font-bold">{totalRep}</p>
+                        <p className="text-lg font-bold">{planned.length}</p>
                       </div>
                     </div>
 
-                    {planned.length ? (
-                      <p className="text-xs text-muted-foreground">{copy.doneAndSkipped(completed.length, planned.length)}</p>
-                    ) : null}
-
                     <div className="space-y-2">
-                      {session.exercises.slice(0, 4).map((item) => {
+                      {performedExercises.slice(0, 4).map((item) => {
                         const exercise = exercises.find((candidate) => candidate.id === item.exerciseId);
                         return (
                           <div key={item.exerciseId} className="surface-list-item flex items-center justify-between gap-3 border-border/90 bg-background/42 p-2">
@@ -245,8 +240,8 @@ export function HistoryPage() {
                           </div>
                         );
                       })}
-                      {session.exercises.length > 4 ? (
-                        <p className="text-xs text-muted-foreground">{copy.moreExercises(session.exercises.length - 4)}</p>
+                      {performedExercises.length > 4 ? (
+                        <p className="text-xs text-muted-foreground">{copy.moreExercises(performedExercises.length - 4)}</p>
                       ) : null}
                     </div>
                     {session.notes ? <p className="text-sm text-muted-foreground">{session.notes}</p> : null}
