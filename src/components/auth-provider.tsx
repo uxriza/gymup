@@ -7,6 +7,7 @@ import { setSentryUser } from "@/lib/sentry";
 type AuthContextValue = {
   authEnabled: boolean;
   loading: boolean;
+  signingOut: boolean;
   user: User | null;
   displayName: string;
   signIn: (email: string, password: string) => Promise<void>;
@@ -27,6 +28,7 @@ const getDisplayName = (user: User | null) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(Boolean(supabase));
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -59,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       authEnabled: isSupabaseConfigured,
       loading,
+      signingOut,
       user,
       displayName: getDisplayName(user),
       signIn: async (email, password) => {
@@ -101,11 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: async () => {
         if (!supabase) return;
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        setSigningOut(true);
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+        } finally {
+          setSigningOut(false);
+        }
       },
     }),
-    [loading, user],
+    [loading, signingOut, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

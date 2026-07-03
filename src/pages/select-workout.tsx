@@ -74,8 +74,8 @@ export function SelectWorkoutPage() {
   };
 
   return (
-    <div className="space-y-5">
-      <section className="space-y-4">
+    <div className="page-shell space-y-5">
+      <section className="page-section space-y-4">
         <Button className="min-h-11 w-fit px-0 text-muted-foreground" variant="ghost" onClick={() => navigate("/")}>
           <ArrowLeft className="h-4 w-4" />
           {copy.back}
@@ -90,7 +90,7 @@ export function SelectWorkoutPage() {
         </div>
       </section>
 
-      <Tabs defaultValue="program" className="space-y-5">
+      <Tabs defaultValue="program" className="page-section space-y-5">
         <TabsList className="grid h-11 w-full grid-cols-2">
           <TabsTrigger className="h-9" value="program">{copy.program}</TabsTrigger>
           <TabsTrigger className="h-9" value="manual">{copy.manual}</TabsTrigger>

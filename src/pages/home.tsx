@@ -213,8 +213,8 @@ export function HomePage() {
   };
 
   return (
-    <div className="space-y-7 pb-10">
-      <section className="space-y-5">
+    <div className="page-shell space-y-7 pb-10">
+      <section className="page-section space-y-5">
         <div className="min-w-0 space-y-2">
           <h1 className="font-display text-[1.5rem] font-bold uppercase leading-[0.96] text-foreground sm:text-[1.65rem]">
             {displayName ? `${copy.greetingPrefix}, ${displayName}` : copy.fallbackTitle}
@@ -297,7 +297,7 @@ export function HomePage() {
         </Card>
       ) : null}
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="section-title">{copy.latestActivity}</h2>
@@ -377,7 +377,7 @@ export function HomePage() {
         )}
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="section-title">{copy.monthlyActivity}</h2>

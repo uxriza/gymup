@@ -93,13 +93,13 @@ export function ProfilePage() {
       };
 
   return (
-    <div className="space-y-7 pb-20">
-      <section className="space-y-2">
+    <div className="page-shell space-y-7 pb-20">
+      <section className="page-section space-y-2">
         <h1 className="page-title">{copy.title}</h1>
         <p className="page-description">{copy.description}</p>
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <h2 className="section-title">{copy.accountSection}</h2>
         <Card>
           <CardContent className="space-y-4 p-4">
@@ -143,7 +143,7 @@ export function ProfilePage() {
         </Card>
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <h2 className="section-title">{copy.preferencesSection}</h2>
         <Card>
           <CardContent className="space-y-3 p-4">
@@ -168,7 +168,7 @@ export function ProfilePage() {
         </Card>
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <h2 className="section-title">{copy.summarySection}</h2>
         <div className="metric-surface grid grid-cols-3 divide-x divide-border/80 overflow-hidden">
           <div className="flex min-h-[92px] flex-col justify-between p-4">

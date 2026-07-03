@@ -97,8 +97,8 @@ export function HistoryPage() {
       };
 
   return (
-    <div className="space-y-7 pb-20">
-      <section className="flex items-start justify-between gap-4">
+    <div className="page-shell space-y-7 pb-20">
+      <section className="page-section flex items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-description">{copy.description(meaningfulSessions.length)}</p>
@@ -139,7 +139,7 @@ export function HistoryPage() {
         </DialogContent>
       </Dialog>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         {meaningfulSessions.length === 0 ? (
           <Card>
             <CardHeader>

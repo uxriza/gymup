@@ -91,6 +91,11 @@ const isPrepExercise = (exerciseId: string, exercises: Exercise[], categories: s
   return Boolean(exercise && categories.includes(exercise.category));
 };
 
+const getCustomWorkoutName = () => {
+  if (typeof window === "undefined") return "Latihan mandiri";
+  return window.localStorage.getItem("gymup-language") === "en" ? "Custom workout" : "Latihan mandiri";
+};
+
 type GymState = {
   exercises: Exercise[];
   workouts: Workout[];
@@ -169,7 +174,7 @@ export const useGymStore = create<GymState>()(
         set({
           activeWorkout: {
             workoutId: "custom-session",
-            customName: "Latihan mandiri",
+            customName: getCustomWorkoutName(),
             isCustom: true,
             startTime: new Date().toISOString(),
             phase: "warmup",
@@ -475,7 +480,7 @@ export const useGymStore = create<GymState>()(
           id: uid("session"),
           date: new Date().toISOString(),
           workoutId: workout?.id ?? activeWorkout.workoutId,
-          workoutName: workout?.name ?? activeWorkout.customName ?? "Latihan mandiri",
+          workoutName: workout?.name ?? activeWorkout.customName ?? getCustomWorkoutName(),
           startTime: activeWorkout.startTime,
           endTime: new Date().toISOString(),
           exercises,

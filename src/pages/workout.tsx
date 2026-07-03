@@ -285,7 +285,7 @@ export function WorkoutPage() {
   const alertedRestStartRef = useRef<string | null>(null);
 
   const workout = workouts.find((item) => item.id === activeWorkout?.workoutId);
-  const sessionName = workout?.name ?? activeWorkout?.customName ?? "Latihan mandiri";
+  const sessionName = workout?.name ?? activeWorkout?.customName ?? (language === "en" ? "Custom workout" : "Latihan mandiri");
   const active = activeWorkout?.exercises[activeWorkout.currentIndex];
   const catalogExercises = exercises.map(getSeedExercise);
   const mainCatalogExercises = catalogExercises.filter((item) => !["Warmup", "Cooldown"].includes(item.category));
@@ -692,7 +692,7 @@ export function WorkoutPage() {
     const onAction = isWarmup ? completeWarmup : () => setShowFinish(true);
 
     return (
-      <Card className="animate-workout-card border-primary/20 bg-card/90">
+      <Card className="animate-workout-card bg-card/90">
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>

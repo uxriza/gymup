@@ -83,15 +83,15 @@ export function SetupPage() {
   }, [catalogExercises, language, query, selectedCategory]);
 
   return (
-    <div className="space-y-7 pb-20">
-      <section className="space-y-3">
+    <div className="page-shell space-y-7 pb-20">
+      <section className="page-section space-y-3">
         <div className="space-y-2">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-description">{copy.description}</p>
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input className="h-12 border-white/10 bg-card/80 pl-9" placeholder={copy.searchPlaceholder} value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -107,7 +107,7 @@ export function SetupPage() {
                 size="sm"
                 className={cn(
                   "h-11 shrink-0 px-4",
-                  selected && "border border-primary/35 bg-secondary/95 text-foreground ring-1 ring-primary/20",
+                  selected && "border border-primary/35 bg-primary/10 text-primary ring-1 ring-primary/20",
                 )}
                 onClick={() => setSelectedCategory(category)}
               >
@@ -118,7 +118,7 @@ export function SetupPage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="page-section space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="section-title">{copy.listTitle}</h2>
           <p className="section-description">{copy.total(catalogExercises.length)}</p>

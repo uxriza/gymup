@@ -1,13 +1,14 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Dumbbell, History, ListChecks, Loader2, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
+import { Dumbbell, History, ListChecks, Lock, LogOut, Menu, Trash2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGymStore } from "@/store/gym-store";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/components/ui/toast";
 
@@ -22,8 +23,51 @@ const VerifiedPage = lazy(() => import("@/pages/verified").then((module) => ({ d
 const AdminPage = lazy(() => import("@/pages/admin").then((module) => ({ default: module.AdminPage })));
 
 const PageLoader = () => (
-  <div className="flex min-h-[45vh] items-center justify-center">
-    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+  <div className="space-y-7 pb-16">
+    <section className="space-y-3">
+      <div className="space-y-2">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-5 w-72 max-w-full" />
+      </div>
+    </section>
+
+    <section className="space-y-4">
+      <div className="rounded-xl border border-border/70 bg-card/80 p-5">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-12 w-44 max-w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-5/6" />
+          </div>
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-11 w-full bg-white/[0.06]" />
+        </div>
+      </div>
+    </section>
+
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+      <div className="rounded-xl border border-border/70 bg-card/70 p-4">
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-32" />
+              <Skeleton className="h-5 w-36" />
+            </div>
+            <Skeleton className="h-7 w-11" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 );
 
@@ -148,7 +192,9 @@ export function App() {
   if (authEnabled && loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <main className="relative mx-auto w-full max-w-[480px] px-4 pt-5">
+          <PageLoader />
+        </main>
       </div>
     );
   }
@@ -282,7 +328,7 @@ export function App() {
           !isAdminRoute && (showBottomNav ? "pb-24" : "pb-8"),
         )}
       >
-        <div key={location.pathname} className="animate-page-transition">
+        <div key={location.pathname}>
           <Suspense fallback={<PageLoader />}>
             {isLockedRoute ? (
           <Card className="border-primary/50">

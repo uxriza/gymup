@@ -8,6 +8,8 @@ type AnalyticsState = {
   sessions: Session[];
 };
 
+const buildInFilter = (values: string[]) => `(${values.map((value) => JSON.stringify(value)).join(",")})`;
+
 const getDurationMinutes = (session: Session) =>
   Math.max(Math.floor((new Date(session.endTime).getTime() - new Date(session.startTime).getTime()) / 60000), 1);
 
@@ -35,6 +37,8 @@ export const syncAnalyticsState = async (userId: string, state: AnalyticsState) 
   if (!supabase) return;
 
   if (state.sessions.length === 0) {
+    const { error: exerciseDeleteError } = await supabase.from("session_exercises").delete().eq("user_id", userId);
+    if (exerciseDeleteError) throw exerciseDeleteError;
     const { error } = await supabase.from("workout_sessions").delete().eq("user_id", userId);
     if (error) throw error;
     return;
@@ -69,6 +73,16 @@ export const syncAnalyticsState = async (userId: string, state: AnalyticsState) 
   const { error: sessionError } = await supabase.from("workout_sessions").upsert(sessionRows);
   if (sessionError) throw sessionError;
 
+  const sessionIds = state.sessions.map((session) => session.id);
+  const sessionIdFilter = buildInFilter(sessionIds);
+
+  const { error: staleSessionError } = await supabase
+    .from("workout_sessions")
+    .delete()
+    .eq("user_id", userId)
+    .not("id", "in", sessionIdFilter);
+  if (staleSessionError) throw staleSessionError;
+
   const exerciseRows = state.sessions.flatMap((session) =>
     session.exercises.map((exercise) => {
       const catalogExercise = exerciseById.get(exercise.exerciseId);
@@ -92,4 +106,11 @@ export const syncAnalyticsState = async (userId: string, state: AnalyticsState) 
     const { error: exerciseError } = await supabase.from("session_exercises").upsert(exerciseRows);
     if (exerciseError) throw exerciseError;
   }
+
+  const { error: staleExerciseError } = await supabase
+    .from("session_exercises")
+    .delete()
+    .eq("user_id", userId)
+    .not("session_id", "in", sessionIdFilter);
+  if (staleExerciseError) throw staleExerciseError;
 };

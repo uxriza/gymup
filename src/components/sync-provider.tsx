@@ -13,10 +13,14 @@ type SyncState = {
   sessions: Session[];
 };
 
-const mergeById = <T extends { id: string }>(remoteItems: T[], localItems: T[]) => {
+const mergeRemoteFirstById = <T extends { id: string }>(remoteItems: T[], localItems: T[]) => {
   const itemsById = new Map<string, T>();
   remoteItems.forEach((item) => itemsById.set(item.id, item));
-  localItems.forEach((item) => itemsById.set(item.id, item));
+  localItems.forEach((item) => {
+    if (!itemsById.has(item.id)) {
+      itemsById.set(item.id, item);
+    }
+  });
   return Array.from(itemsById.values());
 };
 
@@ -39,8 +43,8 @@ const mergeSessions = (remoteSessions: Session[], localSessions: Session[]) => {
 };
 
 const normalizeRemoteState = (remoteState: Partial<SyncState> | null | undefined): SyncState => ({
-  exercises: mergeById(remoteState?.exercises ?? [], defaultExercises),
-  workouts: mergeById(remoteState?.workouts ?? [], defaultWorkouts),
+  exercises: mergeRemoteFirstById(remoteState?.exercises ?? [], defaultExercises),
+  workouts: mergeRemoteFirstById(remoteState?.workouts ?? [], defaultWorkouts),
   sessions: (remoteState?.sessions ?? []).sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   ),
@@ -49,29 +53,24 @@ const normalizeRemoteState = (remoteState: Partial<SyncState> | null | undefined
 const mergeRemoteWithLocalState = (remoteState: Partial<SyncState> | null | undefined, localState: SyncState): SyncState => {
   const normalizedRemoteState = normalizeRemoteState(remoteState);
   return {
-    exercises: mergeById(normalizedRemoteState.exercises, localState.exercises),
-    workouts: mergeById(normalizedRemoteState.workouts, localState.workouts),
+    exercises: mergeRemoteFirstById(normalizedRemoteState.exercises, localState.exercises),
+    workouts: mergeRemoteFirstById(normalizedRemoteState.workouts, localState.workouts),
     sessions: mergeSessions(normalizedRemoteState.sessions, localState.sessions),
   };
 };
 
-const getEmptyAccountState = (): SyncState => ({
-  exercises: defaultExercises,
-  workouts: defaultWorkouts,
-  sessions: [],
-});
-
 export function SyncProvider({ children }: { children: ReactNode }) {
-  const { authEnabled, loading, user } = useAuth();
+  const { authEnabled, loading, signingOut, user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!supabase || !authEnabled || loading || !user?.id) return;
+    if (!supabase || !authEnabled || loading || signingOut || !user?.id) return;
 
     const supabaseClient = supabase;
     let syncTimer: number | undefined;
     let isApplyingRemoteState = false;
     let syncErrorShown = false;
+    let isDisposed = false;
 
     const notifySyncError = () => {
       if (syncErrorShown) return;
@@ -84,6 +83,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     };
 
     const saveState = async (userId: string, state: SyncState) => {
+      if (isDisposed) return;
       const { error } = await supabaseClient.from("gymup_sync_states").upsert({
         user_id: userId,
         state,
@@ -97,6 +97,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
     const startSync = async () => {
       await upsertAnalyticsProfile(user).catch(notifySyncError);
+      if (isDisposed) return undefined;
       const localSnapshot = getSnapshot();
 
       const remoteResult = await supabaseClient
@@ -125,9 +126,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       }
 
       return useGymStore.subscribe((state) => {
-        if (isApplyingRemoteState) return;
+        if (isDisposed || isApplyingRemoteState) return;
         window.clearTimeout(syncTimer);
         syncTimer = window.setTimeout(() => {
+          if (isDisposed) return;
           void saveState(user.id, {
             exercises: state.exercises,
             workouts: state.workouts,
@@ -143,10 +145,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      isDisposed = true;
       window.clearTimeout(syncTimer);
       unsubscribe?.();
     };
-  }, [authEnabled, loading, toast, user?.id]);
+  }, [authEnabled, loading, signingOut, toast, user?.id]);
 
   return children;
 }
