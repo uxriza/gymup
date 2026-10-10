@@ -15,9 +15,9 @@ const STORAGE_KEY = "gymup-language";
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 const getInitialLanguage = (): Language => {
-  if (typeof window === "undefined") return "id";
+  if (typeof window === "undefined") return "en";
   const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
-  return storedLanguage === "en" ? "en" : "id";
+  return storedLanguage === "id" ? "id" : "en";
 };
 
 export function I18nProvider({ children }: { children: ReactNode }) {

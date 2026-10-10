@@ -290,7 +290,7 @@ export function AdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="min-h-12 w-full" variant="secondary" onClick={() => navigate("/")}>
+            <Button className="min-h-12 w-full" variant="secondary" onClick={() => navigate("/app")}>
               {copy.backToApp}
             </Button>
           </CardContent>
@@ -312,7 +312,7 @@ export function AdminPage() {
             {copy.internalDashboard}
           </p>
         </div>
-        <Button variant="secondary" className="w-full lg:w-auto" onClick={() => navigate("/")}>
+        <Button variant="secondary" className="w-full lg:w-auto" onClick={() => navigate("/app")}>
           {copy.backToApp}
         </Button>
       </section>

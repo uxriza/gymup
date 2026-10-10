@@ -1259,7 +1259,7 @@ export function WorkoutPage() {
               className="min-h-11 w-full text-muted-foreground hover:text-destructive"
               onClick={() => {
                 cancelWorkout();
-                navigate("/");
+                navigate("/app");
                 toast({
                   title: copy.discardedTitle,
                   description: copy.discardedDescription,
@@ -1289,7 +1289,7 @@ export function WorkoutPage() {
               onClick={() => {
                 setShowDiscard(false);
                 cancelWorkout();
-                navigate("/");
+                navigate("/app");
                 toast({
                   title: copy.discardedTitle,
                   description: copy.discardedDescription,

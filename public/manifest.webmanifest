@@ -2,7 +2,7 @@
   "name": "GymUp",
   "short_name": "GymUp",
   "description": "Tracker latihan pribadi untuk mencatat sesi gym.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f0f0f",

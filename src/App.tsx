@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/components/ui/toast";
 
+const LandingPage = lazy(() => import("@/pages/landing").then(m => ({ default: m.LandingPage })));
 const HomePage = lazy(() => import("@/pages/home").then((module) => ({ default: module.HomePage })));
 const SelectWorkoutPage = lazy(() => import("@/pages/select-workout").then((module) => ({ default: module.SelectWorkoutPage })));
 const WorkoutPage = lazy(() => import("@/pages/workout").then((module) => ({ default: module.WorkoutPage })));
@@ -88,13 +89,13 @@ export function App() {
   const showBottomNav = !activeWorkout && !["/select", "/admin"].includes(location.pathname);
   const navItems = language === "en"
     ? [
-        { to: "/", label: "Train", icon: Dumbbell },
+        { to: "/app", label: "Train", icon: Dumbbell },
         { to: "/history", label: "History", icon: History },
         { to: "/setup", label: "Exercises", icon: ListChecks },
         { to: "/profile", label: "Profile", icon: UserRound },
       ]
     : [
-        { to: "/", label: "Latihan", icon: Dumbbell },
+        { to: "/app", label: "Latihan", icon: Dumbbell },
         { to: "/history", label: "Riwayat", icon: History },
         { to: "/setup", label: "Gerakan", icon: ListChecks },
         { to: "/profile", label: "Profil", icon: UserRound },
@@ -189,6 +190,8 @@ export function App() {
     return () => window.removeEventListener("mousedown", handlePointerDown);
   }, [menuOpen]);
 
+  if (location.pathname === "/") return <Suspense fallback={<div className="min-h-screen bg-background" />}><LandingPage /></Suspense>;
+
   if (authEnabled && loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -237,7 +240,7 @@ export function App() {
           )}
         >
           <div className="flex items-center justify-between">
-          <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/")}>
+          <button type="button" className="flex items-center gap-2 text-left" onClick={() => navigate(activeWorkout ? "/workout" : "/app")}>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-secondary shadow-[0_0_22px_rgb(255_106_24/0.16)]">
               <img src="/pwa-icon.svg" alt="GymUp" className="h-full w-full object-cover" />
             </span>
@@ -348,7 +351,7 @@ export function App() {
                 variant="outline"
                 onClick={() => {
                   cancelWorkout();
-                  navigate("/");
+                  navigate("/app");
                   toast({
                     title: copy.discardedTitle,
                     description: copy.discardedDescription,
@@ -363,7 +366,7 @@ export function App() {
           </Card>
         ) : (
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/app" element={<HomePage />} />
             <Route path="/select" element={<SelectWorkoutPage />} />
             <Route path="/workout" element={<WorkoutPage />} />
             <Route path="/summary" element={<Navigate to="/history" replace />} />
@@ -420,7 +423,7 @@ export function App() {
                 try {
                   await signOut();
                   resetLocalState();
-                  navigate("/");
+                  navigate("/app");
                   toast({
                     title: copy.loggedOutTitle,
                     description: copy.loggedOutDescription,

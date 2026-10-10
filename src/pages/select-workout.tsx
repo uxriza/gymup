@@ -76,7 +76,7 @@ export function SelectWorkoutPage() {
   return (
     <div className="page-shell space-y-5">
       <section className="page-section space-y-4">
-        <Button className="min-h-11 w-fit px-0 text-muted-foreground" variant="ghost" onClick={() => navigate("/")}>
+        <Button className="min-h-11 w-fit px-0 text-muted-foreground" variant="ghost" onClick={() => navigate("/app")}>
           <ArrowLeft className="h-4 w-4" />
           {copy.back}
         </Button>

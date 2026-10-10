@@ -273,7 +273,7 @@ export function ProfilePage() {
                 try {
                   await signOut();
                   resetLocalState();
-                  navigate("/");
+                  navigate("/app");
                   toast({
                     title: copy.loggedOutTitle,
                     description: copy.loggedOutDescription,

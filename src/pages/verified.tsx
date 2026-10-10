@@ -91,14 +91,14 @@ export function VerifiedPage() {
 
           <CardContent className="space-y-3 p-5 pt-0">
             {!loading && user ? (
-              <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
+              <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/app")}>
                 <ArrowRight className="h-4 w-4" />
                 {copy.openApp}
               </Button>
             ) : null}
 
             {!loading && !user ? (
-              <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/")}>
+              <Button className="min-h-12 w-full" size="lg" onClick={() => navigate("/app")}>
                 <ArrowRight className="h-4 w-4" />
                 {copy.signIn}
               </Button>
