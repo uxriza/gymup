@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +37,16 @@ const getAuthErrorMessage = (message: string, language: "id" | "en") => {
 export function AuthPage() {
   const { language } = useI18n();
   const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = searchParams.get("tab") === "register" ? "register" : "login";
+  const setMode = (nextMode: "login" | "register") => {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      if (nextMode === "register") next.set("tab", "register");
+      else next.delete("tab");
+      return next;
+    }, { replace: true });
+  };
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -18,6 +18,7 @@ const english: Record<string, string> = {
  "Berjalan":"In progress", "Istirahat":"Rest", "Waktu istirahat":"Rest time", "Timer dijeda":"Timer paused", "Tarik napas pelan dan siapkan posisi sebelum mulai set berikutnya.":"Breathe slowly and get into position before your next set.", "Set berikutnya":"Next set", "Durasi gerakan":"Exercise duration", "Set berjalan":"Current set", "Beban latihan":"Training weight", "Mengikuti beban terakhir yang kamu pakai":"Based on your last training weight", "Repetisi set ini":"Reps in this set", "Data contoh":"Sample data", "Dada":"Chest", "repetisi":"reps", "Barbel":"Barbell", "Bangku":"Bench",
  "Berbaring di bangku dengan posisi palang tepat di atas garis mata.":"Lie on the bench with the bar directly above your eyes.", "Pijakkan kaki kuat di lantai dan pegang palang sedikit lebih lebar dari bahu.":"Keep your feet planted and grip the bar slightly wider than your shoulders.", "Turunkan palang perlahan ke area dada tengah dengan siku tetap terkontrol.":"Lower the bar slowly toward your mid-chest with controlled elbows.", "Dorong palang ke atas sampai lengan hampir lurus tanpa mengangkat bahu dari bangku.":"Press the bar up until your arms are almost straight, keeping your shoulders on the bench.",
  "Push Dasar":"Basic Push", "Pull Dasar":"Basic Pull",
+ "Ingat beban terakhirmu":"Remember your last weight", "Lihat catatan sebelumnya saat memulai sesi berikutnya.":"Pick up where you left off with your previous workout records.",
 };
 export function useLandingCopy() {
  const { language } = useI18n();

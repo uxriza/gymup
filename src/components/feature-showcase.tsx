@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
 import { useLandingCopy } from "@/lib/landing-copy";
 import { WorkoutFeaturePreview } from "@/components/workout-feature-preview";
 import { ProgramFeatureCard, GuideFeatureCard, HistoryFeatureCard, InstallFeatureCard } from "@/components/product-feature-cards";
+
+const featureOrder = [1, 0, 2, 3, 4, 5] as const;
 
 const features: { title: string; text: string; points: string[] }[] = [
   { title: "Pilih latihan yang cocok untukmu.", text: "Mulai dari rekomendasi di beranda, pilih program yang tersedia, atau buat sesi custom sesuai kebutuhanmu.", points: ["Rekomendasi latihan di beranda", "Pilihan program dan sesi custom"]},
@@ -16,6 +17,6 @@ export function FeatureShowcase() {
   const t = useLandingCopy();
  const illustrations = [<ProgramFeatureCard />, <WorkoutFeaturePreview compact />, <WorkoutFeaturePreview rest />, <GuideFeatureCard />, <HistoryFeatureCard />, <InstallFeatureCard />];
  return <section className="feature-showcase" aria-label={t("Fitur")}>
- {features.map((feature,index) => <article className={`feature-row landing-band ${index % 2 ? "feature-row-reverse" : ""}`} key={t(feature.title).replace(/\.$/, "")}><div className="feature-copy"><h3>{t(feature.title).replace(/\.$/, "")}</h3><p>{t(feature.text)}</p><ul>{feature.points.map(point=><li key={t(point)}>{t(point)}</li>)}</ul>{index === 1 && <Link to="/app" className="landing-cta feature-mobile-cta">{t("Coba gratis")}</Link>}</div><div className="feature-gallery feature-gallery-single"><div className="feature-static-illustration" ref={node => { if (node) node.inert = true; }}>{illustrations[index]}</div></div></article>)}
+ {featureOrder.map((index, position) => { const feature = features[index]; return <article className={`feature-row landing-band ${index === 1 ? "feature-row-primary" : "feature-row-supporting"} ${position % 2 ? "feature-row-reverse" : ""}`} key={feature.title}><div className="feature-copy"><h3>{t(feature.title).replace(/\.$/, "")}</h3><p>{t(feature.text)}</p><ul>{feature.points.map(point=><li key={point}>{t(point)}</li>)}</ul></div><div className="feature-gallery feature-gallery-single"><div className="feature-static-illustration" ref={node => { if (node) node.inert = true; }}>{illustrations[index]}</div></div></article>; })}
  </section>;
 }
