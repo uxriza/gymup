@@ -141,6 +141,9 @@ Redeploy after any environment variable update.
 
 ## Supabase notes
 
+To reduce Free Plan inactivity pausing, see the setup and operational limits in
+[Supabase database heartbeat](docs/supabase-heartbeat.md).
+
 GymUp depends on:
 
 - Auth for user accounts
